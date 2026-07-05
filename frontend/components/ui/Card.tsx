@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { HTMLAttributes } from "react";
 
-type Accent = "none" | "senior" | "junior" | "brand" | "danger";
+type Accent = "none" | "senior" | "junior" | "brand" | "danger" | "carbon";
 
 const accentRing: Record<Accent, string> = {
   none: "",
@@ -9,6 +9,7 @@ const accentRing: Record<Accent, string> = {
   junior: "hover:border-junior/40",
   brand: "hover:border-brand/40",
   danger: "hover:border-danger/40",
+  carbon: "border-carbon/50",
 };
 
 export function Card({

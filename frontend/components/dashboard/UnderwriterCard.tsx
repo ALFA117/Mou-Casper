@@ -1,6 +1,7 @@
 "use client";
 
-import { Bot, Zap, CircleCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bot, Zap, CircleCheck, Skull } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +17,7 @@ export function UnderwriterCard({
   liveStakeCspr,
   liveReputation,
   latestRun,
+  wasSlashed,
   stakeInputCspr,
   onStakeInputChange,
   busy,
@@ -28,6 +30,7 @@ export function UnderwriterCard({
   liveStakeCspr: number;
   liveReputation: number;
   latestRun: UnderwriterRunEntry | null;
+  wasSlashed: boolean;
   stakeInputCspr: number;
   onStakeInputChange: (v: number) => void;
   busy: boolean;
@@ -38,19 +41,51 @@ export function UnderwriterCard({
   const tone = profile === "conservative" ? "senior" : "junior";
   const quote = latestRun?.quote;
 
+  // Flash blanco una sola vez cuando el slash recien confirma (no en cada
+  // refresco de polling posterior) — el estado "apagado" despues es permanente.
+  const [justFlashed, setJustFlashed] = useState(false);
+  const wasSlashedBefore = useRef(wasSlashed);
+  useEffect(() => {
+    if (wasSlashed && !wasSlashedBefore.current) {
+      setJustFlashed(true);
+      const t = setTimeout(() => setJustFlashed(false), 1100);
+      return () => clearTimeout(t);
+    }
+    wasSlashedBefore.current = wasSlashed;
+  }, [wasSlashed]);
+
   return (
-    <Card accent={tone} className="relative overflow-hidden">
+    <Card
+      accent={wasSlashed ? "carbon" : tone}
+      className={cn("relative overflow-hidden transition-colors duration-700", wasSlashed && "grayscale", justFlashed && "animate-slash-flash")}
+    >
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className={cn("flex size-9 items-center justify-center rounded-lg", tone === "senior" ? "bg-senior/10 text-senior-glow" : "bg-junior/10 text-junior-glow")}>
-            <Bot className="size-4" aria-hidden />
+          <div
+            className={cn(
+              "flex size-9 items-center justify-center rounded-lg",
+              wasSlashed
+                ? "bg-carbon/20 text-foreground-muted"
+                : tone === "senior"
+                  ? "bg-senior/10 text-senior-glow"
+                  : "bg-junior/10 text-junior-glow"
+            )}
+          >
+            {wasSlashed ? <Skull className="size-4" aria-hidden /> : <Bot className="size-4" aria-hidden />}
           </div>
           <div>
-            <CardTitle>{wallet}</CardTitle>
-            <p className="text-xs text-foreground-muted">{PROFILE_LABELS[profile]} · Gemini 2.5 Flash</p>
+            <CardTitle className={wasSlashed ? "text-foreground-muted" : undefined}>{wallet}</CardTitle>
+            <p className="text-xs text-foreground-muted">
+              {wasSlashed ? "Rebanado — stake y reputación castigados" : `${PROFILE_LABELS[profile]} · Gemini 2.5 Flash`}
+            </p>
           </div>
         </div>
-        <Badge variant={tone} className="shrink-0 whitespace-nowrap font-mono">{formatCspr(liveStakeCspr, 3)} en juego</Badge>
+        <Badge
+          variant={wasSlashed ? "carbon" : tone}
+          className="shrink-0 whitespace-nowrap font-mono"
+        >
+          {formatCspr(liveStakeCspr, 3)} en juego
+        </Badge>
       </CardHeader>
       <CardBody className="space-y-4">
         {/* Cotizacion mas reciente (real, de run-log.json) */}
@@ -94,7 +129,7 @@ export function UnderwriterCard({
             <span className="text-xs text-foreground-muted">Stake en UnderwriterStake (en vivo)</span>
             <span className="font-mono text-base font-semibold tabular-nums text-foreground">{formatCspr(liveStakeCspr, 3)}</span>
           </div>
-          <ProgressBar value={liveStakeCspr} max={Math.max(1, liveStakeCspr)} tone={tone} />
+          <ProgressBar value={liveStakeCspr} max={Math.max(1, liveStakeCspr)} tone={wasSlashed ? "carbon" : tone} />
         </div>
 
         {/* Reputacion en vivo (leida on-chain, escala 0-1000) */}
@@ -103,7 +138,7 @@ export function UnderwriterCard({
             <span className="text-xs text-foreground-muted">Reputación (en vivo)</span>
             <span className="font-mono text-base font-semibold tabular-nums text-foreground">{liveReputation}<span className="text-foreground-faint">/1000</span></span>
           </div>
-          <ProgressBar value={liveReputation} max={1000} tone="brand" />
+          <ProgressBar value={liveReputation} max={1000} tone={wasSlashed ? "carbon" : "brand"} />
         </div>
 
         <div className="flex items-center gap-2">

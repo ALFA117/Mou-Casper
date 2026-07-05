@@ -29,16 +29,16 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: #22314a;
+    background-color: #2a2a2a;
     border-radius: 9999px;
-    border: 2px solid #020617;
+    border: 2px solid #0a0a0a;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #334155;
+    background-color: #ff1f1f;
   }
 
   :focus-visible {
-    outline: 2px solid #38bdf8;
+    outline: 2px solid #ff1f1f;
     outline-offset: 2px;
     border-radius: 4px;
   }

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { UnderwriterCard } from "./UnderwriterCard";
-import type { ChainState, RunLogEntry, UnderwriterRunEntry } from "@/lib/types";
+import type { ChainState, RunLogEntry, UnderwriterRunEntry, DefaultChainRunEntry } from "@/lib/types";
 import { formatBps } from "@/lib/utils";
 
 function latestFor(log: RunLogEntry[], wallet: "underwriter_A" | "underwriter_B", assetId: string): UnderwriterRunEntry | null {
@@ -37,6 +37,14 @@ export function UnderwritingArena({
   const runA = useMemo(() => latestFor(runLog, "underwriter_A", assetId), [runLog, assetId]);
   const runB = useMemo(() => latestFor(runLog, "underwriter_B", assetId), [runLog, assetId]);
 
+  // La cadena del servicer siempre rebana al underwriter que sub-cotizo el
+  // riesgo (underwriter_B en el guion de esta demo, ver ClimaxPanel) — una
+  // vez que ese default ya confirmo para este activo, su tarjeta se apaga.
+  const wasSlashedB = useMemo(
+    () => runLog.some((e): e is DefaultChainRunEntry => e.type === "default_chain" && e.assetId === assetId),
+    [runLog, assetId]
+  );
+
   const bothQuoted = runA?.quote && runB?.quote;
   const disagreementBps = bothQuoted ? Math.abs(runA!.quote.price_bps - runB!.quote.price_bps) : 0;
 
@@ -64,6 +72,7 @@ export function UnderwritingArena({
           liveStakeCspr={chainState?.underwriters.underwriter_A.stakeCspr ?? 0}
           liveReputation={chainState?.underwriters.underwriter_A.reputation ?? 0}
           latestRun={runA}
+          wasSlashed={false}
           stakeInputCspr={stakeA}
           onStakeInputChange={setStakeA}
           busy={busyAction === "underwriter_A"}
@@ -77,6 +86,7 @@ export function UnderwritingArena({
           liveStakeCspr={chainState?.underwriters.underwriter_B.stakeCspr ?? 0}
           liveReputation={chainState?.underwriters.underwriter_B.reputation ?? 0}
           latestRun={runB}
+          wasSlashed={wasSlashedB}
           stakeInputCspr={stakeB}
           onStakeInputChange={setStakeB}
           busy={busyAction === "underwriter_B"}

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { HTMLAttributes } from "react";
 
-type Variant = "neutral" | "brand" | "senior" | "junior" | "danger" | "warning";
+type Variant = "neutral" | "brand" | "senior" | "junior" | "danger" | "warning" | "carbon";
 
 const variantClasses: Record<Variant, string> = {
   neutral: "bg-surface-3 text-foreground-muted border-border",
@@ -10,6 +10,7 @@ const variantClasses: Record<Variant, string> = {
   junior: "bg-junior/10 text-junior-glow border-junior/30",
   danger: "bg-danger/10 text-danger-glow border-danger/30",
   warning: "bg-junior/10 text-junior-glow border-junior/30",
+  carbon: "bg-carbon/15 text-foreground-muted border-carbon/50",
 };
 
 export function Badge({

@@ -6,13 +6,13 @@ import * as THREE from "three";
 import type { BackgroundEvent } from "@/lib/types";
 
 /**
- * Ambient 3D backdrop: a slowly drifting network of nodes and edges,
- * evoking the agent-to-agent / capital-flow trust network the product
- * is about. Decorative and behind the UI, but wired to real dashboard
+ * Ambient 3D backdrop: a slowly drifting red wireframe network of nodes and
+ * edges over near-black, evoking the Casper buildathon's neon-red circuit
+ * aesthetic. Decorative and behind the UI, but wired to real dashboard
  * events (see lib/use-aval-dashboard.ts): a node pulses when a wallet
- * pays/stakes/invests, a link lights up toward the registry hub on
- * attest, and a node reddens + goes dark permanently on slash. Every
- * pulse is triggered only after the real on-chain action already
+ * pays/stakes/invests, a link lights up toward the registry hub on attest,
+ * and a node flashes white then goes permanently dark/carbon on slash.
+ * Every pulse is triggered only after the real on-chain action already
  * confirmed — nothing here is simulated ahead of the actual event.
  */
 
@@ -21,14 +21,16 @@ const CONNECT_DISTANCE = 3.1;
 const FIELD_RADIUS = 7.5;
 const HUB_INDEX = 0; // representa AttestationRegistry — forzado cerca del centro
 
-const BASE_COLOR = new THREE.Color("#7DD3FC");
+const BASE_COLOR = new THREE.Color("#8A1F1F"); // ember rojo tenue en reposo
+const WHITE_FLASH = new THREE.Color("#FFFFFF");
 const TONE_COLOR: Record<BackgroundEvent["tone"], THREE.Color> = {
-  brand: new THREE.Color("#4ADE80"),
-  senior: new THREE.Color("#7DD3FC"),
-  junior: new THREE.Color("#FCD34D"),
-  danger: new THREE.Color("#FCA5A5"),
+  brand: new THREE.Color("#FF1F1F"),
+  senior: new THREE.Color("#F4F4F5"),
+  junior: new THREE.Color("#FF4D2E"),
+  danger: new THREE.Color("#E8112B"),
 };
-const KILL_COLOR = new THREE.Color("#7a2020");
+// El nodo del slasheado no se pone "mas rojo" — se apaga a carbon, permanente.
+const KILL_COLOR = new THREE.Color("#3A3A40");
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -150,9 +152,11 @@ function NetworkField({ event, reducedMotion }: { event: BackgroundEvent | null;
     const id = ++pulseIdRef.current;
 
     if (event.kind === "kill") {
+      // Flash blanco instantaneo, y despues el nodo queda marcado como muerto
+      // (KILL_COLOR carbon) permanentemente — nunca vuelve a rojo.
       const idx = nodeIndexForWallet(event.wallet ?? "underwriter_B");
       deadNodesRef.current.add(idx);
-      nodePulsesRef.current.push({ id, nodeIndex: idx, color: TONE_COLOR.danger, createdAt: now, duration: 1600 });
+      nodePulsesRef.current.push({ id, nodeIndex: idx, color: WHITE_FLASH, createdAt: now, duration: 900 });
     } else if (event.kind === "link") {
       const idx = nodeIndexForWallet(event.wallet ?? "underwriter_A");
       linkPulsesRef.current.push({ id, from: idx, to: HUB_INDEX, color: TONE_COLOR[event.tone], createdAt: now, duration: 1400 });
@@ -256,7 +260,7 @@ function NetworkField({ event, reducedMotion }: { event: BackgroundEvent | null;
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[edgePositions, 3]} />
         </bufferGeometry>
-        <lineBasicMaterial color="#22314A" transparent opacity={0.35} depthWrite={false} />
+        <lineBasicMaterial color="#4A1414" transparent opacity={0.4} depthWrite={false} />
       </lineSegments>
       {/* Enlaces de atestacion: hasta 8 pulsos simultaneos hacia el hub, con color por vertice */}
       <lineSegments>
@@ -270,22 +274,69 @@ function NetworkField({ event, reducedMotion }: { event: BackgroundEvent | null;
   );
 }
 
+interface FloatingCube {
+  position: [number, number, number];
+  scale: number;
+  speed: number;
+  phase: number;
+}
+
+// Cubos wireframe flotando lento detras de la red — evocan la estetica de
+// circuito/gema del arte del buildathon de Casper, sin competir con la UI.
+function FloatingCubes({ reducedMotion }: { reducedMotion: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const { edges, cubes } = useMemo(() => {
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1));
+    const cubes: FloatingCube[] = Array.from({ length: 6 }, () => ({
+      position: [(Math.random() - 0.5) * 13, (Math.random() - 0.5) * 5.5, -3 - Math.random() * 7],
+      scale: 0.55 + Math.random() * 1.1,
+      speed: 0.12 + Math.random() * 0.18,
+      phase: Math.random() * Math.PI * 2,
+    }));
+    return { edges, cubes };
+  }, []);
+
+  useFrame(state => {
+    if (reducedMotion || !groupRef.current) return;
+    groupRef.current.children.forEach((child, i) => {
+      const c = cubes[i];
+      if (!c) return;
+      child.rotation.x += 0.0012 + c.speed * 0.001;
+      child.rotation.y += 0.0018 + c.speed * 0.001;
+      child.position.y = c.position[1] + Math.sin(state.clock.elapsedTime * 0.2 + c.phase) * 0.4;
+    });
+  });
+
+  return (
+    <group ref={groupRef}>
+      {cubes.map((c, i) => (
+        <lineSegments key={i} geometry={edges} position={c.position} scale={c.scale}>
+          <lineBasicMaterial color="#FF1F1F" transparent opacity={0.22} depthWrite={false} />
+        </lineSegments>
+      ))}
+    </group>
+  );
+}
+
 export function Background3D({ event }: { event?: BackgroundEvent | null }) {
   const reducedMotion = useReducedMotion();
   const canRender3D = useCanRender3D();
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden="true">
+      <div className="absolute inset-0 bg-grid-lines bg-[length:44px_44px] opacity-40" />
       <div className="absolute inset-0 bg-grid-fade" />
       {canRender3D && (
         <Canvas
           dpr={[1, 1.5]}
           gl={{ antialias: true, alpha: true }}
           camera={{ position: [0, 0.4, 6], fov: 50 }}
-          className="opacity-70"
+          className="opacity-80"
         >
-          <fog attach="fog" args={["#020617", 6, 13]} />
+          <fog attach="fog" args={["#0A0A0A", 6, 13]} />
           <NetworkField event={event ?? null} reducedMotion={reducedMotion} />
+          <FloatingCubes reducedMotion={reducedMotion} />
         </Canvas>
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-background" />

@@ -1,12 +1,13 @@
 import { cn } from "@/lib/utils";
 
-type Tone = "brand" | "senior" | "junior" | "danger";
+type Tone = "brand" | "senior" | "junior" | "danger" | "carbon";
 
 const toneClasses: Record<Tone, string> = {
   brand: "bg-brand",
   senior: "bg-senior",
   junior: "bg-junior",
   danger: "bg-danger",
+  carbon: "bg-carbon",
 };
 
 export function ProgressBar({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Skull, ShieldAlert } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -36,6 +36,21 @@ export function ClimaxPanel({
     const matches = runLog.filter((e): e is ConstitutionTestRunEntry => e.type === "constitution_test");
     return matches.length ? matches[matches.length - 1] : null;
   }, [runLog]);
+
+  // Flash blanco una sola vez cuando el resultado del slash recien aparece —
+  // no en cada refresco de polling posterior sobre el mismo resultado.
+  const [justFlashed, setJustFlashed] = useState(false);
+  const hadResultBefore = useRef(lastDefaultChain !== null);
+  useEffect(() => {
+    const hasResult = lastDefaultChain !== null;
+    if (hasResult && !hadResultBefore.current) {
+      setJustFlashed(true);
+      const t = setTimeout(() => setJustFlashed(false), 1100);
+      hadResultBefore.current = hasResult;
+      return () => clearTimeout(t);
+    }
+    hadResultBefore.current = hasResult;
+  }, [lastDefaultChain]);
 
   return (
     <Card accent="danger" className="scroll-mt-24 border-danger/20" id="climax">
@@ -77,15 +92,25 @@ export function ClimaxPanel({
         </div>
 
         {lastDefaultChain ? (
-          <div className="space-y-3 rounded-xl border border-danger/40 bg-danger/10 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-danger-glow">
-              <Skull className="size-4" aria-hidden />
-              underwriter_B sobre-cotizó ({lastDefaultChain.slashBps / 100}% bajo el spread del mercado) — slasheado
+          <div
+            className={cn(
+              "relative space-y-3 overflow-hidden rounded-xl border border-carbon/50 bg-carbon/10 p-4",
+              justFlashed && "animate-slash-flash"
+            )}
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Skull className="size-4 text-foreground-muted" aria-hidden />
+              underwriter_B sobre-cotizó el riesgo — rebanado
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-              <Badge variant="danger" className="font-mono">slash {(lastDefaultChain.slashBps / 100).toFixed(2)}%</Badge>
-              <Badge variant="danger" className="font-mono">-{lastDefaultChain.penalizePoints} reputación (B)</Badge>
-              <Badge variant="senior" className="font-mono">+{lastDefaultChain.rewardPoints} reputación (A)</Badge>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-4xl font-bold tabular-nums text-foreground">
+                −{(lastDefaultChain.slashBps / 100).toFixed(2)}%
+              </span>
+              <span className="text-xs text-foreground-faint">de su stake, seizado por el waterfall</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+              <Badge variant="carbon" className="font-mono">-{lastDefaultChain.penalizePoints} reputación (B)</Badge>
+              <Badge variant="brand" className="font-mono">+{lastDefaultChain.rewardPoints} reputación (A)</Badge>
               <Badge variant="neutral" className="font-mono">pérdida marcada: {formatCspr(lastDefaultChain.lossAmountCspr, 0)}</Badge>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-muted">
