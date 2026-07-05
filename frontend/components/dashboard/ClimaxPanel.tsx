@@ -6,6 +6,8 @@ import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { TxLink } from "@/components/ui/TxLink";
+import { CountUp } from "@/components/ui/CountUp";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { RunLogEntry, DefaultChainRunEntry, ConstitutionTestRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { cn, formatCspr } from "@/lib/utils";
@@ -60,7 +62,14 @@ export function ClimaxPanel({
             <Skull className="size-4" aria-hidden />
           </div>
           <div>
-            <CardTitle>El clímax — Default y slashing</CardTitle>
+            <CardTitle className="flex items-center gap-1.5">
+              El clímax — Default y slashing
+              <InfoTooltip label="Qué es slashing">
+                Slashing means the protocol itself seizes part of an underwriter&apos;s staked CSPR as a
+                penalty — no human decides this, it&apos;s a smart contract rule that fires automatically
+                when an on-chain check proves the agent mispriced risk.
+              </InfoTooltip>
+            </CardTitle>
             <p className="text-xs text-foreground-muted">
               mark_default → waterfall → slash sobre el underwriter que sobre-cotizó → penalize/reward en Reputation. Todo real.
             </p>
@@ -104,7 +113,7 @@ export function ClimaxPanel({
             </div>
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-4xl font-bold tabular-nums text-foreground">
-                −{(lastDefaultChain.slashBps / 100).toFixed(2)}%
+                <CountUp value={lastDefaultChain.slashBps / 100} decimals={2} prefix="−" suffix="%" duration={900} startFromZero />
               </span>
               <span className="text-xs text-foreground-faint">de su stake, seizado por el waterfall</span>
             </div>

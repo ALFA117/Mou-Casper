@@ -1,9 +1,11 @@
 import { cn } from "@/lib/utils";
+import { CountUp } from "@/components/ui/CountUp";
 import type { LucideIcon } from "lucide-react";
 
 export function StatTile({
   label,
   value,
+  countUp,
   sub,
   icon: Icon,
   tone = "neutral",
@@ -11,6 +13,7 @@ export function StatTile({
 }: {
   label: string;
   value: string;
+  countUp?: { value: number; decimals?: number; suffix?: string };
   sub?: string;
   icon?: LucideIcon;
   tone?: "neutral" | "brand" | "danger";
@@ -28,7 +31,11 @@ export function StatTile({
       <div className="min-w-0">
         <div className="text-[11px] uppercase tracking-wide text-foreground-faint">{label}</div>
         <div className={cn("font-mono text-xl font-semibold tabular-nums leading-tight", toneText)}>
-          {value}
+          {countUp ? (
+            <CountUp value={countUp.value} decimals={countUp.decimals} suffix={countUp.suffix} />
+          ) : (
+            value
+          )}
         </div>
         {sub && <div className="text-xs text-foreground-muted">{sub}</div>}
       </div>

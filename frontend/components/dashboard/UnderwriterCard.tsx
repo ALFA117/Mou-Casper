@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bot, Zap, CircleCheck, Skull } from "lucide-react";
+import { ShieldCheck, Flame, Zap, Stamp, Skull } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
+import { CountUp } from "@/components/ui/CountUp";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { UnderwriterRunEntry } from "@/lib/types";
 import { PROFILE_LABELS, ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
-import { cn, formatBps, formatCspr } from "@/lib/utils";
+import { cn, formatBps } from "@/lib/utils";
 
 export function UnderwriterCard({
   wallet,
@@ -71,7 +73,13 @@ export function UnderwriterCard({
                   : "bg-junior/10 text-junior-glow"
             )}
           >
-            {wasSlashed ? <Skull className="size-4" aria-hidden /> : <Bot className="size-4" aria-hidden />}
+            {wasSlashed ? (
+              <Skull className="size-4" aria-hidden />
+            ) : tone === "senior" ? (
+              <ShieldCheck className="size-4" aria-hidden />
+            ) : (
+              <Flame className="size-4" aria-hidden />
+            )}
           </div>
           <div>
             <CardTitle className={wasSlashed ? "text-foreground-muted" : undefined}>{wallet}</CardTitle>
@@ -84,7 +92,7 @@ export function UnderwriterCard({
           variant={wasSlashed ? "carbon" : tone}
           className="shrink-0 whitespace-nowrap font-mono"
         >
-          {formatCspr(liveStakeCspr, 3)} en juego
+          <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" /> en juego
         </Badge>
       </CardHeader>
       <CardBody className="space-y-4">
@@ -111,7 +119,7 @@ export function UnderwriterCard({
                 </span>
               )}
               <span className="flex items-center gap-1 text-foreground-muted">
-                <CircleCheck className="size-3 text-brand-glow" aria-hidden /> register <TxLink hash={latestRun!.hashes.register} />
+                <Stamp className="size-3 text-brand-glow" aria-hidden /> register <TxLink hash={latestRun!.hashes.register} />
               </span>
               <span className="flex items-center gap-1 text-foreground-muted">stake <TxLink hash={latestRun!.hashes.stake} /></span>
               <span className="flex items-center gap-1 text-foreground-muted">attest <TxLink hash={latestRun!.hashes.attest} /></span>
@@ -126,8 +134,17 @@ export function UnderwriterCard({
         {/* Stake en vivo (leido on-chain) */}
         <div>
           <div className="mb-1 flex items-baseline justify-between">
-            <span className="text-xs text-foreground-muted">Stake en UnderwriterStake (en vivo)</span>
-            <span className="font-mono text-base font-semibold tabular-nums text-foreground">{formatCspr(liveStakeCspr, 3)}</span>
+            <span className="flex items-center gap-1 text-xs text-foreground-muted">
+              Stake en UnderwriterStake (en vivo)
+              <InfoTooltip label="Qué es el stake">
+                CSPR this agent locked in the UnderwriterStake contract as collateral behind its own risk
+                call. It only gets this back if the asset performs — if it defaults and this agent
+                mispriced it, slashing seizes part of it.
+              </InfoTooltip>
+            </span>
+            <span className="font-mono text-base font-semibold tabular-nums text-foreground">
+              <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />
+            </span>
           </div>
           <ProgressBar value={liveStakeCspr} max={Math.max(1, liveStakeCspr)} tone={wasSlashed ? "carbon" : tone} />
         </div>
@@ -136,7 +153,9 @@ export function UnderwriterCard({
         <div>
           <div className="mb-1 flex items-baseline justify-between">
             <span className="text-xs text-foreground-muted">Reputación (en vivo)</span>
-            <span className="font-mono text-base font-semibold tabular-nums text-foreground">{liveReputation}<span className="text-foreground-faint">/1000</span></span>
+            <span className="font-mono text-base font-semibold tabular-nums text-foreground">
+              <CountUp value={liveReputation} className="text-foreground" /><span className="text-foreground-faint">/1000</span>
+            </span>
           </div>
           <ProgressBar value={liveReputation} max={1000} tone={wasSlashed ? "carbon" : "brand"} />
         </div>

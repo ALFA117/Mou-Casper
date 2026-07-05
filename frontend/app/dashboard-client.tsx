@@ -2,6 +2,7 @@
 
 import { Background3D } from "@/components/Background3D";
 import { SiteHeader } from "@/components/dashboard/SiteHeader";
+import { Hero } from "@/components/dashboard/Hero";
 import { UnderwritingArena } from "@/components/dashboard/UnderwritingArena";
 import { TrancheVaultPanel } from "@/components/dashboard/TrancheVaultPanel";
 import { ClimaxPanel } from "@/components/dashboard/ClimaxPanel";
@@ -10,6 +11,7 @@ import { BusyStatusBar } from "@/components/dashboard/BusyStatusBar";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DemoStep } from "@/components/ui/DemoStep";
+import { RevealOnMount } from "@/components/ui/RevealOnMount";
 import { useAvalDashboard } from "@/lib/use-aval-dashboard";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { PlayCircle } from "lucide-react";
@@ -52,88 +54,100 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="space-y-6">
+              <RevealOnMount index={0}>
+                <Hero />
+              </RevealOnMount>
+
               {chainStateError && (
                 <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger-glow">
                   No se pudo leer el estado on-chain: {chainStateError}
                 </div>
               )}
 
-              <DemoStep n="01" tone="senior">
-                <Card accent="senior" id="asset">
-                  <CardHeader>
-                    <div>
-                      <CardTitle>Activo en demo</CardTitle>
-                      <p className="text-xs text-foreground-muted">
-                        Los datos de riesgo reales se compran vía x402 a /x402-service para este ID.
-                      </p>
-                    </div>
-                  </CardHeader>
-                  <CardBody className="flex flex-wrap items-center gap-3">
-                    <input
-                      type="text"
-                      value={assetId}
-                      onChange={e => setAssetId(e.target.value)}
-                      disabled={readOnly}
-                      className="h-10 flex-1 min-w-[200px] rounded-lg border border-border-subtle bg-surface-2 px-3 text-sm text-foreground disabled:opacity-50"
-                      aria-label="Asset ID"
-                    />
-                    <span title={readOnly ? READONLY_TOOLTIP : undefined}>
-                      <Button
-                        onClick={() =>
-                          actions.runFullDemo({
-                            aStakeCspr: 15,
-                            bStakeCspr: 20,
-                            investorSeniorCspr: 15,
-                            investorJuniorCspr: 10,
-                            lossAmountCspr: 30,
-                          })
-                        }
-                        disabled={actionsDisabled}
-                        loading={busyAction === "demo_run"}
-                      >
-                        <PlayCircle className="size-4" aria-hidden />
-                        Correr demo:run completo (~{ACTION_COST_ESTIMATES_CSPR.fullDemoRun} CSPR, varios minutos)
-                      </Button>
-                    </span>
-                  </CardBody>
-                </Card>
-              </DemoStep>
+              <RevealOnMount index={1}>
+                <DemoStep n="01" tone="senior">
+                  <Card accent="senior" id="asset">
+                    <CardHeader>
+                      <div>
+                        <CardTitle>Activo en demo</CardTitle>
+                        <p className="text-xs text-foreground-muted">
+                          Los datos de riesgo reales se compran vía x402 a /x402-service para este ID.
+                        </p>
+                      </div>
+                    </CardHeader>
+                    <CardBody className="flex flex-wrap items-center gap-3">
+                      <input
+                        type="text"
+                        value={assetId}
+                        onChange={e => setAssetId(e.target.value)}
+                        disabled={readOnly}
+                        className="h-10 flex-1 min-w-[200px] rounded-lg border border-border-subtle bg-surface-2 px-3 text-sm text-foreground disabled:opacity-50"
+                        aria-label="Asset ID"
+                      />
+                      <span title={readOnly ? READONLY_TOOLTIP : undefined}>
+                        <Button
+                          onClick={() =>
+                            actions.runFullDemo({
+                              aStakeCspr: 15,
+                              bStakeCspr: 20,
+                              investorSeniorCspr: 15,
+                              investorJuniorCspr: 10,
+                              lossAmountCspr: 30,
+                            })
+                          }
+                          disabled={actionsDisabled}
+                          loading={busyAction === "demo_run"}
+                        >
+                          <PlayCircle className="size-4" aria-hidden />
+                          Correr demo:run completo (~{ACTION_COST_ESTIMATES_CSPR.fullDemoRun} CSPR, varios minutos)
+                        </Button>
+                      </span>
+                    </CardBody>
+                  </Card>
+                </DemoStep>
+              </RevealOnMount>
 
-              <DemoStep n="02" tone="senior">
-                <UnderwritingArena
-                  assetId={assetId}
-                  chainState={chainState}
-                  runLog={runLog}
-                  busyAction={busyAction}
-                  actionsDisabled={actionsDisabled}
-                  readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
-                  onRunA={actions.runUnderwriterA}
-                  onRunB={actions.runUnderwriterB}
-                />
-              </DemoStep>
+              <RevealOnMount index={2}>
+                <DemoStep n="02" tone="senior">
+                  <UnderwritingArena
+                    assetId={assetId}
+                    chainState={chainState}
+                    runLog={runLog}
+                    busyAction={busyAction}
+                    actionsDisabled={actionsDisabled}
+                    readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
+                    onRunA={actions.runUnderwriterA}
+                    onRunB={actions.runUnderwriterB}
+                  />
+                </DemoStep>
+              </RevealOnMount>
 
-              <DemoStep n="03" tone="brand">
-                <TrancheVaultPanel
-                  chainState={chainState}
-                  runLog={runLog}
-                  busyAction={busyAction}
-                  actionsDisabled={actionsDisabled}
-                  readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
-                  onBuySenior={actions.buySenior}
-                  onBuyJunior={actions.buyJunior}
-                />
-              </DemoStep>
+              <RevealOnMount index={3}>
+                <DemoStep n="03" tone="brand">
+                  <TrancheVaultPanel
+                    chainState={chainState}
+                    runLog={runLog}
+                    busyAction={busyAction}
+                    actionsDisabled={actionsDisabled}
+                    readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
+                    onBuySenior={actions.buySenior}
+                    onBuyJunior={actions.buyJunior}
+                  />
+                </DemoStep>
+              </RevealOnMount>
 
-              <DemoStep n="04" tone="danger" last>
-                <ClimaxPanel
-                  assetId={assetId}
-                  runLog={runLog}
-                  busyAction={busyAction}
-                  actionsDisabled={actionsDisabled}
-                  readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
-                  onMarkDefault={actions.markDefault}
-                />
-              </DemoStep>
+              <RevealOnMount index={4}>
+                <DemoStep n="04" tone="danger" last>
+                  <ClimaxPanel
+                    assetId={assetId}
+                    runLog={runLog}
+                    busyAction={busyAction}
+                    actionsDisabled={actionsDisabled}
+                    readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
+                    onMarkDefault={actions.markDefault}
+                  />
+                </DemoStep>
+              </RevealOnMount>
 
               <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">
                 Todas las cifras son leídas en vivo de Casper Testnet o de agents/run-log.json (transacciones reales ya
@@ -141,9 +155,9 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
               </footer>
             </div>
 
-            <div className="lg:sticky lg:top-24 lg:h-[calc(100dvh-7rem)]">
+            <RevealOnMount index={1} className="lg:sticky lg:top-24 lg:h-[calc(100dvh-7rem)]">
               <AttestationFeed runLog={runLog} />
-            </div>
+            </RevealOnMount>
           </div>
         </main>
 

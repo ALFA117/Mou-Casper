@@ -41,7 +41,7 @@ export function Button({
       className={cn(
         "inline-flex cursor-pointer items-center justify-center rounded-xl font-medium tracking-tight transition-all duration-200 ease-out",
         "disabled:cursor-not-allowed disabled:opacity-40",
-        "active:scale-[0.98]",
+        "enabled:hover:-translate-y-px active:scale-[0.98]",
         variantClasses[variant],
         sizeClasses[size],
         className

@@ -53,14 +53,25 @@ export function SiteHeader({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          <StatTile label="Stake total (en vivo)" value={formatCspr(totalStake, 3)} icon={Gauge} />
+          <StatTile
+            label="Stake total (en vivo)"
+            value={formatCspr(totalStake, 3)}
+            countUp={{ value: totalStake, decimals: 3, suffix: " CSPR" }}
+            icon={Gauge}
+          />
           <StatTile
             label="Reputación promedio"
             value={`${avgReputation}/1000`}
+            countUp={{ value: avgReputation, suffix: "/1000" }}
             tone={anySlashed ? "danger" : "brand"}
             icon={Activity}
           />
-          <StatTile label="Eventos on-chain registrados" value={String(onChainEventCount)} icon={Radio} />
+          <StatTile
+            label="Eventos on-chain registrados"
+            value={String(onChainEventCount)}
+            countUp={{ value: onChainEventCount }}
+            icon={Radio}
+          />
           <StatTile
             label="Última lectura"
             value={chainState ? new Date(chainState.readAt).toLocaleTimeString() : "—"}

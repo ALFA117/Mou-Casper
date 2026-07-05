@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
+import { CountUp } from "@/components/ui/CountUp";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { ChainState, RunLogEntry, InvestorBuyRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { cn, formatCspr } from "@/lib/utils";
@@ -54,7 +56,10 @@ export function TrancheVaultPanel({
           </div>
           <div>
             <CardTitle>TrancheVault</CardTitle>
-            <p className="text-xs text-foreground-muted">Senior / junior en vivo, leidos on-chain</p>
+            <p className="text-xs text-foreground-muted">
+              El activo se parte en tramos: el investor compra senior (protegido, paga primero) o junior
+              (absorbe pérdidas primero, mayor rendimiento) — en vivo, leído on-chain.
+            </p>
           </div>
         </div>
       </CardHeader>
@@ -66,6 +71,7 @@ export function TrancheVaultPanel({
               label="Senior tranche"
               sub="Bajo riesgo · paga primero"
               tone="senior"
+              tooltip="The protected slice of the deal. Senior holders get paid back first out of whatever the asset recovers — lower yield, but losses only reach them after the junior tranche is wiped out."
               outstandingCspr={vault?.seniorOutstandingCspr ?? SENIOR_FACE_VALUE_CSPR}
               faceValueCspr={SENIOR_FACE_VALUE_CSPR}
             />
@@ -74,6 +80,7 @@ export function TrancheVaultPanel({
               label="Junior tranche"
               sub="Alto riesgo · absorbe perdidas primero"
               tone="junior"
+              tooltip="The risky slice. Junior holders absorb losses first if the asset defaults — in exchange, they earn a higher yield than senior. This is the tranche the aggressive underwriter (B) tends to push."
               outstandingCspr={vault?.juniorOutstandingCspr ?? JUNIOR_FACE_VALUE_CSPR}
               faceValueCspr={JUNIOR_FACE_VALUE_CSPR}
             />
@@ -87,8 +94,8 @@ export function TrancheVaultPanel({
               <div>
                 <div className="text-sm font-medium text-foreground">Investor Agent</div>
                 <div className="font-mono text-xs tabular-nums text-foreground-muted">
-                  Holdings en vivo: senior {formatCspr(vault?.investorHoldingSeniorCspr ?? 0, 2)} · junior{" "}
-                  {formatCspr(vault?.investorHoldingJuniorCspr ?? 0, 2)}
+                  Holdings en vivo: senior <CountUp value={vault?.investorHoldingSeniorCspr ?? 0} decimals={2} suffix=" CSPR" /> · junior{" "}
+                  <CountUp value={vault?.investorHoldingJuniorCspr ?? 0} decimals={2} suffix=" CSPR" />
                 </div>
               </div>
             </div>
@@ -168,6 +175,7 @@ function TrancheBlock({
   label,
   sub,
   tone,
+  tooltip,
   outstandingCspr,
   faceValueCspr,
 }: {
@@ -175,6 +183,7 @@ function TrancheBlock({
   label: string;
   sub: string;
   tone: "senior" | "junior";
+  tooltip?: string;
   outstandingCspr: number;
   faceValueCspr: number;
 }) {
@@ -191,12 +200,15 @@ function TrancheBlock({
         <div className={cn("flex items-center gap-1.5 text-sm font-semibold", tone === "senior" ? "text-senior-glow" : "text-junior-glow")}>
           <Icon className="size-4" aria-hidden />
           {label}
+          {tooltip && <InfoTooltip label={`Qué es ${label}`}>{tooltip}</InfoTooltip>}
         </div>
         <Badge variant={tone}>{formatCspr(faceValueCspr, 0)} nominal</Badge>
       </div>
       <p className="mb-3 text-xs text-foreground-muted">{sub}</p>
       <div className="mb-2 flex items-baseline justify-between">
-        <span className="font-mono text-2xl font-bold tabular-nums text-foreground">{formatCspr(outstandingCspr, 3)}</span>
+        <span className="font-mono text-2xl font-bold tabular-nums text-foreground">
+          <CountUp value={outstandingCspr} decimals={3} suffix=" CSPR" />
+        </span>
         <span className="text-xs text-foreground-faint">outstanding (en vivo)</span>
       </div>
       <ProgressBar value={outstandingCspr} max={faceValueCspr || 1} tone={wiped ? "danger" : tone} />
