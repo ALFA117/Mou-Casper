@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { runAgentScript } from "@/lib/server/run-script";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 600;
+// Tope real del arco completo es ~10 min localmente, pero el plan Hobby de
+// Vercel limita maxDuration a 300s -- no importa en la practica: esta ruta
+// nunca ejecuta nada en Vercel (ver runAgentScript, corta con VERCEL === "1"
+// antes de spawnear), asi que el valor solo necesita pasar la validacion del
+// build.
+export const maxDuration = 300;
 
 /**
  * Dispara agents/demo-run.mjs: el arco completo (2 underwriters + investor +
