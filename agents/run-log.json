@@ -1,0 +1,115 @@
+[
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_A",
+    "assetId": "invoice-batch-002",
+    "profileKey": "conservative",
+    "stakeAmountCspr": 15,
+    "riskData": {
+      "assetId": "invoice-batch-002",
+      "defaultProbabilityBps": 810,
+      "recommendedSpreadBps": 1200,
+      "source": "aval-risk-feed-v1",
+      "timestamp": "2026-07-05T07:50:52.071Z"
+    },
+    "quote": {
+      "rating": 885,
+      "recommended_tranche": "senior",
+      "price_bps": 1450,
+      "short_reasoning": "El feed de riesgo sugiere 810bps PD. Sin embargo, como underwriter conservador, ajusto al alza por riesgo de cola no modelado. Se prioriza la proteccion del capital inversionista. Tramo senior recomendado. Spread de 1450bps compensa riesgo real y margen de seguridad, asegurando solida rentabilidad ante posibles desviaciones adversas. Evitamos riesgos excesivos por volumen de negocio.",
+      "extended_reasoning": "Como underwriter conservador de AVAL, mi principal objetivo es salvaguardar el capital de los inversionistas. Aunque el feed de riesgo x402 reporta una probabilidad de default (PD) de 810 bps para el batch invoice-batch-002, considero esta cifra como un limite inferior. Mi experiencia indica que los modelos de terceros a menudo subestiman el riesgo de cola y la correlacion de defaults en entornos de estres. Por lo tanto, he ajustado mi percepcion del riesgo al alza, estimando una PD efectiva que justifica una mayor compensacion y un rating mas cauteloso. El spread de suscripcion sugerido de 1450 bps es significativamente mas alto que los 1200 bps recomendados por el feed."
+    },
+    "reasoningHash": "bee6bac217a36d44089a144151214a7f7e5d2b7bc1ff879e5a520f51a85f8444",
+    "hashes": {
+      "x402": "4c0f4e285f1711ed6f55c41d74444390d4e93e13159d6fe319e1e7c1dd864deb",
+      "register": "fe5241968fe8c85a546b5ad6bb0c9abb960f52cddd3f72922c998cf9ad77e545",
+      "stake": "81acb2cf3aca1dbf3613c4d2014f295e7fd2c0ac2e2955837ce54e19d2cbe0c4",
+      "attest": "4a3c6ac914cb34d19fec78155c81b4b54afb23a971c13421af0b51c617694921"
+    },
+    "success": true,
+    "loggedAt": "2026-07-05T08:05:29.411Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_B",
+    "assetId": "invoice-batch-002",
+    "profileKey": "aggressive",
+    "stakeAmountCspr": 20,
+    "riskData": {
+      "assetId": "invoice-batch-002",
+      "defaultProbabilityBps": 810,
+      "recommendedSpreadBps": 1200,
+      "source": "aval-risk-feed-v1",
+      "timestamp": "2026-07-05T07:51:40.865Z"
+    },
+    "quote": {
+      "rating": 940,
+      "recommended_tranche": "junior",
+      "price_bps": 900,
+      "short_reasoning": "Activo de bajo riesgo con solida probabilidad de pago. Rating optimista y spread competitivo para maximizar volumen y rendimiento. Priorizamos el tramo junior por su mayor yield, respaldado por la fuerte calidad crediticia del batch de facturas. Confiamos en la capacidad de cobro y superamos a competidores mas conservadores.",
+      "extended_reasoning": "Este batch de facturas se valora con un rating de 940, reflejando una vision optimista y agresiva sobre la calidad crediticia del activo. La probabilidad de default reportada de 810 BPS se interpreta como significativamente baja. Se recomienda el tramo junior debido a la alta calidad del activo. El spread de suscripcion se ha fijado en 900 BPS, una oferta muy competitiva y agresiva."
+    },
+    "reasoningHash": "b6907a2905155766e1efd6fe559e1aa86403235d713e21ad560d6c23a5c5a056",
+    "hashes": {
+      "x402": "09410997ec0440a49b0c2a727bab8b54c4918ac3bea1fddecb7b74045176e2e8",
+      "register": "9c4d93ab294157e5a713ca5a8813c87a2528fd4e2c442f302ee64033419b8e74",
+      "stake": "95df3143d69ebee919c2c51b1cdcebeb600e3d57d85e45d9bd0dce1933c6005a",
+      "attest": "1de7772cfbbcd67e890a275ba44408b1633f3bb994d14d2b0956a56ad95d28cb"
+    },
+    "success": true,
+    "loggedAt": "2026-07-05T08:05:29.430Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "assetId": "invoice-batch-002",
+    "amountCspr": 15,
+    "hash": "9a7ce912a8579262e1592c92aa8c96ee5cb8ce0505b08e0db96aa1414324fb70",
+    "success": true,
+    "loggedAt": "2026-07-05T08:05:29.446Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_junior",
+    "assetId": "invoice-batch-002",
+    "amountCspr": 10,
+    "hash": "467ef69d6dacc2ada3f26af7e9ead4b239bfbd67fda52a3dc7a6fc19fdd50a43",
+    "success": true,
+    "loggedAt": "2026-07-05T08:05:29.462Z"
+  },
+  {
+    "type": "constitution_test",
+    "assetId": "invoice-batch-002",
+    "requestedExposureCspr": 100000,
+    "hash": "366106d5f58736a571c2232b9e662986231ada0a15ec7757ee37f7a24e8dded6",
+    "errorCode": 4,
+    "errorName": "ExposureLimitExceeded",
+    "success": false,
+    "testPassed": true,
+    "loggedAt": "2026-07-05T08:05:29.476Z"
+  },
+  {
+    "type": "default_chain",
+    "assetId": "invoice-batch-002",
+    "lossAmountCspr": 30,
+    "slashBps": 2500,
+    "penalizePoints": 250,
+    "rewardPoints": 50,
+    "hashes": {
+      "markDefault": "b2cd474f44baa53c4d15687d5f69859d1d89f7ef9dbbd97c79f7c96ce26fc9cb",
+      "slash": "7d9f3bf1f44d9f1ad3bcbb40cb21a5a8ee49321c9c33c3aadc70cd680787d99e",
+      "penalize": "7ee7d5f458eb278feba70f35a4a00d0eab6599a6e57db05586b5fbef862717f3",
+      "reward": "f7442e6828298cf203296b3cd194a3c12b75f8416ff03af81a72175808b8355e"
+    },
+    "success": true,
+    "loggedAt": "2026-07-05T08:05:29.490Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_junior",
+    "amountCspr": 5,
+    "hash": "8d3fa89e88c51c1b11551d33e9b2f30869ac575db69179e17953a9a9397e5d46",
+    "success": true,
+    "loggedAt": "2026-07-05T08:27:33.139Z"
+  }
+]

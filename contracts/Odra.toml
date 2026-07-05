@@ -1,0 +1,20 @@
+[[contracts]]
+fqn = "flipper::Flipper"
+
+[[contracts]]
+fqn = "hello::Hello"
+
+[[contracts]]
+fqn = "constitution::Constitution"
+
+[[contracts]]
+fqn = "reputation::Reputation"
+
+[[contracts]]
+fqn = "underwriter_stake::UnderwriterStake"
+
+[[contracts]]
+fqn = "attestation_registry::AttestationRegistry"
+
+[[contracts]]
+fqn = "tranche_vault::TrancheVault"

@@ -1,0 +1,67 @@
+{
+  "network": "casper-test",
+  "rpcUrl": "https://node.testnet.casper.network/rpc",
+  "deployerPublicKey": "01b5f0782df0a5dcc29de6e97ff1703404708b9da149cf393c11f1ac69f6037090",
+  "contracts": {
+    "hello": {
+      "packageHash": "hash-a35eee053184dcece3fe9d98a840f80c5eafcc491e469b6b9e2ca8f08b954774",
+      "namedKeyOnAccount": "hello_package_hash",
+      "deployHash": "892cbd2d71fe3c3bd226ef2ce99ed31da19b5f723ca9d6c0e90e9c575cc79858",
+      "blockHash": "b76a277bd9081e0371d724a1c0f20b9125af5365f913ce50fee9ad87bdb9ba5d",
+      "status": "success",
+      "paymentCspr": 300,
+      "constructorArgs": {}
+    },
+    "Constitution": {
+      "packageHash": "hash-26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7",
+      "namedKeyOnAccount": "constitution_package_hash",
+      "deployHash": "ff22ffb486e86d03ace66cbf93c8f0df6dbffaf191f6abeaccea0c288796a08a",
+      "blockHash": "8351fa750b6321f1a5c264bf4b8b84648b2de0b48570865188d057c15dcdf217",
+      "status": "success",
+      "paymentCspr": 320,
+      "constructorArgs": {
+        "max_exposure_per_asset_motes": "500000000000",
+        "min_collateral_ratio_bps": 15000
+      }
+    },
+    "Reputation": {
+      "packageHash": "hash-3ee548b28300fe3fc9182aa4bfc747596ab4eded0d7ab4ec23d1da91cb003516",
+      "namedKeyOnAccount": "reputation_package_hash",
+      "deployHash": "1642fa0fafc662b39272d0f74cc0e0fe3b6d9b26a47aa26428a196b0900d23a6",
+      "blockHash": "e421a8e93f3621b6ba9ed56b11a91eb295184687793e322f8996d0af2f75ed43",
+      "status": "success",
+      "paymentCspr": 310,
+      "constructorArgs": {}
+    },
+    "UnderwriterStake": {
+      "packageHash": "hash-8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4",
+      "namedKeyOnAccount": "underwriter_stake_package_hash",
+      "deployHash": "75d347d36e07cd4a4b56745ede66a3b71ad3055f4939e0be21a1eff29f234bc3",
+      "blockHash": "793801290a86b4181411ad9014d05e3c8941f0a3ae13a0a9e431b439dbc78884",
+      "status": "success",
+      "paymentCspr": 320,
+      "constructorArgs": {}
+    },
+    "AttestationRegistry": {
+      "packageHash": "hash-7bd8579d79bb857adfdbc3e3f288275ddae9078d2fe511585860784742357940",
+      "namedKeyOnAccount": "attestation_registry_package_hash",
+      "deployHash": "5b83cdb751288bce34bcf10fbdcac9c10ecdd97f8878daecda4002139c680602",
+      "blockHash": "06ff6dfc199d6ea9c93b68bbc00d0a8698d2d1aa0643d417f644fb515a7f24a4",
+      "status": "success",
+      "paymentCspr": 330,
+      "constructorArgs": {}
+    },
+    "TrancheVault": {
+      "packageHash": "hash-449c08c7d24655aafe27dc4e49964374910fdb6c69bfbd09700332a134b78296",
+      "namedKeyOnAccount": "tranche_vault_package_hash",
+      "deployHash": "30a4159d63791f1c17a03384f46eb556df1d303fdae5faf188897dcfc4dc65f0",
+      "blockHash": "4c73407706188037e3ea2df8b46cdbd76cdd4311ae87bc2518ddfe4b19d21c90",
+      "status": "success",
+      "paymentCspr": 330,
+      "constructorArgs": {
+        "senior_face_value_motes": "100000000000",
+        "junior_face_value_motes": "50000000000"
+      }
+    }
+  }
+}

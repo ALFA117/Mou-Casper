@@ -1,0 +1,8 @@
+{
+  "hello_package_hash": "hash-a35eee053184dcece3fe9d98a840f80c5eafcc491e469b6b9e2ca8f08b954774",
+  "constitution_package_hash": "hash-26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7",
+  "reputation_package_hash": "hash-3ee548b28300fe3fc9182aa4bfc747596ab4eded0d7ab4ec23d1da91cb003516",
+  "underwriter_stake_package_hash": "hash-8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4",
+  "attestation_registry_package_hash": "hash-7bd8579d79bb857adfdbc3e3f288275ddae9078d2fe511585860784742357940",
+  "tranche_vault_package_hash": "hash-449c08c7d24655aafe27dc4e49964374910fdb6c69bfbd09700332a134b78296"
+}
