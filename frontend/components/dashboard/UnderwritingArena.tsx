@@ -51,7 +51,8 @@ export function UnderwritingArena({
         </div>
         {bothQuoted && (
           <div className="rounded-full border border-border bg-surface/90 px-4 py-1.5 text-center text-xs text-foreground-muted shadow-glow">
-            Discrepancia de spread: <span className="font-display font-bold text-foreground">{formatBps(disagreementBps)}</span>
+            Discrepancia de spread:{" "}
+            <span className="font-mono text-sm font-bold tabular-nums text-foreground">{formatBps(disagreementBps)}</span>
           </div>
         )}
       </div>

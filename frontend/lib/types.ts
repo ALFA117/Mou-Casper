@@ -101,3 +101,12 @@ export interface ScriptRunResult {
   stderr: string;
   newLogEntries: RunLogEntry[];
 }
+
+// Disparado por acciones reales ya confirmadas (nunca simulado) para que
+// Background3D pueda reaccionar — ver lib/use-aval-dashboard.ts.
+export interface BackgroundEvent {
+  id: number;
+  kind: "pulse" | "link" | "kill" | "celebrate";
+  tone: "brand" | "senior" | "junior" | "danger";
+  wallet?: string;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Activity, Gauge, RefreshCw } from "lucide-react";
+import { Shield, Activity, Gauge, RefreshCw, CloudOff } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { StatTile } from "@/components/ui/StatTile";
@@ -11,11 +11,13 @@ export function SiteHeader({
   chainState,
   runLog,
   loading,
+  readOnly,
   onRefresh,
 }: {
   chainState: ChainState | null;
   runLog: RunLogEntry[];
   loading: boolean;
+  readOnly: boolean;
   onRefresh: () => void;
 }) {
   const totalStake =
@@ -67,6 +69,18 @@ export function SiteHeader({
           />
         </div>
       </div>
+
+      {readOnly && (
+        <div className="border-t border-border-subtle bg-surface-2/70">
+          <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
+            <CloudOff className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
+            <p className="text-[11px] leading-snug text-foreground-muted">
+              Vitrina de solo lectura (Vercel) — los números de arriba son reales y en vivo. Corre el proyecto
+              localmente para disparar acciones que gastan CSPR.
+            </p>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

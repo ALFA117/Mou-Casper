@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { ChainState, RunLogEntry, ProfileKey } from "./types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent } from "./types";
 import { fetchChainState, fetchRunLog, runUnderwriter, investInTranche, markDefault, runFullDemo } from "./real-data";
 import { DEFAULT_ASSET_ID } from "./dashboard-config";
 
@@ -12,7 +12,9 @@ export interface AvalDashboardState {
   loadingChainState: boolean;
   chainStateError: string | null;
   busyAction: string | null; // qué botón está corriendo ahora mismo, o null
+  busyActionStartedAt: number | null;
   lastActionLog: { label: string; ok: boolean; detail: string }[];
+  bgEvent: BackgroundEvent | null;
 }
 
 export function useAvalDashboard() {
@@ -22,7 +24,17 @@ export function useAvalDashboard() {
   const [loadingChainState, setLoadingChainState] = useState(true);
   const [chainStateError, setChainStateError] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [busyActionStartedAt, setBusyActionStartedAt] = useState<number | null>(null);
   const [lastActionLog, setLastActionLog] = useState<{ label: string; ok: boolean; detail: string }[]>([]);
+  const [bgEvent, setBgEvent] = useState<BackgroundEvent | null>(null);
+  const bgEventIdRef = useRef(0);
+
+  // Emite un evento real para que Background3D pulse/ilumine/apague un nodo —
+  // siempre disparado DESPUES de que la accion on-chain ya confirmo (nunca antes).
+  const emitBgEvent = useCallback((kind: BackgroundEvent["kind"], tone: BackgroundEvent["tone"], wallet?: string) => {
+    bgEventIdRef.current += 1;
+    setBgEvent({ id: bgEventIdRef.current, kind, tone, wallet });
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoadingChainState(true);
@@ -47,16 +59,25 @@ export function useAvalDashboard() {
   }, []);
 
   const runAction = useCallback(
-    async (key: string, label: string, fn: () => Promise<{ exitCode: number; stdout: string }>) => {
+    async (
+      key: string,
+      label: string,
+      fn: () => Promise<{ exitCode: number; stdout: string }>,
+      onSuccess?: () => void
+    ) => {
       if (busyAction) return;
       setBusyAction(key);
+      setBusyActionStartedAt(Date.now());
       try {
         const result = await fn();
-        pushLog(label, result.exitCode === 0, result.exitCode === 0 ? "SUCCESS" : "Revisa la consola / stdout");
+        const ok = result.exitCode === 0;
+        pushLog(label, ok, ok ? "SUCCESS" : "Revisa la consola / stdout");
+        if (ok) onSuccess?.();
       } catch (err) {
         pushLog(label, false, err instanceof Error ? err.message : "Error desconocido");
       } finally {
         setBusyAction(null);
+        setBusyActionStartedAt(null);
         await refresh();
       }
     },
@@ -65,23 +86,67 @@ export function useAvalDashboard() {
 
   const actions = {
     runUnderwriterA: (stakeCspr: number) =>
-      runAction("underwriter_A", "Underwriter A corrió su loop", () =>
-        runUnderwriter({ wallet: "underwriter_A", assetId, stakeCspr, profile: "conservative" as ProfileKey })
+      runAction(
+        "underwriter_A",
+        "Underwriter A corrió su loop",
+        () => runUnderwriter({ wallet: "underwriter_A", assetId, stakeCspr, profile: "conservative" as ProfileKey }),
+        () => {
+          emitBgEvent("pulse", "senior", "underwriter_A");
+          setTimeout(() => emitBgEvent("link", "senior", "underwriter_A"), 550);
+        }
       ),
     runUnderwriterB: (stakeCspr: number) =>
-      runAction("underwriter_B", "Underwriter B corrió su loop", () =>
-        runUnderwriter({ wallet: "underwriter_B", assetId, stakeCspr, profile: "aggressive" as ProfileKey })
+      runAction(
+        "underwriter_B",
+        "Underwriter B corrió su loop",
+        () => runUnderwriter({ wallet: "underwriter_B", assetId, stakeCspr, profile: "aggressive" as ProfileKey }),
+        () => {
+          emitBgEvent("pulse", "junior", "underwriter_B");
+          setTimeout(() => emitBgEvent("link", "junior", "underwriter_B"), 550);
+        }
       ),
     buySenior: (amountCspr: number) =>
-      runAction("buy_senior", "Investor compró tramo senior", () => investInTranche({ entryPoint: "buy_senior", amountCspr })),
+      runAction(
+        "buy_senior",
+        "Investor compró tramo senior",
+        () => investInTranche({ entryPoint: "buy_senior", amountCspr }),
+        () => emitBgEvent("pulse", "senior", "investor")
+      ),
     buyJunior: (amountCspr: number) =>
-      runAction("buy_junior", "Investor compró tramo junior", () => investInTranche({ entryPoint: "buy_junior", amountCspr })),
+      runAction(
+        "buy_junior",
+        "Investor compró tramo junior",
+        () => investInTranche({ entryPoint: "buy_junior", amountCspr }),
+        () => emitBgEvent("pulse", "junior", "investor")
+      ),
     markDefault: (lossAmountCspr: number) =>
-      runAction("mark_default", "Cadena del servicer ejecutada", () => markDefault({ assetId, lossAmountCspr })),
+      runAction(
+        "mark_default",
+        "Cadena del servicer ejecutada",
+        () => markDefault({ assetId, lossAmountCspr }),
+        () => emitBgEvent("kill", "danger", "underwriter_B")
+      ),
     runFullDemo: (params: { aStakeCspr: number; bStakeCspr: number; investorSeniorCspr: number; investorJuniorCspr: number; lossAmountCspr: number }) =>
-      runAction("demo_run", "demo:run completo", () => runFullDemo({ assetId, ...params })),
+      runAction(
+        "demo_run",
+        "demo:run completo",
+        () => runFullDemo({ assetId, ...params }),
+        () => emitBgEvent("celebrate", "brand")
+      ),
     refresh,
   };
 
-  return { assetId, setAssetId, chainState, runLog, loadingChainState, chainStateError, busyAction, lastActionLog, actions };
+  return {
+    assetId,
+    setAssetId,
+    chainState,
+    runLog,
+    loadingChainState,
+    chainStateError,
+    busyAction,
+    busyActionStartedAt,
+    lastActionLog,
+    bgEvent,
+    actions,
+  };
 }

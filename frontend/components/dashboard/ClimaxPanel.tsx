@@ -83,10 +83,10 @@ export function ClimaxPanel({
               underwriter_B sobre-cotizó ({lastDefaultChain.slashBps / 100}% bajo el spread del mercado) — slasheado
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-              <Badge variant="danger">slash {(lastDefaultChain.slashBps / 100).toFixed(2)}%</Badge>
-              <Badge variant="danger">-{lastDefaultChain.penalizePoints} reputación (B)</Badge>
-              <Badge variant="senior">+{lastDefaultChain.rewardPoints} reputación (A)</Badge>
-              <Badge variant="neutral">pérdida marcada: {formatCspr(lastDefaultChain.lossAmountCspr, 0)}</Badge>
+              <Badge variant="danger" className="font-mono">slash {(lastDefaultChain.slashBps / 100).toFixed(2)}%</Badge>
+              <Badge variant="danger" className="font-mono">-{lastDefaultChain.penalizePoints} reputación (B)</Badge>
+              <Badge variant="senior" className="font-mono">+{lastDefaultChain.rewardPoints} reputación (A)</Badge>
+              <Badge variant="neutral" className="font-mono">pérdida marcada: {formatCspr(lastDefaultChain.lossAmountCspr, 0)}</Badge>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-muted">
               <span>mark_default: <TxLink hash={lastDefaultChain.hashes.markDefault} /></span>

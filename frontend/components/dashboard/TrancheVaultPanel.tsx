@@ -86,7 +86,7 @@ export function TrancheVaultPanel({
               </div>
               <div>
                 <div className="text-sm font-medium text-foreground">Investor Agent</div>
-                <div className="text-xs text-foreground-muted">
+                <div className="font-mono text-xs tabular-nums text-foreground-muted">
                   Holdings en vivo: senior {formatCspr(vault?.investorHoldingSeniorCspr ?? 0, 2)} · junior{" "}
                   {formatCspr(vault?.investorHoldingJuniorCspr ?? 0, 2)}
                 </div>
@@ -196,7 +196,7 @@ function TrancheBlock({
       </div>
       <p className="mb-3 text-xs text-foreground-muted">{sub}</p>
       <div className="mb-2 flex items-baseline justify-between">
-        <span className="font-display text-xl font-bold tabular-nums text-foreground">{formatCspr(outstandingCspr, 3)}</span>
+        <span className="font-mono text-2xl font-bold tabular-nums text-foreground">{formatCspr(outstandingCspr, 3)}</span>
         <span className="text-xs text-foreground-faint">outstanding (en vivo)</span>
       </div>
       <ProgressBar value={outstandingCspr} max={faceValueCspr || 1} tone={wiped ? "danger" : tone} />

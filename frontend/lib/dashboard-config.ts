@@ -26,3 +26,31 @@ export const ACTION_COST_ESTIMATES_CSPR = {
   markDefault: 30,
   fullDemoRun: 180,
 };
+
+// Mensajes de espera honestos (no un progreso falso) para las acciones que
+// firman/envian deploys reales a Casper Testnet. Los umbrales reflejan tiempos
+// de confirmacion tipicos observados durante el desarrollo (ver tareas.md).
+const SINGLE_ACTION_WAIT_STAGES = [
+  { atSeconds: 0, text: "Firmando y enviando el deploy a Casper Testnet…" },
+  { atSeconds: 15, text: "Esperando confirmación de bloque (~2 min típico)…" },
+  { atSeconds: 60, text: "El nodo sigue procesando — esto es normal en testnet…" },
+  { atSeconds: 120, text: "Tardando más de lo usual, pero sigue en curso — no cierres esta pestaña…" },
+];
+
+const DEMO_RUN_WAIT_STAGES = [
+  { atSeconds: 0, text: "Arrancando el arco completo: 2 underwriters, investor y servicer…" },
+  { atSeconds: 20, text: "Underwriters pagando x402 y cotizando con Gemini real…" },
+  { atSeconds: 60, text: "Firmando stakes y atestaciones en Testnet…" },
+  { atSeconds: 150, text: "Investor comprando tramos senior/junior…" },
+  { atSeconds: 240, text: "Ejecutando el clímax: mark_default → slash → penalize/reward…" },
+  { atSeconds: 360, text: "Cerrando el arco — puede tardar hasta ~10 min en total…" },
+];
+
+export function getWaitingMessage(actionKey: string, elapsedSeconds: number): string {
+  const stages = actionKey === "demo_run" ? DEMO_RUN_WAIT_STAGES : SINGLE_ACTION_WAIT_STAGES;
+  let current = stages[0].text;
+  for (const stage of stages) {
+    if (elapsedSeconds >= stage.atSeconds) current = stage.text;
+  }
+  return current;
+}

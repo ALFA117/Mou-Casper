@@ -50,7 +50,7 @@ export function UnderwriterCard({
             <p className="text-xs text-foreground-muted">{PROFILE_LABELS[profile]} · Gemini 2.5 Flash</p>
           </div>
         </div>
-        <Badge variant={tone}>{formatCspr(liveStakeCspr, 3)} en juego</Badge>
+        <Badge variant={tone} className="shrink-0 whitespace-nowrap font-mono">{formatCspr(liveStakeCspr, 3)} en juego</Badge>
       </CardHeader>
       <CardBody className="space-y-4">
         {/* Cotizacion mas reciente (real, de run-log.json) */}
@@ -60,13 +60,13 @@ export function UnderwriterCard({
               <span className="text-[11px] uppercase tracking-wide text-foreground-faint">
                 Ultima cotizacion — {latestRun!.assetId}
               </span>
-              <Badge variant={tone}>{quote.rating}/1000</Badge>
+              <Badge variant={tone} className="font-mono">{quote.rating}/1000</Badge>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
               <Stat label="Tramo recomendado" value={quote.recommended_tranche} capitalize />
-              <Stat label="Spread cotizado" value={formatBps(quote.price_bps)} />
-              <Stat label="PD del feed" value={formatBps(latestRun!.riskData.defaultProbabilityBps)} />
-              <Stat label="Spread del mercado" value={formatBps(latestRun!.riskData.recommendedSpreadBps)} />
+              <Stat label="Spread cotizado" value={formatBps(quote.price_bps)} mono />
+              <Stat label="PD del feed" value={formatBps(latestRun!.riskData.defaultProbabilityBps)} mono />
+              <Stat label="Spread del mercado" value={formatBps(latestRun!.riskData.recommendedSpreadBps)} mono />
             </div>
             <p className="mt-2 text-[11px] leading-relaxed text-foreground-muted">{quote.short_reasoning}</p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
@@ -90,18 +90,18 @@ export function UnderwriterCard({
 
         {/* Stake en vivo (leido on-chain) */}
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="text-foreground-muted">Stake en UnderwriterStake (en vivo)</span>
-            <span className="font-medium tabular-nums">{formatCspr(liveStakeCspr, 3)}</span>
+          <div className="mb-1 flex items-baseline justify-between">
+            <span className="text-xs text-foreground-muted">Stake en UnderwriterStake (en vivo)</span>
+            <span className="font-mono text-base font-semibold tabular-nums text-foreground">{formatCspr(liveStakeCspr, 3)}</span>
           </div>
           <ProgressBar value={liveStakeCspr} max={Math.max(1, liveStakeCspr)} tone={tone} />
         </div>
 
         {/* Reputacion en vivo (leida on-chain, escala 0-1000) */}
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="text-foreground-muted">Reputacion (en vivo)</span>
-            <span className="font-medium tabular-nums">{liveReputation}/1000</span>
+          <div className="mb-1 flex items-baseline justify-between">
+            <span className="text-xs text-foreground-muted">Reputación (en vivo)</span>
+            <span className="font-mono text-base font-semibold tabular-nums text-foreground">{liveReputation}<span className="text-foreground-faint">/1000</span></span>
           </div>
           <ProgressBar value={liveReputation} max={1000} tone="brand" />
         </div>
@@ -127,11 +127,11 @@ export function UnderwriterCard({
   );
 }
 
-function Stat({ label, value, capitalize }: { label: string; value: string; capitalize?: boolean }) {
+function Stat({ label, value, capitalize, mono }: { label: string; value: string; capitalize?: boolean; mono?: boolean }) {
   return (
     <div>
       <div className="text-foreground-faint">{label}</div>
-      <div className={cn("font-medium text-foreground", capitalize && "capitalize")}>{value}</div>
+      <div className={cn("font-medium text-foreground", mono && "font-mono tabular-nums", capitalize && "capitalize")}>{value}</div>
     </div>
   );
 }
