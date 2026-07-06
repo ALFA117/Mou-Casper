@@ -160,7 +160,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">{t("footer.disclaimer")}</footer>
             </div>
 
-            <RevealOnMount index={1} className="lg:sticky lg:top-24 lg:h-[calc(100dvh-7rem)]">
+            <RevealOnMount index={1} className="lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)]">
               <AttestationFeed runLog={runLog} />
             </RevealOnMount>
           </div>

@@ -631,17 +631,59 @@ exitoso (15 CSPR, ver Paso 6.6): **balance de `servicer`: 1,466 CSPR.**
      reintentar segundos después siempre funciona), no un bug de concurrencia nuestro. Fix
      definitivo: retry con backoff corto (3 intentos, 400ms×intento) en `readDictionaryValue` —
      probado 4/4 exitoso después del fix.
-- [ ] **Paso 12:** pase de diseño con `/ui-ux-pro-max:ui-ux-pro-max` sobre el dashboard ya
-      conectado a datos reales (jerarquía visual, legibilidad de hashes, estados de carga/error,
-      microinteracciones, accesibilidad).
-- [ ] **Paso 13:** `Background3D.tsx` reactivo a eventos reales — pulso en pago x402, link que se
-      ilumina al atestar, nodo que se apaga/enrojece en el slashing. Respeta
-      `prefers-reduced-motion`, degrada en GPU débil, no compite con el framerate de la demo.
+- [x] **Paso 12 — COMPLETO:** pase de diseño con `/ui-ux-pro-max:ui-ux-pro-max` sobre el dashboard
+      ya conectado a datos reales. Riel numerado 01-04 (jerarquía del arco de la demo), números en
+      vivo en JetBrains Mono como protagonistas, banner de solo-lectura de Vercel integrado al
+      `SiteHeader`, estado de espera honesto (`BusyStatusBar`: cronómetro real + mensajes por
+      umbral de tiempo, no un progreso fabricado).
+- [x] **Paso 13 — COMPLETO:** `Background3D.tsx` reactivo a eventos reales — pulso al pagar
+      x402/stakear/invertir, enlace que se ilumina hacia el hub de AttestationRegistry al atestar,
+      nodo que flashea blanco y se apaga permanentemente a carbón en el slashing. Respeta
+      `prefers-reduced-motion` y degrada a fondo estático si no hay WebGL o el hardware es débil.
+
+### Fase C.1 — Pases de pulido adicionales (post Paso 13, pre Paso 14)
+
+Tres rondas de pulido visual/UX pedidas por el usuario después del Paso 13, antes de pasar al dry
+run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
+
+- [x] **Identidad Casper (rojo neón/negro) + logo original v1:** retema completo de la paleta
+      (fondo `#0A0A0A`, rojo Casper `#FF1F1F` como marca/acento, `senior`=cromo/blanco,
+      `junior`=ember, tono `carbon` dedicado exclusivamente al momento del slash — la tarjeta/nodo
+      del castigado se desatura a gris, no se pone "más rojo"). Logo v1: hexágono wireframe propio
+      (SVG) partido en mitad senior/blanco arriba y junior/rojo abajo. `Background3D` re-coloreado
+      a rojo ember + cubos wireframe flotando.
+- [x] **Pulido final de interfaz:** sección Hero en inglés (headline + thesis + badges de stack
+      x402/Gemini/Casper Testnet) arriba del riel — jurado internacional. Animaciones (`CountUp`
+      con glow-pulse, `RevealOnMount` escalonado, hover con micro-elevación, feed con slide-in
+      escalonado sin re-animar en cada poll). Iconografía por concepto (conservador=escudo,
+      agresivo=llama, atestación=sello, stake=candado). Tooltips accesibles (hover+foco) para
+      términos técnicos (x402, tramo senior/junior, slashing, stake) + copy-to-click en hashes.
+- [x] **Logo real + fix de overflow + profundidad visual + i18n ES/EN:** el hexágono SVG se
+      reemplazó por el logo real "Logo MouSPT" (recortado en círculo, zoom al centro para ocultar
+      las marcas de agua del original — `public/logo-source.png` conserva el original,
+      `public/logo.png`/`app/icon.png` son las versiones optimizadas). Auditoría sistemática de
+      overflow con Playwright en 1440/768/390px: encontró y arregló 3 bugs reales (tooltip
+      causando scroll horizontal en mobile por quedar montado con `opacity-0`, un stat
+      desbordándose en tablet por un breakpoint de grid prematuro, el glow del hero sangrando
+      horizontalmente). Profundidad visual tipo Linear/Vercel: gradientes + highlight superior en
+      `Card`, separador degradado bajo cada header, glassmorphism más fuerte en el header sticky,
+      esquinas HUD en las tarjetas clave. **Selector de idioma ES/EN** en el header — diccionario
+      propio (`lib/i18n/`, sin librería), estado en memoria + query param `?lang=` (sin
+      localStorage), default inglés, TODO el texto de UI traducido (el razonamiento de los LLM en
+      `run-log.json` se deja intacto por ser dato real). Tema claro evaluado con una prueba visual
+      real y **descartado a propósito** — el look wireframe/glow depende del fondo casi negro; el
+      video se graba en oscuro.
+      **Los 3 pases verificados con `tsc`/`npm run build` limpios + Playwright en 1440/768/390px
+      antes de cada commit.** Sin cambios en capa de datos ni rutas API en ninguno de los 3.
 
 ## Pendientes — Fase D: Cierre
 
-- [ ] **Paso 14:** dry run completo de la demo (Mou-Casper.md Sección 8) con tx reales, de
-      principio a fin.
+- [ ] **Paso 14 — EN CURSO:** dry run completo de la demo con tx reales, de principio a fin.
+      Facilitator (`:4022`), resource server (`:4021`) y dev server (`:3000`) confirmados arriba.
+      Guion de grabación bilingüe (EN/ES) entregado con costo estimado por wallet y balance
+      real leído on-chain (bottleneck: wallet `investor`, ~1 toma limpia de margen). **Falta:** que
+      el usuario corra el dry run real con `invoice-batch-003` y confirmar que nada truena antes
+      de la toma final.
 - [ ] **Paso 15:** README final (arquitectura, tabla de contratos con links, cómo correr todo,
       walkthrough, plan a largo plazo) + reporte de sesión. Después: correr
       `Mou-Casper-Fase2-Auditoria.md` completo.

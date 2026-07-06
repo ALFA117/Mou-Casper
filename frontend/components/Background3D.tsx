@@ -106,9 +106,12 @@ function NetworkField({ event, reducedMotion }: { event: BackgroundEvent | null;
       }
       // Distribute inside a flattened ellipsoid so the network reads as a
       // wide horizontal plane drifting behind the dashboard, not a sphere.
+      // 60% of nodes are explicitly pushed into the outer radius band —
+      // denser where the dashboard's own columns leave empty margin, sparser
+      // directly behind the dense card content in the center.
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      const r = FIELD_RADIUS * Math.cbrt(Math.random());
+      const r = Math.random() < 0.6 ? FIELD_RADIUS * (0.6 + 0.4 * Math.random()) : FIELD_RADIUS * Math.cbrt(Math.random());
       const x = r * Math.sin(phi) * Math.cos(theta);
       const y = r * Math.sin(phi) * Math.sin(theta) * 0.45;
       const z = r * Math.cos(phi) * 0.6 - 2;
@@ -281,24 +284,32 @@ interface FloatingCube {
   phase: number;
 }
 
-// Cubos wireframe flotando lento detras de la red — evocan la estetica de
-// circuito/gema del arte del buildathon de Casper, sin competir con la UI.
+// Cubos wireframe flotando lento detras de la red — la capa MAS LEJANA del
+// fondo (z mas negativo que la red de nodos, gira mas lento -> parallax).
+// Su rango de X salta a proposito la franja central donde vive el contenido
+// (columna principal + sidebar), para no competir nunca con el texto.
 function FloatingCubes({ reducedMotion }: { reducedMotion: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
 
   const { edges, cubes } = useMemo(() => {
     const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1));
-    const cubes: FloatingCube[] = Array.from({ length: 6 }, () => ({
-      position: [(Math.random() - 0.5) * 13, (Math.random() - 0.5) * 5.5, -3 - Math.random() * 7],
-      scale: 0.55 + Math.random() * 1.1,
-      speed: 0.12 + Math.random() * 0.18,
-      phase: Math.random() * Math.PI * 2,
-    }));
+    const cubes: FloatingCube[] = Array.from({ length: 6 }, () => {
+      const side = Math.random() < 0.5 ? -1 : 1;
+      return {
+        position: [side * (4 + Math.random() * 5), (Math.random() - 0.5) * 5.5, -5 - Math.random() * 9],
+        scale: 0.55 + Math.random() * 1.1,
+        speed: 0.12 + Math.random() * 0.18,
+        phase: Math.random() * Math.PI * 2,
+      };
+    });
     return { edges, cubes };
   }, []);
 
-  useFrame(state => {
+  useFrame((state, delta) => {
     if (reducedMotion || !groupRef.current) return;
+    // Capa "lejana": gira mas lento que la red de nodos (~30% de su velocidad)
+    // para leerse claramente mas atras — profundidad por parallax, no por escala.
+    groupRef.current.rotation.y += delta * 0.006;
     groupRef.current.children.forEach((child, i) => {
       const c = cubes[i];
       if (!c) return;
