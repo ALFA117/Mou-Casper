@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 import type { ReactNode } from "react";
 
 type Tone = "senior" | "brand" | "junior" | "danger";
@@ -21,31 +24,38 @@ const badgeTone: Record<Tone, string> = {
  * Riel numerado que conecta visualmente el arco de la demo (activo -> underwriters
  * -> vault -> climax) para que el ojo siga un solo camino de arriba a abajo.
  * Solo visible en lg+: en mobile el orden vertical natural ya cumple el mismo rol.
+ * El numero es tambien un ancla real (scroll suave) a su seccion — deja de ser
+ * puramente decorativo, funciona como mini tabla de contenidos.
  */
 export function DemoStep({
   n,
   tone,
   last,
+  targetId,
   children,
 }: {
   n: string;
   tone: Tone;
   last?: boolean;
+  targetId: string;
   children: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <div className="relative lg:pl-10">
       {!last && (
         <div className={cn("absolute left-[15px] top-8 hidden w-px lg:block", railTone[tone])} style={{ bottom: "-1.5rem" }} />
       )}
-      <div
+      <a
+        href={`#${targetId}`}
+        aria-label={t("nav.goToSection", { n })}
         className={cn(
-          "absolute left-0 top-0 hidden size-8 items-center justify-center rounded-full border bg-background font-mono text-[11px] font-semibold tabular-nums lg:flex",
+          "absolute left-0 top-0 hidden size-8 items-center justify-center rounded-full border bg-background font-mono text-[11px] font-semibold tabular-nums transition-transform duration-150 hover:scale-110 lg:flex",
           badgeTone[tone]
         )}
       >
         {n}
-      </div>
+      </a>
       {children}
     </div>
   );

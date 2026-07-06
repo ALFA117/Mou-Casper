@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 function easeOutCubic(t: number): number {
   const clamped = Math.min(1, Math.max(0, t));
@@ -33,6 +34,7 @@ export function CountUp({
 }) {
   const initial = startFromZero ? 0 : value;
   const [display, setDisplay] = useState(initial);
+  const [pulseKey, setPulseKey] = useState(0);
   const currentRef = useRef(initial);
   const rafRef = useRef<number | null>(null);
 
@@ -40,6 +42,10 @@ export function CountUp({
     const from = currentRef.current;
     const to = value;
     if (from === to) return;
+
+    // Glow suave con currentColor cada vez que el numero se mueve — se re-dispara
+    // cambiando la key de la animacion, no solo agregando la clase una vez.
+    setPulseKey(k => k + 1);
 
     const reduced =
       typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -73,7 +79,7 @@ export function CountUp({
   }, [value, duration]);
 
   return (
-    <span className={className}>
+    <span key={pulseKey} className={cn(className, pulseKey > 0 && "motion-safe:animate-glow-pulse")}>
       {prefix}
       {display.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
       {suffix}

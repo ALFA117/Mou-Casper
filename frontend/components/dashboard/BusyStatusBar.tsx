@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { getWaitingMessage } from "@/lib/dashboard-config";
+import { getWaitingMessageKey } from "@/lib/dashboard-config";
+import { useI18n } from "@/lib/i18n/context";
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -18,6 +19,7 @@ function formatElapsed(ms: number): string {
  * Casper Testnet, ver tareas.md).
  */
 export function BusyStatusBar({ actionKey, startedAt }: { actionKey: string; startedAt: number }) {
+  const { t } = useI18n();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export function BusyStatusBar({ actionKey, startedAt }: { actionKey: string; sta
   }, []);
 
   const elapsedMs = now - startedAt;
-  const message = getWaitingMessage(actionKey, Math.floor(elapsedMs / 1000));
+  const message = t(getWaitingMessageKey(actionKey, Math.floor(elapsedMs / 1000)));
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-center px-4">

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { useI18n } from "@/lib/i18n/context";
 import type { RunLogEntry, DefaultChainRunEntry, ConstitutionTestRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { cn, formatCspr } from "@/lib/utils";
@@ -27,6 +28,7 @@ export function ClimaxPanel({
   readOnlyTooltip?: string;
   onMarkDefault: (lossAmountCspr: number) => void;
 }) {
+  const { t } = useI18n();
   const [lossAmount, setLossAmount] = useState(30);
 
   const lastDefaultChain = useMemo(() => {
@@ -47,15 +49,15 @@ export function ClimaxPanel({
     const hasResult = lastDefaultChain !== null;
     if (hasResult && !hadResultBefore.current) {
       setJustFlashed(true);
-      const t = setTimeout(() => setJustFlashed(false), 1100);
+      const timer = setTimeout(() => setJustFlashed(false), 1100);
       hadResultBefore.current = hasResult;
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
     hadResultBefore.current = hasResult;
   }, [lastDefaultChain]);
 
   return (
-    <Card accent="danger" className="scroll-mt-24 border-danger/20" id="climax">
+    <Card accent="danger" hud className="scroll-mt-24 border-danger/20" id="climax">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-lg bg-danger/10 text-danger-glow">
@@ -63,16 +65,10 @@ export function ClimaxPanel({
           </div>
           <div>
             <CardTitle className="flex items-center gap-1.5">
-              El clímax — Default y slashing
-              <InfoTooltip label="Qué es slashing">
-                Slashing means the protocol itself seizes part of an underwriter&apos;s staked CSPR as a
-                penalty — no human decides this, it&apos;s a smart contract rule that fires automatically
-                when an on-chain check proves the agent mispriced risk.
-              </InfoTooltip>
+              {t("climax.title")}
+              <InfoTooltip label={t("tooltip.whatIs", { term: "slashing" })}>{t("climax.slashingTooltip")}</InfoTooltip>
             </CardTitle>
-            <p className="text-xs text-foreground-muted">
-              mark_default → waterfall → slash sobre el underwriter que sobre-cotizó → penalize/reward en Reputation. Todo real.
-            </p>
+            <p className="text-xs text-foreground-muted">{t("climax.description")}</p>
           </div>
         </div>
       </CardHeader>
@@ -85,7 +81,7 @@ export function ClimaxPanel({
             onChange={e => setLossAmount(Number(e.target.value) || 0)}
             disabled={actionsDisabled}
             className="h-9 w-24 rounded-lg border border-border-subtle bg-surface-2 px-2 text-xs text-foreground disabled:opacity-50"
-            aria-label="Monto de perdida en CSPR"
+            aria-label={t("climax.lossInputLabel")}
           />
           <span title={readOnlyTooltip}>
             <Button
@@ -95,7 +91,7 @@ export function ClimaxPanel({
               loading={busyAction === "mark_default"}
             >
               <AlertTriangle className="size-4" aria-hidden />
-              Marcar impago (~{ACTION_COST_ESTIMATES_CSPR.markDefault} CSPR)
+              {t("climax.markDefault", { cost: ACTION_COST_ESTIMATES_CSPR.markDefault })}
             </Button>
           </span>
         </div>
@@ -109,18 +105,20 @@ export function ClimaxPanel({
           >
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Skull className="size-4 text-foreground-muted" aria-hidden />
-              underwriter_B sobre-cotizó el riesgo — rebanado
+              {t("climax.resultHeading")}
             </div>
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-4xl font-bold tabular-nums text-foreground">
                 <CountUp value={lastDefaultChain.slashBps / 100} decimals={2} prefix="−" suffix="%" duration={900} startFromZero />
               </span>
-              <span className="text-xs text-foreground-faint">de su stake, seizado por el waterfall</span>
+              <span className="text-xs text-foreground-faint">{t("climax.slashDetail")}</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-              <Badge variant="carbon" className="font-mono">-{lastDefaultChain.penalizePoints} reputación (B)</Badge>
-              <Badge variant="brand" className="font-mono">+{lastDefaultChain.rewardPoints} reputación (A)</Badge>
-              <Badge variant="neutral" className="font-mono">pérdida marcada: {formatCspr(lastDefaultChain.lossAmountCspr, 0)}</Badge>
+              <Badge variant="carbon" className="font-mono">-{lastDefaultChain.penalizePoints} {t("climax.reputationB")}</Badge>
+              <Badge variant="brand" className="font-mono">+{lastDefaultChain.rewardPoints} {t("climax.reputationA")}</Badge>
+              <Badge variant="neutral" className="font-mono">
+                {t("climax.lossMarked", { amount: formatCspr(lastDefaultChain.lossAmountCspr, 0) })}
+              </Badge>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-muted">
               <span>mark_default: <TxLink hash={lastDefaultChain.hashes.markDefault} /></span>
@@ -131,7 +129,7 @@ export function ClimaxPanel({
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border-subtle p-6 text-center text-sm text-foreground-faint">
-            Corre ambos underwriters para este activo antes de marcar el default (el slash se calcula del spread real que cotizó B).
+            {t("climax.emptyState")}
           </div>
         )}
 
@@ -144,8 +142,11 @@ export function ClimaxPanel({
           >
             <span className="flex items-center gap-2 text-foreground-muted">
               <ShieldAlert className="size-4 shrink-0" aria-hidden />
-              Prueba de Constitution: pedir {formatCspr(lastConstitutionTest.requestedExposureCspr, 0)} de exposición →{" "}
-              {lastConstitutionTest.testPassed ? "revirtió como se esperaba" : "NO revirtió (bug)"} ({lastConstitutionTest.errorName})
+              {t("climax.constitutionTest", {
+                amount: formatCspr(lastConstitutionTest.requestedExposureCspr, 0),
+                result: t(lastConstitutionTest.testPassed ? "climax.reverted" : "climax.notReverted"),
+                error: lastConstitutionTest.errorName,
+              })}
             </span>
             <TxLink hash={lastConstitutionTest.hash} />
           </div>

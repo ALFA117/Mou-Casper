@@ -67,7 +67,10 @@ const config: Config = {
         mono: ["var(--font-mono)", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 0 1px rgba(255,255,255,0.06), 0 8px 30px -8px rgba(0,0,0,0.8)",
+        // Panel base: highlight interno arriba (luz "de arriba") + linea de
+        // contorno + sombra ambiental — usado por Card/badges/toasts en todo
+        // el dashboard, asi que un solo cambio le da profundidad a todo.
+        glow: "inset 0 1px 0 0 rgba(255,255,255,0.07), 0 0 0 1px rgba(255,255,255,0.06), 0 8px 30px -8px rgba(0,0,0,0.8)",
         "glow-brand": "0 0 24px -4px rgba(255,31,31,0.5)",
         "glow-senior": "0 0 20px -4px rgba(255,255,255,0.35)",
         "glow-junior": "0 0 24px -4px rgba(255,77,46,0.5)",
@@ -79,6 +82,9 @@ const config: Config = {
           "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,31,31,0.14), transparent)",
         "grid-lines":
           "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
+        scanlines:
+          "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px)",
+        "hero-glow": "radial-gradient(ellipse 60% 80% at 50% 0%, rgba(255,31,31,0.22), transparent 70%)",
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -86,11 +92,17 @@ const config: Config = {
         "flash-danger": "flash-danger 0.9s ease-in-out",
         "slash-flash": "slash-flash 1.1s ease-out",
         "count-flicker": "count-flicker 0.4s ease-in-out",
+        "glow-pulse": "glow-pulse 0.7s ease-out",
       },
       keyframes: {
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
+        },
+        "glow-pulse": {
+          "0%": { filter: "drop-shadow(0 0 0 currentColor)", opacity: "0.7" },
+          "30%": { filter: "drop-shadow(0 0 7px currentColor)", opacity: "1" },
+          "100%": { filter: "drop-shadow(0 0 0 currentColor)", opacity: "1" },
         },
         "flash-danger": {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(232,17,43,0)" },

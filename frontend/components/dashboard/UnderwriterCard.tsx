@@ -9,8 +9,9 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { useI18n } from "@/lib/i18n/context";
 import type { UnderwriterRunEntry } from "@/lib/types";
-import { PROFILE_LABELS, ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
+import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { cn, formatBps } from "@/lib/utils";
 
 export function UnderwriterCard({
@@ -40,6 +41,7 @@ export function UnderwriterCard({
   tooltip?: string;
   onRun: () => void;
 }) {
+  const { t } = useI18n();
   const tone = profile === "conservative" ? "senior" : "junior";
   const quote = latestRun?.quote;
 
@@ -50,8 +52,8 @@ export function UnderwriterCard({
   useEffect(() => {
     if (wasSlashed && !wasSlashedBefore.current) {
       setJustFlashed(true);
-      const t = setTimeout(() => setJustFlashed(false), 1100);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setJustFlashed(false), 1100);
+      return () => clearTimeout(timer);
     }
     wasSlashedBefore.current = wasSlashed;
   }, [wasSlashed]);
@@ -84,7 +86,9 @@ export function UnderwriterCard({
           <div>
             <CardTitle className={wasSlashed ? "text-foreground-muted" : undefined}>{wallet}</CardTitle>
             <p className="text-xs text-foreground-muted">
-              {wasSlashed ? "Rebanado — stake y reputación castigados" : `${PROFILE_LABELS[profile]} · Gemini 2.5 Flash`}
+              {wasSlashed
+                ? t("underwriter.sliced")
+                : `${t(profile === "conservative" ? "underwriter.conservative" : "underwriter.aggressive")} · Gemini 2.5 Flash`}
             </p>
           </div>
         </div>
@@ -92,7 +96,7 @@ export function UnderwriterCard({
           variant={wasSlashed ? "carbon" : tone}
           className="shrink-0 whitespace-nowrap font-mono"
         >
-          <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" /> en juego
+          <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" /> {t("underwriter.atStake")}
         </Badge>
       </CardHeader>
       <CardBody className="space-y-4">
@@ -101,15 +105,15 @@ export function UnderwriterCard({
           <div className="rounded-xl border border-border-subtle bg-surface-2/60 p-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] uppercase tracking-wide text-foreground-faint">
-                Ultima cotizacion — {latestRun!.assetId}
+                {t("underwriter.latestQuote", { assetId: latestRun!.assetId })}
               </span>
               <Badge variant={tone} className="font-mono">{quote.rating}/1000</Badge>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <Stat label="Tramo recomendado" value={quote.recommended_tranche} capitalize />
-              <Stat label="Spread cotizado" value={formatBps(quote.price_bps)} mono />
-              <Stat label="PD del feed" value={formatBps(latestRun!.riskData.defaultProbabilityBps)} mono />
-              <Stat label="Spread del mercado" value={formatBps(latestRun!.riskData.recommendedSpreadBps)} mono />
+              <Stat label={t("underwriter.recommendedTranche")} value={quote.recommended_tranche} capitalize />
+              <Stat label={t("underwriter.quotedSpread")} value={formatBps(quote.price_bps)} mono />
+              <Stat label={t("underwriter.feedPd")} value={formatBps(latestRun!.riskData.defaultProbabilityBps)} mono />
+              <Stat label={t("underwriter.marketSpread")} value={formatBps(latestRun!.riskData.recommendedSpreadBps)} mono />
             </div>
             <p className="mt-2 text-[11px] leading-relaxed text-foreground-muted">{quote.short_reasoning}</p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
@@ -127,7 +131,7 @@ export function UnderwriterCard({
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border-subtle p-3 text-center text-xs text-foreground-faint">
-            Sin corridas todavia para este activo.
+            {t("underwriter.noRunsYet")}
           </div>
         )}
 
@@ -135,12 +139,8 @@ export function UnderwriterCard({
         <div>
           <div className="mb-1 flex items-baseline justify-between">
             <span className="flex items-center gap-1 text-xs text-foreground-muted">
-              Stake en UnderwriterStake (en vivo)
-              <InfoTooltip label="Qué es el stake">
-                CSPR this agent locked in the UnderwriterStake contract as collateral behind its own risk
-                call. It only gets this back if the asset performs — if it defaults and this agent
-                mispriced it, slashing seizes part of it.
-              </InfoTooltip>
+              {t("underwriter.stakeLabel")}
+              <InfoTooltip label={t("tooltip.whatIs", { term: "stake" })}>{t("underwriter.stakeTooltip")}</InfoTooltip>
             </span>
             <span className="font-mono text-base font-semibold tabular-nums text-foreground">
               <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />
@@ -152,7 +152,7 @@ export function UnderwriterCard({
         {/* Reputacion en vivo (leida on-chain, escala 0-1000) */}
         <div>
           <div className="mb-1 flex items-baseline justify-between">
-            <span className="text-xs text-foreground-muted">Reputación (en vivo)</span>
+            <span className="text-xs text-foreground-muted">{t("underwriter.reputationLabel")}</span>
             <span className="font-mono text-base font-semibold tabular-nums text-foreground">
               <CountUp value={liveReputation} className="text-foreground" /><span className="text-foreground-faint">/1000</span>
             </span>
@@ -168,11 +168,11 @@ export function UnderwriterCard({
             onChange={e => onStakeInputChange(Number(e.target.value) || 0)}
             disabled={disabled}
             className="h-9 w-20 rounded-lg border border-border-subtle bg-surface-2 px-2 text-xs text-foreground disabled:opacity-50"
-            aria-label="Monto de stake en CSPR"
+            aria-label={t("underwriter.stakeInputLabel")}
           />
           <span title={tooltip} className="flex-1">
             <Button size="sm" onClick={onRun} disabled={disabled} loading={busy} className="w-full">
-              Correr loop real (~{ACTION_COST_ESTIMATES_CSPR.runUnderwriter} CSPR)
+              {t("underwriter.runButton", { cost: ACTION_COST_ESTIMATES_CSPR.runUnderwriter })}
             </Button>
           </span>
         </div>

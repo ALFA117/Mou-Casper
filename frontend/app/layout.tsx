@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -23,10 +23,30 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const TITLE = "AVAL — Autonomous Securitization Desk";
+const DESCRIPTION =
+  "AI underwriter agents stake their own capital against their own risk opinions, tranche real-world receivables, and get slashed on-chain when they misjudge risk. Casper Agentic Buildathon 2026.";
+
 export const metadata: Metadata = {
-  title: "AVAL — Autonomous Securitization Desk",
-  description:
-    "AI underwriter agents stake their own capital against their own risk opinions, tranche real-world receivables, and get slashed on-chain when they misjudge risk. Casper Agentic Buildathon 2026.",
+  metadataBase: new URL("https://mou-casper.vercel.app"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/logo.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/logo.png"],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0A0A0A",
 };
 
 export default function RootLayout({

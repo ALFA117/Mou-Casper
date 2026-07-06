@@ -9,6 +9,8 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { useI18n } from "@/lib/i18n/context";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
 import type { ChainState, RunLogEntry, InvestorBuyRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { cn, formatCspr } from "@/lib/utils";
@@ -35,6 +37,7 @@ export function TrancheVaultPanel({
   onBuySenior: (amountCspr: number) => void;
   onBuyJunior: (amountCspr: number) => void;
 }) {
+  const { t } = useI18n();
   const [seniorAmount, setSeniorAmount] = useState(15);
   const [juniorAmount, setJuniorAmount] = useState(10);
 
@@ -56,10 +59,7 @@ export function TrancheVaultPanel({
           </div>
           <div>
             <CardTitle>TrancheVault</CardTitle>
-            <p className="text-xs text-foreground-muted">
-              El activo se parte en tramos: el investor compra senior (protegido, paga primero) o junior
-              (absorbe pérdidas primero, mayor rendimiento) — en vivo, leído on-chain.
-            </p>
+            <p className="text-xs text-foreground-muted">{t("vault.description")}</p>
           </div>
         </div>
       </CardHeader>
@@ -68,19 +68,19 @@ export function TrancheVaultPanel({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TrancheBlock
               icon={ShieldCheck}
-              label="Senior tranche"
-              sub="Bajo riesgo · paga primero"
+              labelKey="vault.seniorLabel"
+              subKey="vault.seniorSub"
               tone="senior"
-              tooltip="The protected slice of the deal. Senior holders get paid back first out of whatever the asset recovers — lower yield, but losses only reach them after the junior tranche is wiped out."
+              tooltipKey="vault.seniorTooltip"
               outstandingCspr={vault?.seniorOutstandingCspr ?? SENIOR_FACE_VALUE_CSPR}
               faceValueCspr={SENIOR_FACE_VALUE_CSPR}
             />
             <TrancheBlock
               icon={Flame}
-              label="Junior tranche"
-              sub="Alto riesgo · absorbe perdidas primero"
+              labelKey="vault.juniorLabel"
+              subKey="vault.juniorSub"
               tone="junior"
-              tooltip="The risky slice. Junior holders absorb losses first if the asset defaults — in exchange, they earn a higher yield than senior. This is the tranche the aggressive underwriter (B) tends to push."
+              tooltipKey="vault.juniorTooltip"
               outstandingCspr={vault?.juniorOutstandingCspr ?? JUNIOR_FACE_VALUE_CSPR}
               faceValueCspr={JUNIOR_FACE_VALUE_CSPR}
             />
@@ -92,9 +92,11 @@ export function TrancheVaultPanel({
                 <UserRound className="size-4" aria-hidden />
               </div>
               <div>
-                <div className="text-sm font-medium text-foreground">Investor Agent</div>
+                <div className="text-sm font-medium text-foreground">{t("vault.investorAgent")}</div>
                 <div className="font-mono text-xs tabular-nums text-foreground-muted">
-                  Holdings en vivo: senior <CountUp value={vault?.investorHoldingSeniorCspr ?? 0} decimals={2} suffix=" CSPR" /> · junior{" "}
+                  {t("vault.holdingsPrefix")}{" "}
+                  <CountUp value={vault?.investorHoldingSeniorCspr ?? 0} decimals={2} suffix=" CSPR" />{" "}
+                  {t("vault.holdingsMiddle")}{" "}
                   <CountUp value={vault?.investorHoldingJuniorCspr ?? 0} decimals={2} suffix=" CSPR" />
                 </div>
               </div>
@@ -109,7 +111,7 @@ export function TrancheVaultPanel({
                   onChange={e => setSeniorAmount(Number(e.target.value) || 0)}
                   disabled={actionsDisabled}
                   className="h-9 w-20 rounded-lg border border-border-subtle bg-surface px-2 text-xs text-foreground disabled:opacity-50"
-                  aria-label="Monto senior en CSPR"
+                  aria-label={t("vault.seniorInputLabel")}
                 />
                 <span title={readOnlyTooltip} className="flex-1">
                   <Button
@@ -120,7 +122,7 @@ export function TrancheVaultPanel({
                     loading={busyAction === "buy_senior"}
                     className="w-full"
                   >
-                    Comprar senior (~{ACTION_COST_ESTIMATES_CSPR.investTranche} CSPR)
+                    {t("vault.buySenior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
                   </Button>
                 </span>
               </div>
@@ -132,7 +134,7 @@ export function TrancheVaultPanel({
                   onChange={e => setJuniorAmount(Number(e.target.value) || 0)}
                   disabled={actionsDisabled}
                   className="h-9 w-20 rounded-lg border border-border-subtle bg-surface px-2 text-xs text-foreground disabled:opacity-50"
-                  aria-label="Monto junior en CSPR"
+                  aria-label={t("vault.juniorInputLabel")}
                 />
                 <span title={readOnlyTooltip} className="flex-1">
                   <Button
@@ -143,7 +145,7 @@ export function TrancheVaultPanel({
                     loading={busyAction === "buy_junior"}
                     className="w-full"
                   >
-                    Comprar junior (~{ACTION_COST_ESTIMATES_CSPR.investTranche} CSPR)
+                    {t("vault.buyJunior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
                   </Button>
                 </span>
               </div>
@@ -153,12 +155,14 @@ export function TrancheVaultPanel({
               <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-muted">
                 {lastSeniorBuy && (
                   <span>
-                    Ultima compra senior ({formatCspr(lastSeniorBuy.amountCspr, 0)}): <TxLink hash={lastSeniorBuy.hash} />
+                    {t("vault.lastSeniorBuy", { amount: formatCspr(lastSeniorBuy.amountCspr, 0) })}{" "}
+                    <TxLink hash={lastSeniorBuy.hash} />
                   </span>
                 )}
                 {lastJuniorBuy && (
                   <span>
-                    Ultima compra junior ({formatCspr(lastJuniorBuy.amountCspr, 0)}): <TxLink hash={lastJuniorBuy.hash} />
+                    {t("vault.lastJuniorBuy", { amount: formatCspr(lastJuniorBuy.amountCspr, 0) })}{" "}
+                    <TxLink hash={lastJuniorBuy.hash} />
                   </span>
                 )}
               </div>
@@ -172,21 +176,23 @@ export function TrancheVaultPanel({
 
 function TrancheBlock({
   icon: Icon,
-  label,
-  sub,
+  labelKey,
+  subKey,
   tone,
-  tooltip,
+  tooltipKey,
   outstandingCspr,
   faceValueCspr,
 }: {
   icon: typeof ShieldCheck;
-  label: string;
-  sub: string;
+  labelKey: TranslationKey;
+  subKey: TranslationKey;
   tone: "senior" | "junior";
-  tooltip?: string;
+  tooltipKey?: TranslationKey;
   outstandingCspr: number;
   faceValueCspr: number;
 }) {
+  const { t } = useI18n();
+  const label = t(labelKey);
   const wiped = outstandingCspr <= 0;
   return (
     <div
@@ -200,19 +206,19 @@ function TrancheBlock({
         <div className={cn("flex items-center gap-1.5 text-sm font-semibold", tone === "senior" ? "text-senior-glow" : "text-junior-glow")}>
           <Icon className="size-4" aria-hidden />
           {label}
-          {tooltip && <InfoTooltip label={`Qué es ${label}`}>{tooltip}</InfoTooltip>}
+          {tooltipKey && <InfoTooltip label={t("tooltip.whatIs", { term: label })}>{t(tooltipKey)}</InfoTooltip>}
         </div>
-        <Badge variant={tone}>{formatCspr(faceValueCspr, 0)} nominal</Badge>
+        <Badge variant={tone}>{t("vault.faceValue", { amount: formatCspr(faceValueCspr, 0) })}</Badge>
       </div>
-      <p className="mb-3 text-xs text-foreground-muted">{sub}</p>
+      <p className="mb-3 text-xs text-foreground-muted">{t(subKey)}</p>
       <div className="mb-2 flex items-baseline justify-between">
         <span className="font-mono text-2xl font-bold tabular-nums text-foreground">
           <CountUp value={outstandingCspr} decimals={3} suffix=" CSPR" />
         </span>
-        <span className="text-xs text-foreground-faint">outstanding (en vivo)</span>
+        <span className="text-xs text-foreground-faint">{t("vault.outstanding")}</span>
       </div>
       <ProgressBar value={outstandingCspr} max={faceValueCspr || 1} tone={wiped ? "danger" : tone} />
-      {wiped && <div className="mt-2 text-xs font-medium text-danger-glow">Tramo agotado por el waterfall</div>}
+      {wiped && <div className="mt-2 text-xs font-medium text-danger-glow">{t("vault.wiped")}</div>}
     </div>
   );
 }

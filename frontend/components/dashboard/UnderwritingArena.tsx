@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { UnderwriterCard } from "./UnderwriterCard";
+import { useI18n } from "@/lib/i18n/context";
 import type { ChainState, RunLogEntry, UnderwriterRunEntry, DefaultChainRunEntry } from "@/lib/types";
 import { formatBps } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ export function UnderwritingArena({
   onRunA: (stakeCspr: number) => void;
   onRunB: (stakeCspr: number) => void;
 }) {
+  const { t } = useI18n();
   const [stakeA, setStakeA] = useState(15);
   const [stakeB, setStakeB] = useState(20);
 
@@ -52,14 +54,12 @@ export function UnderwritingArena({
     <section className="scroll-mt-24" id="underwriting">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-semibold text-foreground">Underwriters compitiendo</h2>
-          <p className="text-xs text-foreground-muted">
-            Dos agentes pagan x402 real por datos de riesgo, cotizan con Gemini real, y apuestan CSPR real detrás de su propio call.
-          </p>
+          <h2 className="font-display text-lg font-semibold text-foreground">{t("arena.title")}</h2>
+          <p className="text-xs text-foreground-muted">{t("arena.description")}</p>
         </div>
         {bothQuoted && (
           <div className="rounded-full border border-border bg-surface/90 px-4 py-1.5 text-center text-xs text-foreground-muted shadow-glow">
-            Discrepancia de spread:{" "}
+            {t("arena.spreadDiscrepancy")}{" "}
             <span className="font-mono text-sm font-bold tabular-nums text-foreground">{formatBps(disagreementBps)}</span>
           </div>
         )}

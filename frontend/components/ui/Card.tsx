@@ -15,21 +15,45 @@ const accentRing: Record<Accent, string> = {
   carbon: "border-carbon/50",
 };
 
+const hudCornerTone: Record<Accent, string> = {
+  none: "border-border",
+  senior: "border-senior/50",
+  junior: "border-junior/50",
+  brand: "border-brand/50",
+  danger: "border-danger/50",
+  carbon: "border-carbon/60",
+};
+
+/** Marcas de esquina estilo HUD/terminal — reservadas a las tarjetas "clave" (ver uso de `hud`). */
+function HudCorners({ tone }: { tone: Accent }) {
+  const cls = cn("absolute size-3 border-2", hudCornerTone[tone]);
+  return (
+    <>
+      <span className={cn(cls, "left-2 top-2 border-b-0 border-r-0 rounded-tl-[3px]")} aria-hidden />
+      <span className={cn(cls, "right-2 top-2 border-b-0 border-l-0 rounded-tr-[3px]")} aria-hidden />
+      <span className={cn(cls, "bottom-2 left-2 border-t-0 border-r-0 rounded-bl-[3px]")} aria-hidden />
+      <span className={cn(cls, "bottom-2 right-2 border-t-0 border-l-0 rounded-br-[3px]")} aria-hidden />
+    </>
+  );
+}
+
 export function Card({
   className,
   accent = "none",
+  hud = false,
   children,
   ...props
-}: HTMLAttributes<HTMLDivElement> & { accent?: Accent }) {
+}: HTMLAttributes<HTMLDivElement> & { accent?: Accent; hud?: boolean }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-surface/80 backdrop-blur-sm shadow-glow transition-all duration-200 ease-out",
+        "relative rounded-2xl border border-border bg-gradient-to-b from-white/[0.04] via-surface-2/95 to-surface/90 backdrop-blur-sm shadow-glow transition-all duration-200 ease-out",
         accentRing[accent],
         className
       )}
       {...props}
     >
+      {hud && <HudCorners tone={accent} />}
       {children}
     </div>
   );
@@ -41,8 +65,9 @@ export function CardHeader({
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-start justify-between gap-3 p-5 pb-3", className)} {...props}>
+    <div className={cn("relative flex items-start justify-between gap-3 p-5 pb-3", className)} {...props}>
       {children}
+      <div className="pointer-events-none absolute inset-x-5 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>
   );
 }

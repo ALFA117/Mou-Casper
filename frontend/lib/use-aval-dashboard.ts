@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent } from "./types";
 import { fetchChainState, fetchRunLog, runUnderwriter, investInTranche, markDefault, runFullDemo } from "./real-data";
 import { DEFAULT_ASSET_ID } from "./dashboard-config";
+import { useI18n } from "./i18n/context";
 
 export interface AvalDashboardState {
   assetId: string;
@@ -18,6 +19,7 @@ export interface AvalDashboardState {
 }
 
 export function useAvalDashboard() {
+  const { t } = useI18n();
   const [assetId, setAssetId] = useState(DEFAULT_ASSET_ID);
   const [chainState, setChainState] = useState<ChainState | null>(null);
   const [runLog, setRunLog] = useState<RunLogEntry[]>([]);
@@ -44,11 +46,11 @@ export function useAvalDashboard() {
       setRunLog(log);
       setChainStateError(null);
     } catch (err) {
-      setChainStateError(err instanceof Error ? err.message : "Error leyendo estado on-chain");
+      setChainStateError(err instanceof Error ? err.message : t("error.readingChain"));
     } finally {
       setLoadingChainState(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     refresh();
@@ -71,24 +73,24 @@ export function useAvalDashboard() {
       try {
         const result = await fn();
         const ok = result.exitCode === 0;
-        pushLog(label, ok, ok ? "SUCCESS" : "Revisa la consola / stdout");
+        pushLog(label, ok, ok ? t("action.success") : t("action.checkConsole"));
         if (ok) onSuccess?.();
       } catch (err) {
-        pushLog(label, false, err instanceof Error ? err.message : "Error desconocido");
+        pushLog(label, false, err instanceof Error ? err.message : t("action.unknownError"));
       } finally {
         setBusyAction(null);
         setBusyActionStartedAt(null);
         await refresh();
       }
     },
-    [busyAction, pushLog, refresh]
+    [busyAction, pushLog, refresh, t]
   );
 
   const actions = {
     runUnderwriterA: (stakeCspr: number) =>
       runAction(
         "underwriter_A",
-        "Underwriter A corrió su loop",
+        t("action.underwriterA"),
         () => runUnderwriter({ wallet: "underwriter_A", assetId, stakeCspr, profile: "conservative" as ProfileKey }),
         () => {
           emitBgEvent("pulse", "senior", "underwriter_A");
@@ -98,7 +100,7 @@ export function useAvalDashboard() {
     runUnderwriterB: (stakeCspr: number) =>
       runAction(
         "underwriter_B",
-        "Underwriter B corrió su loop",
+        t("action.underwriterB"),
         () => runUnderwriter({ wallet: "underwriter_B", assetId, stakeCspr, profile: "aggressive" as ProfileKey }),
         () => {
           emitBgEvent("pulse", "junior", "underwriter_B");
@@ -108,28 +110,28 @@ export function useAvalDashboard() {
     buySenior: (amountCspr: number) =>
       runAction(
         "buy_senior",
-        "Investor compró tramo senior",
+        t("action.buySenior"),
         () => investInTranche({ entryPoint: "buy_senior", amountCspr }),
         () => emitBgEvent("pulse", "senior", "investor")
       ),
     buyJunior: (amountCspr: number) =>
       runAction(
         "buy_junior",
-        "Investor compró tramo junior",
+        t("action.buyJunior"),
         () => investInTranche({ entryPoint: "buy_junior", amountCspr }),
         () => emitBgEvent("pulse", "junior", "investor")
       ),
     markDefault: (lossAmountCspr: number) =>
       runAction(
         "mark_default",
-        "Cadena del servicer ejecutada",
+        t("action.markDefault"),
         () => markDefault({ assetId, lossAmountCspr }),
         () => emitBgEvent("kill", "danger", "underwriter_B")
       ),
     runFullDemo: (params: { aStakeCspr: number; bStakeCspr: number; investorSeniorCspr: number; investorJuniorCspr: number; lossAmountCspr: number }) =>
       runAction(
         "demo_run",
-        "demo:run completo",
+        t("action.demoRun"),
         () => runFullDemo({ assetId, ...params }),
         () => emitBgEvent("celebrate", "brand")
       ),

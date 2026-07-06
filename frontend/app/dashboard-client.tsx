@@ -14,11 +14,19 @@ import { DemoStep } from "@/components/ui/DemoStep";
 import { RevealOnMount } from "@/components/ui/RevealOnMount";
 import { useAvalDashboard } from "@/lib/use-aval-dashboard";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
+import { I18nProvider, useI18n } from "@/lib/i18n/context";
 import { PlayCircle } from "lucide-react";
 
-const READONLY_TOOLTIP = "Corre localmente para acciones — este deploy en Vercel es solo lectura (no puede firmar transacciones ni correr agentes).";
-
 export function DashboardClient({ readOnly }: { readOnly: boolean }) {
+  return (
+    <I18nProvider>
+      <DashboardContent readOnly={readOnly} />
+    </I18nProvider>
+  );
+}
+
+function DashboardContent({ readOnly }: { readOnly: boolean }) {
+  const { t } = useI18n();
   const {
     assetId,
     setAssetId,
@@ -32,6 +40,8 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
     bgEvent,
     actions,
   } = useAvalDashboard();
+
+  const readOnlyTooltip = readOnly ? t("readOnly.tooltip") : undefined;
 
   // Vercel no puede: firmar deploys (las llaves viven en /keys, no se suben),
   // correr el facilitator x402 (necesita localhost:4021/4022), ni hacer spawn
@@ -60,19 +70,17 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
 
               {chainStateError && (
                 <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger-glow">
-                  No se pudo leer el estado on-chain: {chainStateError}
+                  {t("error.chainStateRead", { error: chainStateError })}
                 </div>
               )}
 
               <RevealOnMount index={1}>
-                <DemoStep n="01" tone="senior">
-                  <Card accent="senior" id="asset">
+                <DemoStep n="01" tone="senior" targetId="asset">
+                  <Card accent="senior" className="scroll-mt-24" id="asset">
                     <CardHeader>
                       <div>
-                        <CardTitle>Activo en demo</CardTitle>
-                        <p className="text-xs text-foreground-muted">
-                          Los datos de riesgo reales se compran vía x402 a /x402-service para este ID.
-                        </p>
+                        <CardTitle>{t("step1.title")}</CardTitle>
+                        <p className="text-xs text-foreground-muted">{t("step1.description")}</p>
                       </div>
                     </CardHeader>
                     <CardBody className="flex flex-wrap items-center gap-3">
@@ -82,9 +90,9 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
                         onChange={e => setAssetId(e.target.value)}
                         disabled={readOnly}
                         className="h-10 flex-1 min-w-[200px] rounded-lg border border-border-subtle bg-surface-2 px-3 text-sm text-foreground disabled:opacity-50"
-                        aria-label="Asset ID"
+                        aria-label={t("step1.assetIdLabel")}
                       />
-                      <span title={readOnly ? READONLY_TOOLTIP : undefined}>
+                      <span title={readOnlyTooltip}>
                         <Button
                           onClick={() =>
                             actions.runFullDemo({
@@ -99,7 +107,7 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
                           loading={busyAction === "demo_run"}
                         >
                           <PlayCircle className="size-4" aria-hidden />
-                          Correr demo:run completo (~{ACTION_COST_ESTIMATES_CSPR.fullDemoRun} CSPR, varios minutos)
+                          {t("step1.runFullDemo", { cost: ACTION_COST_ESTIMATES_CSPR.fullDemoRun })}
                         </Button>
                       </span>
                     </CardBody>
@@ -108,14 +116,14 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
               </RevealOnMount>
 
               <RevealOnMount index={2}>
-                <DemoStep n="02" tone="senior">
+                <DemoStep n="02" tone="senior" targetId="underwriting">
                   <UnderwritingArena
                     assetId={assetId}
                     chainState={chainState}
                     runLog={runLog}
                     busyAction={busyAction}
                     actionsDisabled={actionsDisabled}
-                    readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
+                    readOnlyTooltip={readOnlyTooltip}
                     onRunA={actions.runUnderwriterA}
                     onRunB={actions.runUnderwriterB}
                   />
@@ -123,13 +131,13 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
               </RevealOnMount>
 
               <RevealOnMount index={3}>
-                <DemoStep n="03" tone="brand">
+                <DemoStep n="03" tone="brand" targetId="vault">
                   <TrancheVaultPanel
                     chainState={chainState}
                     runLog={runLog}
                     busyAction={busyAction}
                     actionsDisabled={actionsDisabled}
-                    readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
+                    readOnlyTooltip={readOnlyTooltip}
                     onBuySenior={actions.buySenior}
                     onBuyJunior={actions.buyJunior}
                   />
@@ -137,22 +145,19 @@ export function DashboardClient({ readOnly }: { readOnly: boolean }) {
               </RevealOnMount>
 
               <RevealOnMount index={4}>
-                <DemoStep n="04" tone="danger" last>
+                <DemoStep n="04" tone="danger" targetId="climax" last>
                   <ClimaxPanel
                     assetId={assetId}
                     runLog={runLog}
                     busyAction={busyAction}
                     actionsDisabled={actionsDisabled}
-                    readOnlyTooltip={readOnly ? READONLY_TOOLTIP : undefined}
+                    readOnlyTooltip={readOnlyTooltip}
                     onMarkDefault={actions.markDefault}
                   />
                 </DemoStep>
               </RevealOnMount>
 
-              <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">
-                Todas las cifras son leídas en vivo de Casper Testnet o de agents/run-log.json (transacciones reales ya
-                confirmadas) — nada en esta página está simulado ni calculado localmente sin respaldo on-chain.
-              </footer>
+              <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">{t("footer.disclaimer")}</footer>
             </div>
 
             <RevealOnMount index={1} className="lg:sticky lg:top-24 lg:h-[calc(100dvh-7rem)]">

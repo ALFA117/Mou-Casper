@@ -327,6 +327,7 @@ export function Background3D({ event }: { event?: BackgroundEvent | null }) {
     <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden="true">
       <div className="absolute inset-0 bg-grid-lines bg-[length:44px_44px] opacity-40" />
       <div className="absolute inset-0 bg-grid-fade" />
+      <div className="absolute inset-0 bg-scanlines opacity-60" />
       {canRender3D && (
         <Canvas
           dpr={[1, 1.5]}

@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Zap, Stamp, Lock, Layers, ShieldAlert, AlertTriangle, Skull, Activity, Coins, type LucideIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { TxLink } from "@/components/ui/TxLink";
+import { useI18n } from "@/lib/i18n/context";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
 import type { RunLogEntry } from "@/lib/types";
 import { cn, timeAgo, formatCspr, formatBps } from "@/lib/utils";
 
 type FeedTone = "senior" | "junior" | "brand" | "danger" | "carbon";
+type Translate = (key: TranslationKey, vars?: Record<string, string | number>) => string;
 
 interface FeedItem {
   id: string;
@@ -20,7 +23,7 @@ interface FeedItem {
   tone: FeedTone;
 }
 
-function toFeedItems(log: RunLogEntry[]): FeedItem[] {
+function toFeedItems(log: RunLogEntry[], t: Translate): FeedItem[] {
   const items: FeedItem[] = [];
   log.forEach((entry, i) => {
     const ts = new Date(entry.loggedAt).getTime();
@@ -34,8 +37,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
           id: `${i}-x402`,
           timestamp: ts,
           actor: entry.walletName,
-          label: "Pago x402 liquidado",
-          detail: `Datos de riesgo para ${entry.assetId}`,
+          label: t("feed.x402Settled"),
+          detail: t("feed.x402Detail", { assetId: entry.assetId }),
           hash: entry.hashes.x402,
           icon: Zap,
           tone,
@@ -45,8 +48,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-attest`,
         timestamp: ts,
         actor: entry.walletName,
-        label: `Cotización emitida: ${entry.quote.rating}/1000`,
-        detail: `${entry.quote.recommended_tranche} tranche · spread ${formatBps(entry.quote.price_bps)}`,
+        label: t("feed.quoteIssued", { rating: entry.quote.rating }),
+        detail: t("feed.quoteDetail", { tranche: entry.quote.recommended_tranche, spread: formatBps(entry.quote.price_bps) }),
         hash: entry.hashes.attest,
         icon: Stamp,
         tone,
@@ -55,8 +58,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-stake`,
         timestamp: ts,
         actor: entry.walletName,
-        label: "Stake depositado",
-        detail: `${formatCspr(entry.stakeAmountCspr, 0)} apostados contra su propia cotización`,
+        label: t("feed.stakeDeposited"),
+        detail: t("feed.stakeDetail", { amount: formatCspr(entry.stakeAmountCspr, 0) }),
         hash: entry.hashes.stake,
         icon: Lock,
         tone,
@@ -67,8 +70,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-buy`,
         timestamp: ts,
         actor: "Investor Agent",
-        label: `Compró tramo ${entry.entryPoint === "buy_senior" ? "senior" : "junior"}`,
-        detail: `${formatCspr(entry.amountCspr, 0)} comprometidos`,
+        label: t("feed.boughtTranche", { tranche: entry.entryPoint === "buy_senior" ? "senior" : "junior" }),
+        detail: t("feed.boughtDetail", { amount: formatCspr(entry.amountCspr, 0) }),
         hash: entry.hash,
         icon: Layers,
         tone,
@@ -78,8 +81,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-constitution`,
         timestamp: ts,
         actor: "Constitution",
-        label: entry.testPassed ? "Límite de exposición protegido (revirtió)" : "Constitution NO revirtió",
-        detail: `Pedido: ${formatCspr(entry.requestedExposureCspr, 0)} · ${entry.errorName}`,
+        label: t(entry.testPassed ? "feed.exposureProtected" : "feed.exposureNotReverted"),
+        detail: t("feed.exposureDetail", { amount: formatCspr(entry.requestedExposureCspr, 0), error: entry.errorName }),
         hash: entry.hash,
         icon: ShieldAlert,
         tone: "danger",
@@ -89,8 +92,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-default`,
         timestamp: ts,
         actor: "TrancheVault",
-        label: "Default marcado — waterfall ejecutado",
-        detail: `Pérdida simulada de ${formatCspr(entry.lossAmountCspr, 0)}`,
+        label: t("feed.defaultMarked"),
+        detail: t("feed.defaultDetail", { amount: formatCspr(entry.lossAmountCspr, 0) }),
         hash: entry.hashes.markDefault,
         icon: AlertTriangle,
         tone: "danger",
@@ -99,8 +102,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-slash`,
         timestamp: ts,
         actor: "UnderwriterStake",
-        label: `underwriter_B slasheado (${(entry.slashBps / 100).toFixed(2)}%)`,
-        detail: "Sobre-cotizó el riesgo — stake seizado",
+        label: t("feed.slashed", { pct: (entry.slashBps / 100).toFixed(2) }),
+        detail: t("feed.slashedDetail"),
         hash: entry.hashes.slash,
         icon: Skull,
         tone: "carbon",
@@ -109,8 +112,8 @@ function toFeedItems(log: RunLogEntry[]): FeedItem[] {
         id: `${i}-reputation`,
         timestamp: ts,
         actor: "Reputation",
-        label: "Reputación actualizada",
-        detail: `B −${entry.penalizePoints} · A +${entry.rewardPoints}`,
+        label: t("feed.reputationUpdated"),
+        detail: t("feed.reputationDetail", { penalize: entry.penalizePoints, reward: entry.rewardPoints }),
         hash: entry.hashes.reward,
         icon: Activity,
         tone: "brand",
@@ -169,7 +172,8 @@ function FeedEntryRow({ entry, isNew, staggerIndex }: { entry: FeedItem; isNew: 
 }
 
 export function AttestationFeed({ runLog }: { runLog: RunLogEntry[] }) {
-  const entries = toFeedItems(runLog);
+  const { t } = useI18n();
+  const entries = toFeedItems(runLog, t);
 
   // Cada entrada recuerda si ya se vio antes (Set persistente entre renders).
   // Las nunca-vistas entran con slide-in escalonado; el resto no re-anima en
@@ -189,17 +193,17 @@ export function AttestationFeed({ runLog }: { runLog: RunLogEntry[] }) {
     <Card className="flex h-full flex-col" id="attestations">
       <CardHeader>
         <div>
-          <CardTitle>Feed de atestaciones on-chain</CardTitle>
+          <CardTitle>{t("feed.title")}</CardTitle>
           <p className="text-xs text-foreground-muted">
             <Coins className="mr-1 inline size-3" aria-hidden />
-            Reconstruido de agents/run-log.json — cada entrada es una transacción real confirmada en CSPR.live.
+            {t("feed.description")}
           </p>
         </div>
       </CardHeader>
       <CardBody className="flex-1 overflow-y-auto">
         {entries.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border-subtle p-6 text-center text-xs text-foreground-faint">
-            Sin actividad on-chain todavía.
+            {t("feed.empty")}
           </div>
         ) : (
           <ol className="space-y-2.5">
