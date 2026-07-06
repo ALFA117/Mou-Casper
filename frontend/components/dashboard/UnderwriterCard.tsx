@@ -96,7 +96,8 @@ export function UnderwriterCard({
           variant={wasSlashed ? "carbon" : tone}
           className="shrink-0 whitespace-nowrap font-mono"
         >
-          <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" /> {t("underwriter.atStake")}
+          <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />{" "}
+          {t("underwriter.atStake")}
         </Badge>
       </CardHeader>
       <CardBody className="space-y-4">
