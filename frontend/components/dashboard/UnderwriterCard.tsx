@@ -63,11 +63,11 @@ export function UnderwriterCard({
       accent={wasSlashed ? "carbon" : tone}
       className={cn("relative overflow-hidden transition-colors duration-700", wasSlashed && "grayscale", justFlashed && "animate-slash-flash")}
     >
-      <CardHeader>
-        <div className="flex items-center gap-3">
+      <CardHeader className="flex-wrap gap-y-2">
+        <div className="flex min-w-0 items-center gap-3">
           <div
             className={cn(
-              "flex size-9 items-center justify-center rounded-lg",
+              "flex size-9 shrink-0 items-center justify-center rounded-lg",
               wasSlashed
                 ? "bg-carbon/20 text-foreground-muted"
                 : tone === "senior"

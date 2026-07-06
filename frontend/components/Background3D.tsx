@@ -16,7 +16,7 @@ import type { BackgroundEvent } from "@/lib/types";
  * confirmed — nothing here is simulated ahead of the actual event.
  */
 
-const NODE_COUNT = 90;
+const NODE_COUNT = 130;
 const CONNECT_DISTANCE = 3.1;
 const FIELD_RADIUS = 7.5;
 const HUB_INDEX = 0; // representa AttestationRegistry — forzado cerca del centro
@@ -257,13 +257,13 @@ function NetworkField({ event, reducedMotion }: { event: BackgroundEvent | null;
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
           <bufferAttribute ref={pointsColorRef} attach="attributes-color" args={[colors, 3]} />
         </bufferGeometry>
-        <pointsMaterial size={0.05} sizeAttenuation transparent opacity={0.7} depthWrite={false} vertexColors />
+        <pointsMaterial size={0.065} sizeAttenuation transparent opacity={0.85} depthWrite={false} vertexColors />
       </points>
       <lineSegments>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[edgePositions, 3]} />
         </bufferGeometry>
-        <lineBasicMaterial color="#4A1414" transparent opacity={0.4} depthWrite={false} />
+        <lineBasicMaterial color="#7A2424" transparent opacity={0.6} depthWrite={false} />
       </lineSegments>
       {/* Enlaces de atestacion: hasta 8 pulsos simultaneos hacia el hub, con color por vertice */}
       <lineSegments>
@@ -323,7 +323,7 @@ function FloatingCubes({ reducedMotion }: { reducedMotion: boolean }) {
     <group ref={groupRef}>
       {cubes.map((c, i) => (
         <lineSegments key={i} geometry={edges} position={c.position} scale={c.scale}>
-          <lineBasicMaterial color="#FF1F1F" transparent opacity={0.22} depthWrite={false} />
+          <lineBasicMaterial color="#FF1F1F" transparent opacity={0.34} depthWrite={false} />
         </lineSegments>
       ))}
     </group>
@@ -339,14 +339,23 @@ export function Background3D({ event }: { event?: BackgroundEvent | null }) {
       <div className="absolute inset-0 bg-grid-lines bg-[length:44px_44px] opacity-40" />
       <div className="absolute inset-0 bg-grid-fade" />
       <div className="absolute inset-0 bg-scanlines opacity-60" />
+      {/* Glow ambiental rojo en las esquinas -- refuerza que hay "vida" detras
+          sin restar legibilidad al centro, donde vive el contenido. */}
+      <div
+        className="absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 0% 0%, rgba(255,31,31,0.16), transparent 60%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(255,31,31,0.14), transparent 60%)",
+        }}
+      />
       {canRender3D && (
         <Canvas
           dpr={[1, 1.5]}
           gl={{ antialias: true, alpha: true }}
           camera={{ position: [0, 0.4, 6], fov: 50 }}
-          className="opacity-80"
+          className="opacity-90"
         >
-          <fog attach="fog" args={["#0A0A0A", 6, 13]} />
+          <fog attach="fog" args={["#0A0A0A", 8, 21]} />
           <NetworkField event={event ?? null} reducedMotion={reducedMotion} />
           <FloatingCubes reducedMotion={reducedMotion} />
         </Canvas>

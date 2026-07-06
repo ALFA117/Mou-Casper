@@ -62,7 +62,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
         />
 
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
             <div className="space-y-6">
               <RevealOnMount index={0}>
                 <Hero />
@@ -160,7 +160,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">{t("footer.disclaimer")}</footer>
             </div>
 
-            <RevealOnMount index={1} className="lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)]">
+            <RevealOnMount index={1} className="xl:sticky xl:top-20 xl:h-[calc(100dvh-5rem)]">
               <AttestationFeed runLog={runLog} />
             </RevealOnMount>
           </div>
