@@ -117,8 +117,8 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               )}
 
               {chainStateError && (
-                <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger-glow">
-                  {t("error.chainStateRead", { error: chainStateError })}
+                <div className="rounded-xl border border-border-subtle bg-surface-2 p-3 text-xs text-foreground-muted">
+                  {chainStateError}
                 </div>
               )}
 

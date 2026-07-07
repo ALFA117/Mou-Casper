@@ -173,5 +173,43 @@
     },
     "success": true,
     "loggedAt": "2026-07-07T15:09:39.031Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_A",
+    "assetId": "invoice-batch-002",
+    "profileKey": "conservative",
+    "stakeAmountCspr": 15,
+    "riskData": {
+      "assetId": "invoice-batch-002",
+      "defaultProbabilityBps": 810,
+      "recommendedSpreadBps": 1200,
+      "source": "aval-risk-feed-v1",
+      "timestamp": "2026-07-07T15:39:46.522Z"
+    },
+    "quote": {
+      "rating": 890,
+      "recommended_tranche": "senior",
+      "price_bps": 1500,
+      "short_reasoning": "Default probability from feed is considered a floor. Applied additional conservative margin due to potential tail risk and correlation. High price_bps reflects demand for generous compensation to protect investor capital. Senior tranche is strongly preferred for its lower risk profile and higher payment priority.",
+      "extended_reasoning": "Como underwriter conservador de AVAL, mi principal objetivo es proteger el capital de los inversionistas. Los datos de riesgo reportados por el feed (810 bps de probabilidad de default) se interpretan como un piso, no como una estimación final. Históricamente, los feeds de terceros tienden a subestimar el riesgo de cola y la correlación de defaults en escenarios de estrés. Por lo tanto, he aplicado un margen de precaución adicional a esta probabilidad de default percibida. Mi rating de 890 refleja esta visión más cautelosa, siendo inferior al promedio del mercado para este nivel de riesgo base, pero proporcionando un colchón adicional. La preferencia por el tramo 'senior' es absoluta, alineándose con mi perfil conservador que busca maximizar la protección del principal frente a la maximización del rendimiento. Este tramo ofrece mayor seguridad y prioridad de pago ante cualquier evento adverso. El price_bps sugerido de 1500 bps excede la recomendación del feed (1200 bps). Esta prima se exige como compensación por el riesgo percibido que es mayor al reportado, y para garantizar un retorno adecuado a los inversionistas de AVAL, incluso ante escenarios moderados de riesgo. Prefiero perder una operación competitiva a comprometer la solidez de la cobertura para nuestros inversionistas."
+    },
+    "reasoningHash": "cf62ea0eb27a53b26556498875e2009fe8119e23ecfe662846dc9754e2a3a59d",
+    "hashes": {
+      "x402": "54d2685be2b3f94dd399ff3874fe92cf84309ebee46d3e0496003e0425750597",
+      "register": "ae439a5c16fec95c48ca8096496256efdc31f15c1ea28ba176b28b83f1673983",
+      "stake": "67de9db229b75a5c817f03963b46e8015657c9b33c505f110ac1c3a502f78b9e",
+      "attest": "7861cc9955211be553dd37ff5444383795888bc152ec97bd90ece0bcb72db849"
+    },
+    "success": true,
+    "loggedAt": "2026-07-07T15:40:25.427Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 5,
+    "hash": "eeab5d843d0873f9b688db8516318c6414b0531687554372ee76fd80a1a56390",
+    "success": true,
+    "loggedAt": "2026-07-07T16:34:44.698Z"
   }
 ]

@@ -42,7 +42,7 @@ export const dictionary = {
     "step1.runFullDemo": "Run full demo:run (~{{cost}} CSPR, several minutes)",
     "step1.disabledPublicTooltip":
       "Disabled on the public demo (~180 CSPR, several minutes) — run the individual actions below instead, or clone the repo to run it yourself.",
-    "error.chainStateRead": "Could not read on-chain state: {{error}}",
+    "error.chainStateTransient": "Network hiccup, retrying automatically…",
 
     "arena.title": "Underwriters competing",
     "arena.description":
@@ -150,7 +150,6 @@ export const dictionary = {
     "wait.demo.240": "Running the climax: mark_default → slash → penalize/reward…",
     "wait.demo.360": "Wrapping up the arc — can take up to ~10 min total…",
 
-    "error.readingChain": "Error reading on-chain state",
     "nav.goToSection": "Go to section {{n}}",
     "action.underwriterA": "Underwriter A",
     "action.underwriterB": "Underwriter B",
@@ -215,7 +214,7 @@ export const dictionary = {
     "step1.runFullDemo": "Correr demo:run completo (~{{cost}} CSPR, varios minutos)",
     "step1.disabledPublicTooltip":
       "Deshabilitado en la demo pública (~180 CSPR, varios minutos) — usa las acciones individuales de abajo, o clona el repo para correrlo tú mismo.",
-    "error.chainStateRead": "No se pudo leer el estado on-chain: {{error}}",
+    "error.chainStateTransient": "Problema de red pasajero, reintentando automáticamente…",
 
     "arena.title": "Underwriters compitiendo",
     "arena.description":
@@ -328,7 +327,6 @@ export const dictionary = {
     "wait.demo.240": "Ejecutando el clímax: mark_default → slash → penalize/reward…",
     "wait.demo.360": "Cerrando el arco — puede tardar hasta ~10 min en total…",
 
-    "error.readingChain": "Error leyendo estado on-chain",
     "nav.goToSection": "Ir a la sección {{n}}",
     "action.underwriterA": "Underwriter A",
     "action.underwriterB": "Underwriter B",

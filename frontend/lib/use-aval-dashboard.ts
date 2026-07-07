@@ -15,6 +15,12 @@ import {
 import { DEFAULT_ASSET_ID } from "./dashboard-config";
 import { useI18n } from "./i18n/context";
 
+// El RPC publico de testnet a veces tira un 413 pasajero incluso despues del
+// retry del server (casper-read.ts). En vez de pintar el error crudo apenas
+// falla una vez, reintentamos callados un par de veces mas -- si el jurado
+// ve algo, que sea un mensaje tranquilo, no un 413 en rojo.
+const CHAIN_STATE_SILENT_RETRY_DELAYS_MS = [1200, 2500];
+
 export interface AvalDashboardState {
   assetId: string;
   chainState: ChainState | null;
@@ -53,17 +59,25 @@ export function useAvalDashboard() {
 
   const refresh = useCallback(async () => {
     setLoadingChainState(true);
-    try {
-      const [state, log, budget] = await Promise.all([fetchChainState(), fetchRunLog(), fetchDemoBudget()]);
-      setChainState(state);
-      setRunLog(log);
-      setDemoBudget(budget);
-      setChainStateError(null);
-    } catch (err) {
-      setChainStateError(err instanceof Error ? err.message : t("error.readingChain"));
-    } finally {
-      setLoadingChainState(false);
+    for (let attempt = 0; attempt <= CHAIN_STATE_SILENT_RETRY_DELAYS_MS.length; attempt++) {
+      try {
+        const [state, log, budget] = await Promise.all([fetchChainState(), fetchRunLog(), fetchDemoBudget()]);
+        setChainState(state);
+        setRunLog(log);
+        setDemoBudget(budget);
+        setChainStateError(null);
+        setLoadingChainState(false);
+        return;
+      } catch {
+        const delay = CHAIN_STATE_SILENT_RETRY_DELAYS_MS[attempt];
+        if (delay !== undefined) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          setChainStateError(t("error.chainStateTransient"));
+        }
+      }
     }
+    setLoadingChainState(false);
   }, [t]);
 
   useEffect(() => {

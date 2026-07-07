@@ -43,7 +43,7 @@ function decodeU32(byteArray: number[]): bigint {
 export async function readDictionaryValue(
   dictionaryKey: string,
   valueType: DictValueType,
-  maxRetries = 3
+  maxRetries = 6
 ): Promise<bigint> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
