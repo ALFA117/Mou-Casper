@@ -22,10 +22,16 @@ export function isPublicHost(req: Request): boolean {
   return !/localhost|127\.0\.0\.1|\[::1\]/.test(host);
 }
 
+// Codigo estructurado para que el CLIENTE arme el mensaje en el idioma activo
+// (ES/EN) -- `error` de abajo queda solo como fallback/log en español, nunca
+// se muestra directo en el toast cuando hay un `reason` conocido.
+export type GuardRejectionReason = "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+
 export interface GuardResult {
   ok: boolean;
   status?: number;
   error?: string;
+  reason?: GuardRejectionReason;
   retryAfterSeconds?: number;
 }
 
@@ -36,6 +42,7 @@ export function reserveActionSlot(req: Request, actionKey: string): GuardResult 
     return {
       ok: false,
       status: 403,
+      reason: "tunnel_disabled",
       error:
         "El demo:run completo (~180 CSPR, varios minutos) está deshabilitado en la demo pública. Usa las acciones individuales de abajo, o clona el repo y córrelo con tus propias llaves (ver 'Run it yourself').",
     };
@@ -45,6 +52,7 @@ export function reserveActionSlot(req: Request, actionKey: string): GuardResult 
     return {
       ok: false,
       status: 429,
+      reason: "concurrent_lock",
       error: "Otra acción está en curso ahora mismo en esta demo. Espera unos segundos y reintenta.",
     };
   }
@@ -57,6 +65,7 @@ export function reserveActionSlot(req: Request, actionKey: string): GuardResult 
       return {
         ok: false,
         status: 429,
+        reason: "cooldown",
         error: `Cooldown de la demo pública: espera ${retryAfterSeconds}s antes de otra acción.`,
         retryAfterSeconds,
       };
@@ -66,6 +75,7 @@ export function reserveActionSlot(req: Request, actionKey: string): GuardResult 
       return {
         ok: false,
         status: 429,
+        reason: "hourly_cap",
         error: `Tope de ${HOURLY_CAP} acciones/hora alcanzado en la demo pública. Vuelve a intentar más tarde, o corre el proyecto localmente con tus propias llaves.`,
       };
     }

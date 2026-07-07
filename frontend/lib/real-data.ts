@@ -25,6 +25,12 @@ export async function fetchRunLog(): Promise<RunLogEntry[]> {
   return data.log ?? [];
 }
 
+// Las 4 funciones de abajo NO lanzan en !res.ok a proposito: la ruta siempre
+// responde con la forma de ScriptRunResult (exitCode/stderr/reason/...),
+// incluso cuando lib/server/demo-guard.ts rechazo la accion. Lanzar aqui
+// perdia ese `stderr`/`reason` real y forzaba un mensaje generico en el
+// toast -- dejamos que runAction (use-aval-dashboard.ts) lea exitCode y arme
+// el detalle especifico a partir del cuerpo completo.
 export async function runUnderwriter(params: {
   wallet: "underwriter_A" | "underwriter_B";
   assetId: string;
@@ -36,9 +42,7 @@ export async function runUnderwriter(params: {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(params),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "El agente underwriter fallo");
-  return data;
+  return res.json();
 }
 
 export async function investInTranche(params: {
@@ -50,9 +54,7 @@ export async function investInTranche(params: {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(params),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "La compra de tramo fallo");
-  return data;
+  return res.json();
 }
 
 export async function markDefault(params: {
@@ -64,9 +66,7 @@ export async function markDefault(params: {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(params),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "La cadena del servicer fallo");
-  return data;
+  return res.json();
 }
 
 export async function runFullDemo(params: {
@@ -82,7 +82,5 @@ export async function runFullDemo(params: {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(params),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "demo-run fallo");
-  return data;
+  return res.json();
 }

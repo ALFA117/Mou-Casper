@@ -100,6 +100,11 @@ export interface ScriptRunResult {
   stdout: string;
   stderr: string;
   newLogEntries: RunLogEntry[];
+  // Solo presentes cuando lib/server/demo-guard.ts rechazo la accion (nunca
+  // llego a tocar el script real) -- el cliente los usa para armar el
+  // mensaje del toast en el idioma activo, ver lib/use-aval-dashboard.ts.
+  reason?: "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+  retryAfterSeconds?: number;
 }
 
 // El hash "cabecera" de cada tipo de entrada -- el que mas vale la pena poner

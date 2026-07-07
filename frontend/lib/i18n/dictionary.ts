@@ -40,6 +40,8 @@ export const dictionary = {
     "step1.description": "Real risk data is purchased via x402 from /x402-service for this ID.",
     "step1.assetIdLabel": "Asset ID",
     "step1.runFullDemo": "Run full demo:run (~{{cost}} CSPR, several minutes)",
+    "step1.disabledPublicTooltip":
+      "Disabled on the public demo (~180 CSPR, several minutes) — run the individual actions below instead, or clone the repo to run it yourself.",
     "error.chainStateRead": "Could not read on-chain state: {{error}}",
 
     "arena.title": "Underwriters competing",
@@ -146,15 +148,19 @@ export const dictionary = {
 
     "error.readingChain": "Error reading on-chain state",
     "nav.goToSection": "Go to section {{n}}",
-    "action.underwriterA": "Underwriter A ran its loop",
-    "action.underwriterB": "Underwriter B ran its loop",
-    "action.buySenior": "Investor bought the senior tranche",
-    "action.buyJunior": "Investor bought the junior tranche",
-    "action.markDefault": "Servicer chain executed",
-    "action.demoRun": "demo:run complete",
+    "action.underwriterA": "Underwriter A",
+    "action.underwriterB": "Underwriter B",
+    "action.buySenior": "Buy senior",
+    "action.buyJunior": "Buy junior",
+    "action.markDefault": "Mark default",
+    "action.demoRun": "demo:run",
     "action.success": "SUCCESS",
     "action.checkConsole": "Check console / stdout",
     "action.unknownError": "Unknown error",
+    "action.reason.tunnelDisabled": "Disabled on the public demo — run the individual actions instead (A → B → buy → default).",
+    "action.reason.concurrentLock": "Another action is running right now on this demo — wait a few seconds and retry.",
+    "action.reason.cooldown": "Wait {{time}} (anti-drain cooldown).",
+    "action.reason.hourlyCap": "Hourly action limit reached on the public demo — try again later, or run it locally.",
 
     "runItYourself.title": "Run it yourself",
     "runItYourself.thesis":
@@ -203,6 +209,8 @@ export const dictionary = {
     "step1.description": "Los datos de riesgo reales se compran vía x402 a /x402-service para este ID.",
     "step1.assetIdLabel": "ID del activo",
     "step1.runFullDemo": "Correr demo:run completo (~{{cost}} CSPR, varios minutos)",
+    "step1.disabledPublicTooltip":
+      "Deshabilitado en la demo pública (~180 CSPR, varios minutos) — usa las acciones individuales de abajo, o clona el repo para correrlo tú mismo.",
     "error.chainStateRead": "No se pudo leer el estado on-chain: {{error}}",
 
     "arena.title": "Underwriters compitiendo",
@@ -314,15 +322,19 @@ export const dictionary = {
 
     "error.readingChain": "Error leyendo estado on-chain",
     "nav.goToSection": "Ir a la sección {{n}}",
-    "action.underwriterA": "Underwriter A corrió su loop",
-    "action.underwriterB": "Underwriter B corrió su loop",
-    "action.buySenior": "Investor compró tramo senior",
-    "action.buyJunior": "Investor compró tramo junior",
-    "action.markDefault": "Cadena del servicer ejecutada",
-    "action.demoRun": "demo:run completo",
+    "action.underwriterA": "Underwriter A",
+    "action.underwriterB": "Underwriter B",
+    "action.buySenior": "Comprar senior",
+    "action.buyJunior": "Comprar junior",
+    "action.markDefault": "Marcar default",
+    "action.demoRun": "demo:run",
     "action.success": "SUCCESS",
     "action.checkConsole": "Revisa la consola / stdout",
     "action.unknownError": "Error desconocido",
+    "action.reason.tunnelDisabled": "Deshabilitado en la demo pública — usa las acciones individuales (A → B → comprar → default).",
+    "action.reason.concurrentLock": "Otra acción está en curso ahora mismo en esta demo — espera unos segundos y reintenta.",
+    "action.reason.cooldown": "Espera {{time}} (cooldown anti-drenaje).",
+    "action.reason.hourlyCap": "Tope de acciones por hora alcanzado en la demo pública — intenta más tarde, o corre el proyecto localmente.",
 
     "runItYourself.title": "Corre esto tú mismo",
     "runItYourself.thesis":

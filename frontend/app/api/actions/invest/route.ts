@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const guard = reserveActionSlot(req, "invest");
   if (!guard.ok) {
     return NextResponse.json(
-      { exitCode: 1, stdout: "", stderr: guard.error, newLogEntries: [] },
+      { exitCode: 1, stdout: "", stderr: guard.error, reason: guard.reason, retryAfterSeconds: guard.retryAfterSeconds, newLogEntries: [] },
       { status: guard.status ?? 429 }
     );
   }

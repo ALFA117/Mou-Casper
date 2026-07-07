@@ -135,5 +135,13 @@
     "hash": "798dbee74aeffa4d883f634829eb03de4ebd09ed96a4b8dde63d17e7939fbd5a",
     "success": true,
     "loggedAt": "2026-07-07T05:39:19.891Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 5,
+    "hash": "90b2e4e21ad7eef6933374d1dfef3903da50ba8affd6a5f31643f95e3d863718",
+    "success": true,
+    "loggedAt": "2026-07-07T05:58:32.092Z"
   }
 ]

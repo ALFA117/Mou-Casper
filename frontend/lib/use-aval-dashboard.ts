@@ -74,11 +74,41 @@ export function useAvalDashboard() {
     setLastActionLog(prev => [{ label, ok, detail, hash }, ...prev].slice(0, 20));
   }, []);
 
+  // Arma el detalle de fallo especifico y legible -- nunca un generico
+  // "check console" cuando ya sabemos la razon real (bloqueo de tunel,
+  // cooldown, tope horario, o el stderr real del script).
+  const describeFailure = useCallback(
+    (result: {
+      stderr?: string;
+      reason?: "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+      retryAfterSeconds?: number;
+    }): string => {
+      if (result.reason === "tunnel_disabled") return t("action.reason.tunnelDisabled");
+      if (result.reason === "concurrent_lock") return t("action.reason.concurrentLock");
+      if (result.reason === "hourly_cap") return t("action.reason.hourlyCap");
+      if (result.reason === "cooldown") {
+        const secs = Math.max(0, result.retryAfterSeconds ?? 0);
+        const mm = Math.floor(secs / 60);
+        const ss = String(secs % 60).padStart(2, "0");
+        return t("action.reason.cooldown", { time: `${mm}:${ss}` });
+      }
+      return result.stderr?.trim() || t("action.checkConsole");
+    },
+    [t]
+  );
+
   const runAction = useCallback(
     async (
       key: string,
       label: string,
-      fn: () => Promise<{ exitCode: number; stdout: string; newLogEntries?: RunLogEntry[] }>,
+      fn: () => Promise<{
+        exitCode: number;
+        stdout: string;
+        stderr?: string;
+        reason?: "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+        retryAfterSeconds?: number;
+        newLogEntries?: RunLogEntry[];
+      }>,
       onSuccess?: () => void
     ) => {
       if (busyAction) return;
@@ -89,7 +119,7 @@ export function useAvalDashboard() {
         const ok = result.exitCode === 0;
         const lastEntry = result.newLogEntries?.[result.newLogEntries.length - 1];
         const hash = ok && lastEntry ? getPrimaryHash(lastEntry) : null;
-        pushLog(label, ok, ok ? t("action.success") : t("action.checkConsole"), hash);
+        pushLog(label, ok, ok ? t("action.success") : describeFailure(result), hash);
         if (ok) onSuccess?.();
       } catch (err) {
         pushLog(label, false, err instanceof Error ? err.message : t("action.unknownError"));
@@ -99,7 +129,7 @@ export function useAvalDashboard() {
         await refresh();
       }
     },
-    [busyAction, pushLog, refresh, t]
+    [busyAction, pushLog, refresh, t, describeFailure]
   );
 
   const actions = {

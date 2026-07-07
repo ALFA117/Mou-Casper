@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const guard = reserveActionSlot(req, "mark_default");
   if (!guard.ok) {
     return NextResponse.json(
-      { exitCode: 1, stdout: "", stderr: guard.error, newLogEntries: [] },
+      { exitCode: 1, stdout: "", stderr: guard.error, reason: guard.reason, retryAfterSeconds: guard.retryAfterSeconds, newLogEntries: [] },
       { status: guard.status ?? 429 }
     );
   }
@@ -45,7 +45,12 @@ export async function POST(req: Request) {
 
     if (!aRun || !bRun) {
       return NextResponse.json(
-        { error: `No hay corridas de underwriter_A y underwriter_B registradas para el activo "${assetId}". Corre ambos underwriters primero.` },
+        {
+          exitCode: 1,
+          stdout: "",
+          stderr: `No hay corridas de underwriter_A y underwriter_B registradas para el activo "${assetId}". Corre ambos underwriters primero.`,
+          newLogEntries: [],
+        },
         { status: 400 }
       );
     }

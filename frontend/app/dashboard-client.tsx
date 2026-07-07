@@ -54,6 +54,14 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
   // dejarlos fallar con un error confuso.
   const actionsDisabled = readOnly || busyAction !== null;
 
+  // El demo:run completo esta bloqueado server-side cuando se llega por el
+  // tunel publico (ver lib/server/demo-guard.ts) -- el boton debe verse
+  // deshabilitado con su motivo ANTES de que el visitante haga click y
+  // reciba un fallo, no despues.
+  const demoRunBlockedPublic = demoBudget ? !demoBudget.demoRunEnabled : false;
+  const demoRunDisabled = actionsDisabled || demoRunBlockedPublic;
+  const demoRunTooltip = demoRunBlockedPublic ? t("step1.disabledPublicTooltip") : readOnlyTooltip;
+
   // Modo guia: el siguiente paso no completado del arco para ESTE assetId,
   // para que un visitante que llega por el tunel sin contexto sepa por donde
   // empezar. Desaparece solo cuando ese paso ya corrio, no hay que cerrarlo.
@@ -129,7 +137,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
                         className="h-10 flex-1 min-w-[200px] rounded-lg border border-border-subtle bg-surface-2 px-3 text-sm text-foreground disabled:opacity-50"
                         aria-label={t("step1.assetIdLabel")}
                       />
-                      <span title={readOnlyTooltip}>
+                      <span title={demoRunTooltip}>
                         <Button
                           onClick={() =>
                             actions.runFullDemo({
@@ -140,7 +148,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
                               lossAmountCspr: 30,
                             })
                           }
-                          disabled={actionsDisabled}
+                          disabled={demoRunDisabled}
                           loading={busyAction === "demo_run"}
                         >
                           <PlayCircle className="size-4" aria-hidden />
