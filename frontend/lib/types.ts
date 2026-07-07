@@ -110,3 +110,15 @@ export interface BackgroundEvent {
   tone: "brand" | "senior" | "junior" | "danger";
   wallet?: string;
 }
+
+// Ver app/api/demo/budget — balance real (motes leidos on-chain, convertidos
+// a CSPR) de las wallets que financian las acciones, mas el estado del
+// rate-limit publico (solo aplica cuando se llega por el tunel, no en local).
+export interface DemoBudget {
+  totalBalanceCspr: number;
+  isPublic: boolean;
+  demoRunEnabled: boolean;
+  cooldownRemainingSeconds: number;
+  actionsUsedThisHour: number;
+  actionsCapPerHour: number;
+}

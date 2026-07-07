@@ -15,6 +15,11 @@ export const dictionary = {
     "header.stat.lastRead": "Last read",
     "header.readOnlyBanner":
       "Read-only showcase (Vercel) — the numbers above are real and live. Run the project locally to trigger actions that spend CSPR.",
+    "header.liveDemoBanner": "Try the live interactive demo",
+
+    "budget.remaining": "Demo budget remaining: ~{{amount}} (real balance)",
+    "budget.hourlyCap": "{{used}}/{{cap}} actions this hour",
+    "budget.cooldown": "Cooldown: {{seconds}}s until the next action",
 
     "hero.headlinePre": "AI underwriters that",
     "hero.headlineEmphasis": "bleed",
@@ -150,6 +155,18 @@ export const dictionary = {
     "action.success": "SUCCESS",
     "action.checkConsole": "Check console / stdout",
     "action.unknownError": "Unknown error",
+
+    "runItYourself.title": "Run it yourself",
+    "runItYourself.thesis":
+      "This live demo signs with the project's own agent wallets — that's the thesis, agents are the ones who sign. To operate with your own keys, clone it like this:",
+    "runItYourself.step1": "Clone the repo and copy the .env.example files (root, x402-service, frontend).",
+    "runItYourself.step2":
+      "Generate your own wallets (agents/keygen.js) and fund them from the Casper testnet faucet.",
+    "runItYourself.step3": "Fill in GEMINI_API_KEY and the contract hashes, install deps in /agents, /x402-service and /frontend.",
+    "runItYourself.step4": "Start the x402 facilitator, run agents/demo-run.mjs or npm run dev in /frontend — action buttons sign with your keys.",
+    "runItYourself.repoLink": "GitHub repo",
+    "runItYourself.faucetLink": "Casper testnet faucet",
+    "runItYourself.contractsTitle": "Deployed contracts (Casper Testnet)",
   },
   es: {
     "header.tagline": "Mesa de titularización autónoma para la economía de agentes",
@@ -274,6 +291,11 @@ export const dictionary = {
       "Todas las cifras son leídas en vivo de Casper Testnet o de agents/run-log.json (transacciones reales ya confirmadas) — nada en esta página está simulado ni calculado localmente sin respaldo on-chain.",
     "readOnly.tooltip":
       "Corre localmente para acciones — este deploy en Vercel es solo lectura (no puede firmar transacciones ni correr agentes).",
+    "header.liveDemoBanner": "Ver la demo interactiva en vivo",
+
+    "budget.remaining": "Presupuesto de demo restante: ~{{amount}} (balance real)",
+    "budget.hourlyCap": "{{used}}/{{cap}} acciones esta hora",
+    "budget.cooldown": "Cooldown: {{seconds}}s para la próxima acción",
 
     "wait.single.0": "Firmando y enviando el deploy a Casper Testnet…",
     "wait.single.15": "Esperando confirmación de bloque (~2 min típico)…",
@@ -297,6 +319,17 @@ export const dictionary = {
     "action.success": "SUCCESS",
     "action.checkConsole": "Revisa la consola / stdout",
     "action.unknownError": "Error desconocido",
+
+    "runItYourself.title": "Corre esto tú mismo",
+    "runItYourself.thesis":
+      "Esta demo en vivo firma con los wallets de los agentes del proyecto — esa es la tesis, los agentes son los que firman. Para operar con tus propias llaves, clónalo así:",
+    "runItYourself.step1": "Clona el repo y copia los .env.example (raíz, x402-service, frontend).",
+    "runItYourself.step2": "Genera tus propias wallets (agents/keygen.js) y fondéalas desde el faucet de Casper testnet.",
+    "runItYourself.step3": "Llena GEMINI_API_KEY y los hashes de contratos, instala deps en /agents, /x402-service y /frontend.",
+    "runItYourself.step4": "Arranca el facilitator x402, corre agents/demo-run.mjs o npm run dev en /frontend — los botones firman con tus llaves.",
+    "runItYourself.repoLink": "Repo en GitHub",
+    "runItYourself.faucetLink": "Faucet de Casper testnet",
+    "runItYourself.contractsTitle": "Contratos deployados (Casper Testnet)",
   },
 } as const;
 

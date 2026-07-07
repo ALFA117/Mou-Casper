@@ -8,6 +8,7 @@ import { TrancheVaultPanel } from "@/components/dashboard/TrancheVaultPanel";
 import { ClimaxPanel } from "@/components/dashboard/ClimaxPanel";
 import { AttestationFeed } from "@/components/dashboard/AttestationFeed";
 import { BusyStatusBar } from "@/components/dashboard/BusyStatusBar";
+import { RunItYourself } from "@/components/dashboard/RunItYourself";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DemoStep } from "@/components/ui/DemoStep";
@@ -38,6 +39,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
     busyActionStartedAt,
     lastActionLog,
     bgEvent,
+    demoBudget,
     actions,
   } = useAvalDashboard();
 
@@ -58,6 +60,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
           runLog={runLog}
           loading={loadingChainState}
           readOnly={readOnly}
+          demoBudget={demoBudget}
           onRefresh={actions.refresh}
         />
 
@@ -155,6 +158,10 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
                     onMarkDefault={actions.markDefault}
                   />
                 </DemoStep>
+              </RevealOnMount>
+
+              <RevealOnMount index={5}>
+                <RunItYourself />
               </RevealOnMount>
 
               <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">{t("footer.disclaimer")}</footer>

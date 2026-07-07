@@ -1,8 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent } from "./types";
-import { fetchChainState, fetchRunLog, runUnderwriter, investInTranche, markDefault, runFullDemo } from "./real-data";
+import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent, DemoBudget } from "./types";
+import {
+  fetchChainState,
+  fetchRunLog,
+  fetchDemoBudget,
+  runUnderwriter,
+  investInTranche,
+  markDefault,
+  runFullDemo,
+} from "./real-data";
 import { DEFAULT_ASSET_ID } from "./dashboard-config";
 import { useI18n } from "./i18n/context";
 
@@ -16,6 +24,7 @@ export interface AvalDashboardState {
   busyActionStartedAt: number | null;
   lastActionLog: { label: string; ok: boolean; detail: string }[];
   bgEvent: BackgroundEvent | null;
+  demoBudget: DemoBudget | null;
 }
 
 export function useAvalDashboard() {
@@ -29,6 +38,7 @@ export function useAvalDashboard() {
   const [busyActionStartedAt, setBusyActionStartedAt] = useState<number | null>(null);
   const [lastActionLog, setLastActionLog] = useState<{ label: string; ok: boolean; detail: string }[]>([]);
   const [bgEvent, setBgEvent] = useState<BackgroundEvent | null>(null);
+  const [demoBudget, setDemoBudget] = useState<DemoBudget | null>(null);
   const bgEventIdRef = useRef(0);
 
   // Emite un evento real para que Background3D pulse/ilumine/apague un nodo —
@@ -41,9 +51,10 @@ export function useAvalDashboard() {
   const refresh = useCallback(async () => {
     setLoadingChainState(true);
     try {
-      const [state, log] = await Promise.all([fetchChainState(), fetchRunLog()]);
+      const [state, log, budget] = await Promise.all([fetchChainState(), fetchRunLog(), fetchDemoBudget()]);
       setChainState(state);
       setRunLog(log);
+      setDemoBudget(budget);
       setChainStateError(null);
     } catch (err) {
       setChainStateError(err instanceof Error ? err.message : t("error.readingChain"));
@@ -149,6 +160,7 @@ export function useAvalDashboard() {
     busyActionStartedAt,
     lastActionLog,
     bgEvent,
+    demoBudget,
     actions,
   };
 }

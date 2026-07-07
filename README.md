@@ -20,8 +20,13 @@ exactly what broke and how we found out."
 **[mou-casper.vercel.app](https://mou-casper.vercel.app)** — read-only view of the current
 on-chain state (stakes, reputation, tranches), refreshed live from Casper Testnet. Action buttons
 (run an agent, mark a default) are disabled on Vercel — they need local secret keys and a
-locally-hosted x402 facilitator that can't run in a serverless function. Run the project locally
-to fire them for real (see [Running locally](#running-locally)).
+locally-hosted x402 facilitator that can't run in a serverless function.
+
+When the "🔴 Try the live interactive demo" banner is showing, it points at a Cloudflare Tunnel
+into the operator's own local instance — every button there fires a real transaction, no wallet
+or faucet needed to watch it. **The live demo signs with the project's own agent wallets — that's
+the thesis, the agents are the ones who sign.** To operate with your own keys instead, see
+[Run it yourself](#run-it-yourself) below.
 
 ## What's actually implemented
 
@@ -112,10 +117,10 @@ into both tranches → a simulated default is marked → the waterfall hits juni
 underwriter who under-priced risk is slashed live, reputation drops, the other is rewarded —
 every step links to a real CSPR.live testnet tx. Run it yourself with `demo:run` (below).
 
-## Running locally
+## Run it yourself
 
 Action buttons and the agent scripts need real secret keys and a real x402 facilitator — none of
-that can run on Vercel. To use them:
+that can run on Vercel. To use them with your own wallets instead of the live demo's:
 
 1. `cp .env.example .env` at the repo root, and `cp x402-service/.env.example x402-service/.env`,
    `cp frontend/.env.example frontend/.env.local` — fill in `GEMINI_API_KEY` (free tier,

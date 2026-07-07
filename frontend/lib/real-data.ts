@@ -4,11 +4,17 @@
  * work server-side. The browser never talks to the Casper RPC node directly
  * (CORS, and it would leak the dictionary-key decode logic client-side).
  */
-import type { ChainState, RunLogEntry, ScriptRunResult, ProfileKey } from "./types";
+import type { ChainState, RunLogEntry, ScriptRunResult, ProfileKey, DemoBudget } from "./types";
 
 export async function fetchChainState(): Promise<ChainState> {
   const res = await fetch("/api/chain/state", { cache: "no-store" });
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "No se pudo leer el estado on-chain");
+  return res.json();
+}
+
+export async function fetchDemoBudget(): Promise<DemoBudget | null> {
+  const res = await fetch("/api/demo/budget", { cache: "no-store" });
+  if (!res.ok) return null;
   return res.json();
 }
 
