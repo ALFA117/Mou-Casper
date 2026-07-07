@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Background3D } from "@/components/Background3D";
 import { SiteHeader } from "@/components/dashboard/SiteHeader";
 import { Hero } from "@/components/dashboard/Hero";
@@ -9,6 +10,8 @@ import { ClimaxPanel } from "@/components/dashboard/ClimaxPanel";
 import { AttestationFeed } from "@/components/dashboard/AttestationFeed";
 import { BusyStatusBar } from "@/components/dashboard/BusyStatusBar";
 import { RunItYourself } from "@/components/dashboard/RunItYourself";
+import { GuideHint } from "@/components/dashboard/GuideHint";
+import { TxLink } from "@/components/ui/TxLink";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DemoStep } from "@/components/ui/DemoStep";
@@ -51,6 +54,31 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
   // dejarlos fallar con un error confuso.
   const actionsDisabled = readOnly || busyAction !== null;
 
+  // Modo guia: el siguiente paso no completado del arco para ESTE assetId,
+  // para que un visitante que llega por el tunel sin contexto sepa por donde
+  // empezar. Desaparece solo cuando ese paso ya corrio, no hay que cerrarlo.
+  const suggestedStep = useMemo<"02" | "03" | "04" | null>(() => {
+    if (readOnly) return null;
+    const bothUnderwritersRun = (["underwriter_A", "underwriter_B"] as const).every(wallet =>
+      runLog.some(e => e.type === "underwriter" && e.assetId === assetId && e.walletName === wallet)
+    );
+    if (!bothUnderwritersRun) return "02";
+    if (!runLog.some(e => e.type === "investor_buy")) return "03";
+    if (!runLog.some(e => e.type === "default_chain" && e.assetId === assetId)) return "04";
+    return null;
+  }, [runLog, assetId, readOnly]);
+
+  const guideHintText =
+    suggestedStep === "02"
+      ? t("guide.hint.underwriters")
+      : suggestedStep === "03"
+        ? t("guide.hint.vault")
+        : suggestedStep === "04"
+          ? t("guide.hint.climax")
+          : null;
+  const guideHintTarget =
+    suggestedStep === "02" ? "underwriting" : suggestedStep === "03" ? "vault" : suggestedStep === "04" ? "climax" : null;
+
   return (
     <>
       <Background3D event={bgEvent} />
@@ -70,6 +98,12 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               <RevealOnMount index={0}>
                 <Hero />
               </RevealOnMount>
+
+              {guideHintText && guideHintTarget && !actionsDisabled && (
+                <RevealOnMount index={0}>
+                  <GuideHint text={guideHintText} targetId={guideHintTarget} />
+                </RevealOnMount>
+              )}
 
               {chainStateError && (
                 <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger-glow">
@@ -119,7 +153,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               </RevealOnMount>
 
               <RevealOnMount index={2}>
-                <DemoStep n="02" tone="senior" targetId="underwriting">
+                <DemoStep n="02" tone="senior" targetId="underwriting" suggested={suggestedStep === "02"}>
                   <UnderwritingArena
                     assetId={assetId}
                     chainState={chainState}
@@ -134,7 +168,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               </RevealOnMount>
 
               <RevealOnMount index={3}>
-                <DemoStep n="03" tone="brand" targetId="vault">
+                <DemoStep n="03" tone="brand" targetId="vault" suggested={suggestedStep === "03"}>
                   <TrancheVaultPanel
                     chainState={chainState}
                     runLog={runLog}
@@ -148,7 +182,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               </RevealOnMount>
 
               <RevealOnMount index={4}>
-                <DemoStep n="04" tone="danger" targetId="climax" last>
+                <DemoStep n="04" tone="danger" targetId="climax" last suggested={suggestedStep === "04"}>
                   <ClimaxPanel
                     assetId={assetId}
                     runLog={runLog}
@@ -186,6 +220,11 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               >
                 <div className="font-medium">{entry.label}</div>
                 <div className="text-foreground-faint">{entry.detail}</div>
+                {entry.hash && (
+                  <div className="mt-1">
+                    <TxLink hash={entry.hash} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -13,3 +13,5 @@ keys/
 .DS_Store
 *.log
 *.tsbuildinfo
+
+.vercel

@@ -119,5 +119,21 @@
     "hash": "4c3876da1948db772b4b7f4282cd54d68ae5c7b0550cf727c941a49d6e472155",
     "success": true,
     "loggedAt": "2026-07-07T05:14:01.787Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 5,
+    "hash": "4faf571969e10da633165825356c98d93b7b5a0e2606cacf7ebf4bf7782c9548",
+    "success": true,
+    "loggedAt": "2026-07-07T05:35:52.049Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 5,
+    "hash": "798dbee74aeffa4d883f634829eb03de4ebd09ed96a4b8dde63d17e7939fbd5a",
+    "success": true,
+    "loggedAt": "2026-07-07T05:39:19.891Z"
   }
 ]

@@ -31,12 +31,14 @@ export function DemoStep({
   n,
   tone,
   last,
+  suggested,
   targetId,
   children,
 }: {
   n: string;
   tone: Tone;
   last?: boolean;
+  suggested?: boolean;
   targetId: string;
   children: ReactNode;
 }) {
@@ -51,7 +53,8 @@ export function DemoStep({
         aria-label={t("nav.goToSection", { n })}
         className={cn(
           "absolute left-0 top-0 hidden size-8 items-center justify-center rounded-full border bg-background font-mono text-[11px] font-semibold tabular-nums transition-transform duration-150 hover:scale-110 lg:flex",
-          badgeTone[tone]
+          badgeTone[tone],
+          suggested && "animate-pulse ring-2 ring-brand/60 ring-offset-2 ring-offset-background"
         )}
       >
         {n}

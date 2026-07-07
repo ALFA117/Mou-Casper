@@ -56,7 +56,7 @@ export const dictionary = {
     "underwriter.quotedSpread": "Quoted spread",
     "underwriter.feedPd": "Feed PD",
     "underwriter.marketSpread": "Market spread",
-    "underwriter.noRunsYet": "No runs yet for this asset.",
+    "underwriter.noRunsYet": "Run this agent to see it quote live.",
     "underwriter.stakeLabel": "Stake in UnderwriterStake (live)",
     "underwriter.stakeTooltip":
       "CSPR this agent locked in the UnderwriterStake contract as collateral behind its own risk call. It only gets this back if the asset performs — if it defaults and this agent mispriced it, slashing seizes part of it.",
@@ -109,7 +109,7 @@ export const dictionary = {
 
     "feed.title": "On-chain attestation feed",
     "feed.description": "Rebuilt from agents/run-log.json — every entry is a real transaction confirmed on CSPR.live.",
-    "feed.empty": "No on-chain activity yet.",
+    "feed.empty": "No on-chain activity yet — trigger an action above to see it appear here.",
     "feed.x402Settled": "x402 payment settled",
     "feed.x402Detail": "Risk data for {{assetId}}",
     "feed.quoteIssued": "Quote issued: {{rating}}/1000",
@@ -167,6 +167,10 @@ export const dictionary = {
     "runItYourself.repoLink": "GitHub repo",
     "runItYourself.faucetLink": "Casper testnet faucet",
     "runItYourself.contractsTitle": "Deployed contracts (Casper Testnet)",
+
+    "guide.hint.underwriters": "Start here: run Underwriter A to see it quote live",
+    "guide.hint.vault": "Now: buy into the senior or junior tranche as the investor",
+    "guide.hint.climax": "Finally: mark the default and watch the slash happen live",
   },
   es: {
     "header.tagline": "Mesa de titularización autónoma para la economía de agentes",
@@ -215,7 +219,7 @@ export const dictionary = {
     "underwriter.quotedSpread": "Spread cotizado",
     "underwriter.feedPd": "PD del feed",
     "underwriter.marketSpread": "Spread del mercado",
-    "underwriter.noRunsYet": "Sin corridas todavía para este activo.",
+    "underwriter.noRunsYet": "Corre este agente para verlo cotizar en vivo.",
     "underwriter.stakeLabel": "Stake en UnderwriterStake (en vivo)",
     "underwriter.stakeTooltip":
       "CSPR que este agente bloqueó en el contrato UnderwriterStake como colateral detrás de su propia cotización de riesgo. Solo lo recupera si el activo se comporta bien — si cae en default y este agente se equivocó, el slashing le confisca una parte.",
@@ -268,7 +272,7 @@ export const dictionary = {
 
     "feed.title": "Feed de atestaciones on-chain",
     "feed.description": "Reconstruido de agents/run-log.json — cada entrada es una transacción real confirmada en CSPR.live.",
-    "feed.empty": "Sin actividad on-chain todavía.",
+    "feed.empty": "Sin actividad on-chain todavía — dispara una acción arriba para verla aquí.",
     "feed.x402Settled": "Pago x402 liquidado",
     "feed.x402Detail": "Datos de riesgo para {{assetId}}",
     "feed.quoteIssued": "Cotización emitida: {{rating}}/1000",
@@ -330,6 +334,10 @@ export const dictionary = {
     "runItYourself.repoLink": "Repo en GitHub",
     "runItYourself.faucetLink": "Faucet de Casper testnet",
     "runItYourself.contractsTitle": "Contratos deployados (Casper Testnet)",
+
+    "guide.hint.underwriters": "Empieza aquí: corre Underwriter A para verlo cotizar en vivo",
+    "guide.hint.vault": "Ahora: compra el tramo senior o junior como investor",
+    "guide.hint.climax": "Por último: marca el default y mira el slash en vivo",
   },
 } as const;
 

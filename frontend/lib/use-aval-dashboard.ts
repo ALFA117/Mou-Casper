@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent, DemoBudget } from "./types";
+import { getPrimaryHash } from "./types";
 import {
   fetchChainState,
   fetchRunLog,
@@ -22,7 +23,7 @@ export interface AvalDashboardState {
   chainStateError: string | null;
   busyAction: string | null; // qué botón está corriendo ahora mismo, o null
   busyActionStartedAt: number | null;
-  lastActionLog: { label: string; ok: boolean; detail: string }[];
+  lastActionLog: { label: string; ok: boolean; detail: string; hash: string | null }[];
   bgEvent: BackgroundEvent | null;
   demoBudget: DemoBudget | null;
 }
@@ -36,7 +37,9 @@ export function useAvalDashboard() {
   const [chainStateError, setChainStateError] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [busyActionStartedAt, setBusyActionStartedAt] = useState<number | null>(null);
-  const [lastActionLog, setLastActionLog] = useState<{ label: string; ok: boolean; detail: string }[]>([]);
+  const [lastActionLog, setLastActionLog] = useState<
+    { label: string; ok: boolean; detail: string; hash: string | null }[]
+  >([]);
   const [bgEvent, setBgEvent] = useState<BackgroundEvent | null>(null);
   const [demoBudget, setDemoBudget] = useState<DemoBudget | null>(null);
   const bgEventIdRef = useRef(0);
@@ -67,15 +70,15 @@ export function useAvalDashboard() {
     refresh();
   }, [refresh]);
 
-  const pushLog = useCallback((label: string, ok: boolean, detail: string) => {
-    setLastActionLog(prev => [{ label, ok, detail }, ...prev].slice(0, 20));
+  const pushLog = useCallback((label: string, ok: boolean, detail: string, hash: string | null = null) => {
+    setLastActionLog(prev => [{ label, ok, detail, hash }, ...prev].slice(0, 20));
   }, []);
 
   const runAction = useCallback(
     async (
       key: string,
       label: string,
-      fn: () => Promise<{ exitCode: number; stdout: string }>,
+      fn: () => Promise<{ exitCode: number; stdout: string; newLogEntries?: RunLogEntry[] }>,
       onSuccess?: () => void
     ) => {
       if (busyAction) return;
@@ -84,7 +87,9 @@ export function useAvalDashboard() {
       try {
         const result = await fn();
         const ok = result.exitCode === 0;
-        pushLog(label, ok, ok ? t("action.success") : t("action.checkConsole"));
+        const lastEntry = result.newLogEntries?.[result.newLogEntries.length - 1];
+        const hash = ok && lastEntry ? getPrimaryHash(lastEntry) : null;
+        pushLog(label, ok, ok ? t("action.success") : t("action.checkConsole"), hash);
         if (ok) onSuccess?.();
       } catch (err) {
         pushLog(label, false, err instanceof Error ? err.message : t("action.unknownError"));

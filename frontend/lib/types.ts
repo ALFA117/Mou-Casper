@@ -102,6 +102,22 @@ export interface ScriptRunResult {
   newLogEntries: RunLogEntry[];
 }
 
+// El hash "cabecera" de cada tipo de entrada -- el que mas vale la pena poner
+// a un clic en el toast de exito (ver lib/use-aval-dashboard.ts). Para
+// default_chain es el slash (el evento dramatico), no el ultimo cronologico.
+export function getPrimaryHash(entry: RunLogEntry): string | null {
+  switch (entry.type) {
+    case "underwriter":
+      return entry.hashes.attest;
+    case "investor_buy":
+      return entry.hash;
+    case "constitution_test":
+      return entry.hash;
+    case "default_chain":
+      return entry.hashes.slash;
+  }
+}
+
 // Disparado por acciones reales ya confirmadas (nunca simulado) para que
 // Background3D pueda reaccionar — ver lib/use-aval-dashboard.ts.
 export interface BackgroundEvent {
