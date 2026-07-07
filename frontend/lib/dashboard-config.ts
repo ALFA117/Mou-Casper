@@ -51,8 +51,26 @@ const DEMO_RUN_WAIT_STAGES: { atSeconds: number; key: TranslationKey }[] = [
   { atSeconds: 360, key: "wait.demo.360" },
 ];
 
+// underwriter_A / underwriter_B pasan por Gemini (agents/underwriter-agent.mjs).
+// El backend no hace streaming de su stdout (spawn bloqueante, ver
+// lib/server/run-script.ts), asi que estas etapas son honestas sobre lo que
+// PUEDE estar pasando durante los tramos de espera mas largos -- reflejan la
+// ventana real de reintentos (5/15/30/60s, hasta 5 intentos) y de fallback en
+// vez de dejar la barra en silencio si Gemini esta saturado.
+const UNDERWRITER_WAIT_STAGES: { atSeconds: number; key: TranslationKey }[] = [
+  { atSeconds: 0, key: "wait.underwriter.0" },
+  { atSeconds: 45, key: "wait.underwriter.45" },
+  { atSeconds: 130, key: "wait.underwriter.130" },
+  { atSeconds: 170, key: "wait.underwriter.170" },
+];
+
 export function getWaitingMessageKey(actionKey: string, elapsedSeconds: number): TranslationKey {
-  const stages = actionKey === "demo_run" ? DEMO_RUN_WAIT_STAGES : SINGLE_ACTION_WAIT_STAGES;
+  const stages =
+    actionKey === "demo_run"
+      ? DEMO_RUN_WAIT_STAGES
+      : actionKey === "underwriter_A" || actionKey === "underwriter_B"
+        ? UNDERWRITER_WAIT_STAGES
+        : SINGLE_ACTION_WAIT_STAGES;
   let current = stages[0].key;
   for (const stage of stages) {
     if (elapsedSeconds >= stage.atSeconds) current = stage.key;

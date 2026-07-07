@@ -31,9 +31,16 @@ export const CHAIN_NAME = 'casper-test';
 export const KEYS_DIR = path.join(__dirname, '..', 'keys');
 export const PROXY_CALLER_WASM_PATH = path.join(__dirname, '..', 'scripts', 'wasm-tools', 'proxy_caller_with_return.wasm');
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// gemini-2.0-flash quedo con cuota 0 en el tier gratuito (probado 2026-07-05);
-// gemini-2.5-flash confirmado funcional con la key actual.
+// Modelos de Gemini (tier gratuito). Cuota verificada con una llamada barata
+// (agents/test-gemini-key.js) el 2026-07-07 con la key actual de esta cuenta:
+//   - gemini-2.5-flash        (PRIMARIO)    -> cuota OK
+//   - gemini-2.5-flash-lite   (FALLBACK #1) -> cuota OK
+//   - gemini-2.0-flash-lite   (FALLBACK #2) -> cuota 0 (HTTP 429 en la prueba),
+//     se deja como ultimo recurso por si la cuota se libera despues.
+// gemini-2.0-flash (sin "-lite") quedo con cuota 0 en el tier gratuito
+// (probado 2026-07-05) y no se usa en absoluto.
 const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_FALLBACK_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'];
 const X402_RESOURCE_SERVER_URL = process.env.X402_RESOURCE_SERVER_URL || 'http://localhost:4021';
 
 const REPUTATION_PACKAGE_HASH = process.env.REPUTATION_CONTRACT_HASH;
@@ -134,12 +141,21 @@ const GEMINI_RESPONSE_SCHEMA = {
   required: ['rating', 'recommended_tranche', 'price_bps', 'short_reasoning', 'extended_reasoning']
 };
 
-async function callGeminiWithRetry(prompt, maxRetries = 4) {
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY no configurada en .env');
-  }
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+// Se reintenta ante: 429 (rate limit), 503 (servidor saturado -- el caso real
+// que tumbo una corrida de demo el 2026-07-07 con "high demand") y errores de
+// red (DNS/timeout/conexion resetada, que fetch() de Node lanza como
+// excepcion en vez de devolver una response con status).
+const RETRYABLE_STATUS = new Set([429, 503]);
+const BACKOFF_SECONDS = [5, 15, 30, 60];
+
+function isRetryableNetworkError(err) {
+  return err instanceof TypeError || ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN'].includes(err.code);
+}
+
+async function callGeminiModel(model, prompt, maxAttempts) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
@@ -148,28 +164,40 @@ async function callGeminiWithRetry(prompt, maxRetries = 4) {
     }
   };
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY
-      },
-      body: JSON.stringify(body)
-    });
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      if (attempt === maxAttempts || !isRetryableNetworkError(err)) throw err;
+      const waitSeconds = BACKOFF_SECONDS[attempt - 1] ?? BACKOFF_SECONDS[BACKOFF_SECONDS.length - 1];
+      console.log(`   Gemini saturado (${model}, error de red: ${err.message}) - reintentando en ${waitSeconds}s (intento ${attempt}/${maxAttempts})...`);
+      await sleep(waitSeconds * 1000);
+      continue;
+    }
 
-    if (res.status === 429) {
-      const retryAfterHeader = res.headers.get('retry-after');
-      const waitSeconds = retryAfterHeader ? Number(retryAfterHeader) : Math.min(30, 5 * attempt);
-      console.log(`   Gemini rate limit (429) - reintentando en ${waitSeconds}s (intento ${attempt}/${maxRetries})...`);
-      await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+    if (RETRYABLE_STATUS.has(res.status)) {
+      if (attempt === maxAttempts) {
+        throw new Error(`Gemini API (${model}) error ${res.status} tras agotar los ${maxAttempts} intentos`);
+      }
+      const retryAfterHeader = res.status === 429 ? res.headers.get('retry-after') : null;
+      const waitSeconds = retryAfterHeader ? Number(retryAfterHeader) : (BACKOFF_SECONDS[attempt - 1] ?? BACKOFF_SECONDS[BACKOFF_SECONDS.length - 1]);
+      console.log(`   Gemini saturado (${model}, HTTP ${res.status}) - reintentando en ${waitSeconds}s (intento ${attempt}/${maxAttempts})...`);
+      await sleep(waitSeconds * 1000);
       continue;
     }
 
     if (!res.ok) {
       // No incluir headers de la request en el error (evitar filtrar la API key).
       const errText = await res.text();
-      throw new Error(`Gemini API error ${res.status}: ${errText}`);
+      throw new Error(`Gemini API (${model}) error ${res.status}: ${errText}`);
     }
 
     const data = await res.json();
@@ -177,7 +205,63 @@ async function callGeminiWithRetry(prompt, maxRetries = 4) {
     return JSON.parse(text);
   }
 
-  throw new Error('Gemini API: se agotaron los reintentos por rate limit (429)');
+  throw new Error(`Gemini API (${model}): se agotaron los reintentos`);
+}
+
+// Llamada minima (prompt trivial, sin schema) solo para saber si esta cuenta
+// tiene cuota en `model` antes de gastar tokens del prompt real de underwriting.
+async function probeModelQuota(model) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY
+      },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'OK' }] }] })
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// La ruta run-underwriter tiene maxDuration=300s (limite del plan Hobby de
+// Vercel, ver commit 922ffc1) y register/stake/attest tambien consumen ese
+// presupuesto de tiempo. El primario usa el retry completo pedido (hasta 5
+// intentos, backoff 5/15/30/60s -> ~110s en el peor caso); los fallbacks usan
+// un presupuesto mas corto porque ese tiempo ya se gasto en el primario.
+const PRIMARY_MAX_ATTEMPTS = 5;
+const FALLBACK_MAX_ATTEMPTS = 2;
+
+export async function callGeminiWithRetry(prompt) {
+  if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY no configurada en .env');
+  }
+
+  try {
+    return await callGeminiModel(GEMINI_MODEL, prompt, PRIMARY_MAX_ATTEMPTS);
+  } catch (primaryError) {
+    console.log(`   Gemini (${GEMINI_MODEL}) no disponible tras ${PRIMARY_MAX_ATTEMPTS} intentos (${primaryError.message}). Probando modelos de fallback...`);
+
+    for (const fallbackModel of GEMINI_FALLBACK_MODELS) {
+      console.log(`   Verificando cuota de ${fallbackModel} con una llamada barata...`);
+      const hasQuota = await probeModelQuota(fallbackModel);
+      if (!hasQuota) {
+        console.log(`   ${fallbackModel} sin cuota disponible en esta cuenta, probando siguiente...`);
+        continue;
+      }
+      console.log(`   Cuota OK en ${fallbackModel} - usandolo como fallback (mismo JSON schema, transparente para el resto del flujo).`);
+      try {
+        return await callGeminiModel(fallbackModel, prompt, FALLBACK_MAX_ATTEMPTS);
+      } catch (fallbackError) {
+        console.log(`   Fallback ${fallbackModel} tambien fallo (${fallbackError.message}), probando siguiente...`);
+      }
+    }
+
+    throw new Error(`Gemini no disponible: primario ${GEMINI_MODEL} y todos los fallbacks (${GEMINI_FALLBACK_MODELS.join(', ')}) fallaron. Ultimo error del primario: ${primaryError.message}`);
+  }
 }
 
 export async function quoteWithGemini(assetId, riskData, profileKey) {
@@ -313,7 +397,29 @@ export async function runUnderwriterLoop({ walletName, assetId, stakeAmountCspr,
   }
 
   console.log(`\n2) Cotizando con Gemini (perfil ${profileKey}, LLM real, tier gratuito)...`);
-  const quote = await quoteWithGemini(assetId, riskData, profileKey);
+  let quote;
+  try {
+    quote = await quoteWithGemini(assetId, riskData, profileKey);
+  } catch (err) {
+    // El pago x402 del paso 1 ya se ejecuto -- riskData es insumo del prompt
+    // de Gemini, asi que el orden pago-antes-que-LLM no se puede invertir sin
+    // romper el flujo. Si Gemini sigue caido tras agotar reintentos + los dos
+    // fallbacks, el CSPR de ese pago x402 ya se gasto y NO hay reembolso
+    // automatico. Se deja constancia en el run log (en vez de perderse en un
+    // stacktrace) para que quede visible en el dashboard/historial.
+    appendRunLog({
+      type: 'underwriter_failed_after_payment',
+      walletName,
+      assetId,
+      profileKey,
+      stakeAmountCspr,
+      riskData,
+      hashes: { x402: paymentResponse?.transaction || null },
+      error: err.message,
+      success: false
+    });
+    throw new Error(`Gemini fallo tras agotar reintentos y fallbacks; el pago x402 de este run (deploy ${paymentResponse?.transaction || 'N/A'}) ya se ejecuto y no se reembolsa automaticamente. Detalle: ${err.message}`);
+  }
   console.log('   Cotizacion del LLM:', JSON.stringify(quote, null, 2));
 
   const reasoningHash = crypto.createHash('sha256').update(quote.extended_reasoning).digest('hex');
