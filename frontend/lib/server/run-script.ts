@@ -1,9 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
-
-const AGENTS_DIR = path.join(process.cwd(), "..", "agents");
-const RUN_LOG_PATH = path.join(AGENTS_DIR, "run-log.json");
+import { AGENTS_DIR, RUN_LOG_PATH } from "@/lib/server/agents-paths";
 
 export interface ScriptRunResult {
   exitCode: number;

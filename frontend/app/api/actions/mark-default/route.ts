@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
-import path from "path";
 import { runAgentScript } from "@/lib/server/run-script";
 import { reserveActionSlot, releaseActionSlot } from "@/lib/server/demo-guard";
+import { RUN_LOG_PATH } from "@/lib/server/agents-paths";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-
-const RUN_LOG_PATH = path.join(process.cwd(), "..", "agents", "run-log.json");
 
 function readRunLog(): any[] {
   try {
