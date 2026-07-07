@@ -60,7 +60,10 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
   // reciba un fallo, no despues.
   const demoRunBlockedPublic = demoBudget ? !demoBudget.demoRunEnabled : false;
   const demoRunDisabled = actionsDisabled || demoRunBlockedPublic;
-  const demoRunTooltip = demoRunBlockedPublic ? t("step1.disabledPublicTooltip") : readOnlyTooltip;
+  // readOnly (Vercel) es la razon mas fundamental -- si aplica, su tooltip
+  // gana sobre el del bloqueo por tunel aunque demoBudget tambien diga
+  // bloqueado (Vercel tambien resuelve isPublic=true por su propio Host).
+  const demoRunTooltip = readOnly ? readOnlyTooltip : demoRunBlockedPublic ? t("step1.disabledPublicTooltip") : undefined;
 
   // Modo guia: el siguiente paso no completado del arco para ESTE assetId,
   // para que un visitante que llega por el tunel sin contexto sepa por donde
