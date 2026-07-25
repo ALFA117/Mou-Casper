@@ -678,12 +678,38 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
 
 ## Pendientes — Fase D: Cierre
 
-- [ ] **Paso 14 — EN CURSO:** dry run completo de la demo con tx reales, de principio a fin.
-      Facilitator (`:4022`), resource server (`:4021`) y dev server (`:3000`) confirmados arriba.
-      Guion de grabación bilingüe (EN/ES) entregado con costo estimado por wallet y balance
-      real leído on-chain (bottleneck: wallet `investor`, ~1 toma limpia de margen). **Falta:** que
-      el usuario corra el dry run real con `invoice-batch-003` y confirmar que nada truena antes
-      de la toma final.
+- [ ] **Paso 14 — EN CURSO (bloqueado por bug externo):** dry run completo de la demo con tx
+      reales, de principio a fin. Facilitator (`:4022`), resource server (`:4021`) y dev server
+      (`:3000`) confirmados arriba. Guion de grabación bilingüe (EN/ES) entregado con costo
+      estimado por wallet y balance real leído on-chain.
+      **Corrida real del 2026-07-25:** se descubrió que `invoice-batch-003` (el activo del guion)
+      no está registrado en `RISK_FEEDS` de `x402-service/server.ts` — solo existen
+      `invoice-batch-001` e `invoice-batch-002`. Se corrió `agents/demo-run.mjs invoice-batch-002`
+      en su lugar (Edgar confirmó usar ese activo). Resultado real en testnet:
+        - Underwriter A y B: register/stake/attest — 6 deploys, todos `SUCCESS`.
+        - Investor: `buy_senior` + `buy_junior` — `SUCCESS`.
+        - Constitution: prueba de reversión por límite de exposición — `SUCCESS` (revirtió como
+          se esperaba).
+        - **Pago x402 (datos de riesgo) — FALLA:** `invalid_exact_casper_facilitator_settle_failed`,
+          `transaction execution failed: User error: 64658` en la llamada `transfer_with_authorization`
+          del contrato WCSPR compartido de testnet (`ASSET_PACKAGE` en `x402-service/.env`).
+          Investigado a fondo sin gastar más CSPR: **no es balance** (underwriter_A tiene 6.0
+          WCSPR, underwriter_B 9.0 WCSPR, se necesitan 0.5 c/u), **no es nonce/ventana de tiempo**
+          (aleatorio y con margen amplio en `@make-software/casper-x402`), **no es mismatch de
+          versión** (tanto cliente como facilitator usan el *package hash*, que resuelve solo a la
+          versión activa — confirmado que el contrato WCSPR está en su v8, con v1-v7
+          deshabilitadas, pero eso no es la causa ya que nada apunta a un hash de versión vieja).
+          Queda como un revert genuino dentro del contrato WCSPR externo (no hay código fuente
+          Rust de ese contrato en este repo para decodificar el 64658). **Efecto en cascada:** al
+          llegar `riskData: {}` vacío, el paso de slashing calculaba `NaN` bps y reventaba feo con
+          un error de `BigNumber` al construir el argumento on-chain — **arreglado y commiteado**
+          (`24fde6f`, `agents/servicer-agent.mjs`): `runDefaultChain` ahora valida
+          `marketRecommendedSpreadBps`/`bQuotedSpreadBps` al inicio y falla limpio, sin llegar a
+          tocar la blockchain, si el feed de riesgo no llegó.
+      **Falta:** confirmar con el organizador (Telegram) si el 64658 es un problema conocido del
+      contrato WCSPR compartido (ver tarea humana abajo), y luego re-correr el dry run completo
+      (con `invoice-batch-002` o, si se registra antes, `invoice-batch-003`) para llegar hasta el
+      final sin bloqueos antes de la toma del video.
 - [ ] **Paso 15:** README final (arquitectura, tabla de contratos con links, cómo correr todo,
       walkthrough, plan a largo plazo) + reporte de sesión. Después: correr
       `Mou-Casper-Fase2-Auditoria.md` completo.
@@ -712,6 +738,14 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
       va en `.env` (ya gitignored).
 - [ ] Confirmar con el organizador (Telegram) el mecanismo de uso patrocinado de x402 para el
       equipo (Paso 6.2).
+- [ ] **Confirmar con el organizador (Telegram) el error `User error: 64658` al liquidar pagos
+      x402 contra el contrato WCSPR compartido de testnet** (ver Paso 14) — bloquea el dry run
+      final; podría ser un problema conocido si el contrato fue actualizado recientemente (está en
+      su v8).
 - [ ] **Borrar la `GEMINI_API_KEY` actual en AI Studio y crear una nueva al terminar el
       buildathon** — quedó pegada en la conversación con la IA (higiene, no hay riesgo real ya
-      que el tier gratuito no tiene tarjeta asociada, pero es buena práctica).
+      que el tier gratuito no tiene tarjeta asociada, pero es buena práctica). Verificado
+      2026-07-25: la key actual sigue viva y con cuota en `gemini-2.5-flash`/`gemini-2.5-flash-lite`
+      (los modelos que realmente usa `underwriter-agent.mjs`); solo `gemini-2.0-flash`/`-lite`
+      están en 429 cuota-0, pero no bloquean nada. No urge rotarla para el cierre, sigue pendiente
+      por higiene.
