@@ -708,10 +708,21 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
           tocar la blockchain, si el feed de riesgo no llegó.
       **Confirmado con el organizador (Telegram, 2026-07-25):** el `User error: 64658` es un
       problema conocido del contrato WCSPR compartido de testnet, ya lo están arreglando del lado
-      del organizador — no es nada que arreglar de nuestro lado. **Falta:** esperar a que quede
-      resuelto y volver a correr el dry run completo (con `invoice-batch-002` o, si se registra
-      antes, `invoice-batch-003`) para llegar hasta el final sin bloqueos antes de la toma del
-      video.
+      del organizador — no es nada que arreglar de nuestro lado.
+      **Re-verificado dos veces más el mismo día tras avisos del organizador de "ya quedó":**
+      sondeo automático corrido en background durante >2h (13 intentos con
+      `scripts/check-x402-settle.mjs`, cada ~10min) — **sin cambio, mismo `User error: 64658`
+      siempre.** Además, se corrió el `demo:run` completo **tres veces** en total ese día
+      (incluyendo una tercera vez a pedido explícito después de que el organizador insistiera que
+      ya estaba arreglado) — las tres con resultado idéntico: register/stake/attest × 2, compra de
+      tramos, y la reversión de Constitution en `SUCCESS`; el pago x402 siempre falla igual; el
+      guard de `24fde6f` sigue conteniendo el crash de `NaN` correctamente cada vez. **Costo real
+      acumulado de estas corridas de prueba: ~450+ CSPR brutos entre las tres** (gas de
+      register/stake/attest/compra de tramos/prueba de exposición, no recuperable aunque el pago
+      x402 en sí nunca se liquidó). **Falta:** que el organizador confirme con evidencia real (no
+      solo "ya quedó") que el fix está desplegado, y usar `scripts/check-x402-settle.mjs` para
+      verificar barato ANTES de volver a correr el `demo:run` completo — no vale la pena seguir
+      gastando CSPR en corridas completas hasta tener esa confirmación.
 - [ ] **Paso 15 — en curso:** README final (arquitectura, tabla de contratos con links, cómo
       correr todo, walkthrough, plan a largo plazo) — **hecho**, `README.md` actualizado (commit
       `17db9ae`). Reporte de sesión — **hecho**, [`REPORTE-SESION.md`](./REPORTE-SESION.md).

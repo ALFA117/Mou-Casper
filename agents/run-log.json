@@ -339,5 +339,69 @@
     "hash": "f9e8a2be7969aa5fb882c2d3efba8eb1d7cd1a8a352c06a412e240b84dcaf48d",
     "success": true,
     "loggedAt": "2026-07-25T10:09:12.952Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_A",
+    "assetId": "invoice-batch-002",
+    "profileKey": "conservative",
+    "stakeAmountCspr": 15,
+    "riskData": {},
+    "quote": {
+      "rating": 150,
+      "recommended_tranche": "senior",
+      "price_bps": 1500,
+      "short_reasoning": "No risk data provided for invoice-batch-002. Default probability unknown. Rating reflects extreme uncertainty and high tail risk. Conservative pricing mitigates information asymmetry. Investor capital protection is paramount.",
+      "extended_reasoning": "La ausencia total de datos de riesgo para 'invoice-batch-002' hace imposible una evaluacion cuantitativa precisa. Como underwriter conservador, la falta de informacion verificable se interpreta como el escenario de mayor riesgo, ya que no se pueden descartar factores adversos. Por ello, se ha asignado un rating muy bajo y se ha exigido un spread de suscripcion excepcionalmente alto (1500 bps) para compensar la incertidumbre radical. Aunque se recomienda el tramo senior, esta recomendacion se basa unicamente en la estructura de prelacion de pagos, y no en una evaluacion de la calidad crediticia subyacente. Los inversionistas deben ser plenamente conscientes de que la inversion en este batch conlleva un riesgo de capital extremadamente alto debido a la completa falta de transparencia sobre el perfil de riesgo de las facturas subyacentes. Nuestra prioridad es proteger el capital del inversor ante cualquier costo, incluso si eso significa no cerrar la operacion por la falta de datos."
+    },
+    "reasoningHash": "74cad1718bf45319005354a80bc6e5ab72b1a74a76f3d4523411b2ad6f647a29",
+    "hashes": {
+      "x402": null,
+      "register": "5b16ea92d272cea126ae6d0d31bab55be5f13fe251105f07d778b43cd2a50e9f",
+      "stake": "77f5b3dafd1b84b47ddc4f6d9d228ed3d32608478f0944bc1806a98d165bb6f4",
+      "attest": "661d6a16d737ca3a00c7ec9193ed1f327bdeb3629f25ce7b3de4bc1177cf8f85"
+    },
+    "success": true,
+    "loggedAt": "2026-07-25T18:39:49.733Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_B",
+    "assetId": "invoice-batch-002",
+    "profileKey": "aggressive",
+    "stakeAmountCspr": 20,
+    "riskData": {},
+    "quote": {
+      "rating": 920,
+      "recommended_tranche": "junior",
+      "price_bps": 110,
+      "short_reasoning": "Invoices evaluated as strong short-term assets. Market risk perception for similar instruments is typically inflated. Our assessment, reflecting no negative signals and an optimistic view, supports a high rating and competitive pricing. The junior tranche offers superior yield potential balanced by perceived low default risk. This strategy aims to secure market share and maximize investor returns through aggressive yet calculated underwriting, leveraging the inherent stability of corporate re...",
+      "extended_reasoning": "El analisis de este batch de facturas, denominado 'invoice-batch-002', se ha realizado bajo una perspectiva optimista y agresiva, coherente con la estrategia de AVAL de maximizar el rendimiento y la cuota de mercado. A pesar de que los datos de riesgo provistos por x402 estaban vacios, nuestra postura es que la ausencia de señales negativas explicitas, en combinacion con la naturaleza intrinsecamente de bajo riesgo de las facturas corporativas a corto plazo, justifica una evaluacion favorable. Consideramos que el mercado en general tiende a sobrestimar el riesgo de estos activos, y por tanto, nuestra valoracion no añade colchones adicionales sino que interpreta la situacion con confianza. El rating de 920 refleja una muy baja percepcion de riesgo de impago, ubicando estas facturas entre los activos de mayor calidad para los objetivos de AVAL. La recomendacion del tramo 'junior' se fundamenta en la busqueda de un mayor rendimiento (yield) para los inversores. Dada la solidez percibida del activo y nuestro optimismo inherente, creemos que el riesgo adicional asumido en el tramo junior es mas que compensado por el potencial de ganancias superiores. El spread de suscripcion sugerido de 110 basis points es deliberadamente bajo y competitivo. Esto se alinea con nuestra meta de atraer volumen de negocio y superar a competidores mas cautelosos, ofreciendo condiciones de financiacion altamente atractivas para los originadores de facturas. Este precio agresivo esta respaldado por nuestra conviccion de que el riesgo real es significativamente menor que la percepcion general del mercado. En resumen, la cotizacion para 'invoice-batch-002' es una manifestacion directa de nuestra politica de underwriting agresiva y optimista, diseñada para liderar el mercado en terminos de competitividad y rendimiento."
+    },
+    "reasoningHash": "2414136106fd8b3fee9954803bb1db1d993f100fd9a5d03774a27ec54477eb99",
+    "hashes": {
+      "x402": null,
+      "register": "b0f4f0ef54f4dbb497f8976adff2d56fa1b3dc37b660d7fc5cb898bdec78a05f",
+      "stake": "910fbb0d47ef551b748a07ac885514a50e0f8f12f7c23e7231905e4c407fce2f",
+      "attest": "ead36c2ad261b79187ac5615ba03b2cc4c69ad768c5fc73e2fcfdbe2fbf3f77c"
+    },
+    "success": true,
+    "loggedAt": "2026-07-25T18:40:29.871Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 15,
+    "hash": "4d548f9deac3919744bc8811940c5b7db0046de6f7d3625d377912cdea30aac3",
+    "success": true,
+    "loggedAt": "2026-07-25T18:40:38.276Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_junior",
+    "amountCspr": 10,
+    "hash": "f39e754c9d176188d8ed981475bca4d90a6c57a2a87c96b63ead5ead7c2362da",
+    "success": true,
+    "loggedAt": "2026-07-25T18:40:46.080Z"
   }
 ]
