@@ -99,6 +99,16 @@ export async function runDefaultChain({
   startingScore = 500,
   rewardPoints = 50
 }) {
+  if (!Number.isFinite(marketRecommendedSpreadBps) || marketRecommendedSpreadBps === 0) {
+    throw new Error(
+      `runDefaultChain: marketRecommendedSpreadBps invalido (${marketRecommendedSpreadBps}) -- ` +
+      'probablemente el feed de riesgo x402 no llego (revisar riskData del underwriter B antes de marcar el default).'
+    );
+  }
+  if (!Number.isFinite(bQuotedSpreadBps)) {
+    throw new Error(`runDefaultChain: bQuotedSpreadBps invalido (${bQuotedSpreadBps}).`);
+  }
+
   const slashBps = Math.round(((marketRecommendedSpreadBps - bQuotedSpreadBps) / marketRecommendedSpreadBps) * 10000);
   const penalizePoints = Math.round((slashBps / 10000) * 1000);
 

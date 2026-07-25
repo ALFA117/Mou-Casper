@@ -211,5 +211,69 @@
     "hash": "eeab5d843d0873f9b688db8516318c6414b0531687554372ee76fd80a1a56390",
     "success": true,
     "loggedAt": "2026-07-07T16:34:44.698Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_A",
+    "assetId": "invoice-batch-002",
+    "profileKey": "conservative",
+    "stakeAmountCspr": 15,
+    "riskData": {},
+    "quote": {
+      "rating": 50,
+      "recommended_tranche": "senior",
+      "price_bps": 750,
+      "short_reasoning": "No se recibieron datos de riesgo via x402 para este lote de facturas. Como underwriter conservador, la ausencia total de informacion nos obliga a asumir un riesgo maximo y una incertidumbre extrema. La prioridad absoluta es proteger el capital de los inversores. Por ello, el rating es bajo y el spread exigido es elevado, para compensar la opacidad del activo y el riesgo implicito. Se aplica un colchon de seguridad sustancial para el tramo senior.",
+      "extended_reasoning": "Como underwriter conservador de AVAL, la ausencia completa de datos de riesgo provistos por el feed x402 para el activo 'invoice-batch-002' es un factor crítico. Nuestra política prioriza la protección del capital del inversor por encima de cualquier otro objetivo. Sin información alguna sobre la calidad crediticia subyacente de las facturas, la diversificación, el historial de pagos de los deudores o cualquier otro indicador de riesgo, nos vemos forzados a operar bajo la hipótesis de un riesgo máximo y una opacidad total. Esta postura conservadora se traduce en un rating muy bajo (50/1000), reflejando la extrema incertidumbre y el riesgo potencial no cuantificable. Aunque se recomienda el tramo 'senior' para alinearse con nuestra preferencia, el precio sugerido (750 bps) es considerablemente alto. Este spread está diseñado para ofrecer una compensación muy generosa al inversor por asumir un riesgo que no puede ser evaluado de manera precisa debido a la falta de datos. Representa el costo de un 'colchón de seguridad' muy robusto, necesario para proteger contra posibles defaults no previstos y el 'tail risk' que a menudo se subestima en mercados más transparentes. La decisión es consistente con la directriz de preferir perder una operación competitiva a quedar mal cubierto."
+    },
+    "reasoningHash": "d7c8263b71bb88fc92fe55277e12881344528513a71680d2429afa643e189b7a",
+    "hashes": {
+      "x402": null,
+      "register": "a3a8192bb00394bbcc12d06429201c4c1ef668377b81a4b32d0f79165e7f0d7a",
+      "stake": "ca0fd11a68e1f2ec3df312e5968e47e523e83e7a1b1e1647caed02a2a0ae1694",
+      "attest": "86b90a19530ce5783883336da0ccb0f2aec09184018cc8afceeb474493a92f71"
+    },
+    "success": true,
+    "loggedAt": "2026-07-25T09:14:33.265Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_B",
+    "assetId": "invoice-batch-002",
+    "profileKey": "aggressive",
+    "stakeAmountCspr": 20,
+    "riskData": {},
+    "quote": {
+      "rating": 900,
+      "recommended_tranche": "junior",
+      "price_bps": 180,
+      "short_reasoning": "Evaluacion optimista de invoice-batch-002. Fuerte confianza en la calidad del activo y la resiliencia del flujo de caja subyacente. Se prioriza el tramo junior para un rendimiento optimo y se ofrece un spread competitivo para maximizar el volumen. El riesgo real se considera bajo y se estima que el mercado lo sobreestima. La estrategia busca capitalizar esta ineficiencia para ganar cuota de mercado con condiciones atractivas.",
+      "extended_reasoning": "Esta cotización se basa en una interpretación agresiva y optimista del riesgo inherente a este tipo de activos de corto plazo. A pesar de la ausencia de datos de riesgo específicos externos (indicados por el objeto vacío en los datos de x402), nuestra política de underwriting asume que los feeds de riesgo de terceros suelen sobrestimar el riesgo real de las facturas corporativas. Por lo tanto, hemos asignado un rating elevado de 900, reflejando una alta confianza en la solidez crediticia subyacente del batch de facturas 'invoice-batch-002'. Se recomienda el tramo junior, ya que ofrece un mayor potencial de rendimiento, y nuestro perfil agresivo busca maximizar el yield siempre que el activo lo permita. El spread de suscripción propuesto de 180 basis points es deliberadamente bajo y competitivo, diseñado para atraer y capturar un mayor volumen de negocio, superando a competidores más cautelosos. Confiamos en que la capacidad de repago del originador y los pagadores finales es robusta, y que el riesgo de impago es mínimo, lo que justifica nuestra posición optimista y nuestra apuesta por condiciones de mercado favorables para AVAL."
+    },
+    "reasoningHash": "7d7082091b24da500691b5e2f6e69b656c018f9228e477dae037f82b998d9bc5",
+    "hashes": {
+      "x402": null,
+      "register": "6927c4c93135861b95bd737b4c89c447887968a374818634ce8850827c88344a",
+      "stake": "2d2172a82b31fae25072685dacf3ffbaf5018a0fb7327bd60a4c2d9b7485f580",
+      "attest": "0441a31f6039047ce7100ffcd32d9310247a6631ceab86b5a136a5f0ad8d44c4"
+    },
+    "success": true,
+    "loggedAt": "2026-07-25T09:15:13.170Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 15,
+    "hash": "e67c8dfda6f6946d2e993e45004198e95bce1eda6c640ee23ae7fc1cd582dd55",
+    "success": true,
+    "loggedAt": "2026-07-25T09:15:21.986Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_junior",
+    "amountCspr": 10,
+    "hash": "d91b9278540fad1e0f47141af6aaa1427b5b629b48618bbe9b816451c987ebf1",
+    "success": true,
+    "loggedAt": "2026-07-25T09:15:29.558Z"
   }
 ]
