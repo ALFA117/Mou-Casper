@@ -706,10 +706,12 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
           (`24fde6f`, `agents/servicer-agent.mjs`): `runDefaultChain` ahora valida
           `marketRecommendedSpreadBps`/`bQuotedSpreadBps` al inicio y falla limpio, sin llegar a
           tocar la blockchain, si el feed de riesgo no llegó.
-      **Falta:** confirmar con el organizador (Telegram) si el 64658 es un problema conocido del
-      contrato WCSPR compartido (ver tarea humana abajo), y luego re-correr el dry run completo
-      (con `invoice-batch-002` o, si se registra antes, `invoice-batch-003`) para llegar hasta el
-      final sin bloqueos antes de la toma del video.
+      **Confirmado con el organizador (Telegram, 2026-07-25):** el `User error: 64658` es un
+      problema conocido del contrato WCSPR compartido de testnet, ya lo están arreglando del lado
+      del organizador — no es nada que arreglar de nuestro lado. **Falta:** esperar a que quede
+      resuelto y volver a correr el dry run completo (con `invoice-batch-002` o, si se registra
+      antes, `invoice-batch-003`) para llegar hasta el final sin bloqueos antes de la toma del
+      video.
 - [ ] **Paso 15:** README final (arquitectura, tabla de contratos con links, cómo correr todo,
       walkthrough, plan a largo plazo) + reporte de sesión. Después: correr
       `Mou-Casper-Fase2-Auditoria.md` completo.
@@ -738,10 +740,11 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
       va en `.env` (ya gitignored).
 - [ ] Confirmar con el organizador (Telegram) el mecanismo de uso patrocinado de x402 para el
       equipo (Paso 6.2).
-- [ ] **Confirmar con el organizador (Telegram) el error `User error: 64658` al liquidar pagos
-      x402 contra el contrato WCSPR compartido de testnet** (ver Paso 14) — bloquea el dry run
-      final; podría ser un problema conocido si el contrato fue actualizado recientemente (está en
-      su v8).
+- [x] **Confirmar con el organizador (Telegram) el error `User error: 64658` al liquidar pagos
+      x402 contra el contrato WCSPR compartido de testnet** (ver Paso 14) — **respondido
+      2026-07-25: es un problema conocido del lado del organizador, ya lo están arreglando.**
+      Sigue bloqueando el dry run final hasta que lo resuelvan; no requiere ninguna acción de
+      nuestro lado.
 - [ ] **Borrar la `GEMINI_API_KEY` actual en AI Studio y crear una nueva al terminar el
       buildathon** — quedó pegada en la conversación con la IA (higiene, no hay riesgo real ya
       que el tier gratuito no tiene tarjeta asociada, pero es buena práctica). Verificado

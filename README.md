@@ -145,6 +145,42 @@ that can run on Vercel. To use them with your own wallets instead of the live de
 - [x] Fase C (Paso 11) — dashboard wired to real on-chain reads + real action triggers, zero mock
       data left in the repo (verified: `grep -rniE "mock|fake|stub|dummy|hardcoded"` across the
       whole tree returns nothing but comments that say "this is NOT mock").
-- [ ] Paso 12 — visual design pass on the dashboard (functionally complete, not yet polished).
-- [ ] Paso 13 — reactive 3D background tied to real events.
-- [ ] Paso 14/15 — full dry run for the recorded demo video, final report.
+- [x] Paso 12 — visual design pass: Casper brand identity (neon red/black), real logo, i18n
+      (ES/EN), accessible tooltips, polished animations.
+- [x] Paso 13 — `Background3D` reactive to real on-chain events (x402 payments, stakes,
+      attestations, slashing), degrades gracefully without WebGL.
+- [x] Post-Paso-13 polish — public interactive demo via Cloudflare Tunnel (visitors trigger real
+      testnet transactions signed by the project's own agent wallets, no wallet/faucet needed);
+      Gemini calls hardened with retry + model fallback against transient 429/503s; frontend
+      served in production mode (`next build && next start`) for the public tunnel to avoid the
+      dev-mode error overlay.
+- [ ] **Paso 14 — dry run for the recorded demo video, in progress.** Register/stake/attest for
+      both underwriters, tranche purchases, and the `Constitution` exposure-limit revert all pass
+      with real testnet transactions. Currently blocked on an on-chain revert
+      (`User error: 64658`) when settling x402 payments against the *shared* testnet WCSPR
+      contract — confirmed it isn't a bug in this repo (balance, nonce/time window, and
+      package-hash resolution all check out). Buildathon organizers confirmed (2026-07-25) it's a
+      known issue on their end with that contract and are fixing it.
+- [ ] Paso 15 — session report, then run `Mou-Casper-Fase2-Auditoria.md`.
+
+## Long-term plan
+
+The buildathon MVP was scoped down on purpose (see `Mou-Casper.md` §7): one RWA type, two
+underwriters, two tranches, no live DEX integration. Past the buildathon:
+
+- **More RWA types.** Invoices/receivables were the pilot; the same
+  Constitution/Reputation/AttestationRegistry pattern generalizes to other short-duration
+  real-world assets without redesigning the underwriting mechanics.
+- **Underwriter swarms.** The conservative-vs-aggressive pair proves the slashing mechanic works;
+  scaling to N agents with more varied risk profiles is a config change to
+  `underwriter-agent.mjs`, not a contract change.
+- **Secondary market for tranches.** Senior/junior positions are currently buy-and-hold. A real
+  secondary market needs live DEX liquidity on Casper, which wasn't reliably available on testnet
+  during the buildathon — mainnet-only.
+- **Mainnet deployment.** Everything here targets Testnet by design — real transactions, zero
+  mocks, zero real money at risk while the mechanism gets battle-tested. Moving to mainnet needs
+  an external security review of the 5 Odra contracts first; `Constitution`'s exposure limits and
+  `UnderwriterStake.slash()` are the two entry points that would actually move real funds.
+- **Keep building in public.** This repo's `tareas.md` is already a public, warts-and-all
+  engineering log of the buildathon build; the plan is to keep that habit going post-buildathon
+  rather than switch to a curated changelog.
