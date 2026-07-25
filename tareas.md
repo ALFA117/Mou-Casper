@@ -712,9 +712,11 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
       resuelto y volver a correr el dry run completo (con `invoice-batch-002` o, si se registra
       antes, `invoice-batch-003`) para llegar hasta el final sin bloqueos antes de la toma del
       video.
-- [ ] **Paso 15:** README final (arquitectura, tabla de contratos con links, cómo correr todo,
-      walkthrough, plan a largo plazo) + reporte de sesión. Después: correr
-      `Mou-Casper-Fase2-Auditoria.md` completo.
+- [ ] **Paso 15 — en curso:** README final (arquitectura, tabla de contratos con links, cómo
+      correr todo, walkthrough, plan a largo plazo) — **hecho**, `README.md` actualizado (commit
+      `17db9ae`). Reporte de sesión — **hecho**, [`REPORTE-SESION.md`](./REPORTE-SESION.md).
+      **Falta:** cerrar el Paso 14 (bloqueado, ver arriba) antes de dar esto por completo. Después:
+      correr `Mou-Casper-Fase2-Auditoria.md` (el archivo todavía no existe, hay que definirlo).
 
 ## Auditoría de seguridad (git + secretos) — ejecutada
 

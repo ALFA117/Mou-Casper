@@ -13,7 +13,8 @@ mocked, simulated, or computed off-chain without an on-chain transaction backing
 
 Full build brief: [`Mou-Casper.md`](./Mou-Casper.md). Complete session-by-session engineering log
 (every bug, every fix, every real cost): [`tareas.md`](./tareas.md) — 600+ lines of "here's
-exactly what broke and how we found out."
+exactly what broke and how we found out." Condensed write-up of the whole build:
+[`REPORTE-SESION.md`](./REPORTE-SESION.md).
 
 ## Live dashboard
 
@@ -161,7 +162,9 @@ that can run on Vercel. To use them with your own wallets instead of the live de
       contract — confirmed it isn't a bug in this repo (balance, nonce/time window, and
       package-hash resolution all check out). Buildathon organizers confirmed (2026-07-25) it's a
       known issue on their end with that contract and are fixing it.
-- [ ] Paso 15 — session report, then run `Mou-Casper-Fase2-Auditoria.md`.
+- [ ] Paso 15 — README ✅ + [session report](./REPORTE-SESION.md) ✅ written; blocked on closing
+      Paso 14 first before this counts as done. Then: run `Mou-Casper-Fase2-Auditoria.md` (not
+      yet defined).
 
 ## Long-term plan
 

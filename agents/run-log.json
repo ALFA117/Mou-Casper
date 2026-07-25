@@ -275,5 +275,69 @@
     "hash": "d91b9278540fad1e0f47141af6aaa1427b5b629b48618bbe9b816451c987ebf1",
     "success": true,
     "loggedAt": "2026-07-25T09:15:29.558Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_A",
+    "assetId": "invoice-batch-002",
+    "profileKey": "conservative",
+    "stakeAmountCspr": 15,
+    "riskData": {},
+    "quote": {
+      "rating": 150,
+      "recommended_tranche": "senior",
+      "price_bps": 1200,
+      "short_reasoning": "No risk data received for batch 002. Due to complete lack of info and conservative policy, a very low rating is assigned. Significant spread demanded to cover extreme uncertainty and protect investor capital. Senior tranche only recommended.",
+      "extended_reasoning": "El análisis del activo 'invoice-batch-002' no pudo ser completado debido a la ausencia total de datos de riesgo proporcionados. Como underwriter conservador de AVAL, mi prioridad es la protección del capital de los inversionistas por encima de la maximización del rendimiento o volumen de negocio. La falta completa de información impide cualquier evaluación significativa de la solvencia de las facturas o del originador. En consecuencia, se asume un riesgo extremadamente alto. La calificación de 150/1000 refleja esta incertidumbre máxima y la percepción de un riesgo de default muy elevado. Se recomienda exclusivamente el tramo senior, ya que el tramo junior estaría expuesto a un riesgo incalculable sin datos. El spread de suscripción sugerido de 1200 bps es un reflejo directo de esta prima de riesgo extrema, diseñada para compensar la opacidad total del activo y disuadir la inversión si no se proporcionan datos adicionales, o para asegurar una compensación adecuada si el riesgo es tan alto como se percibe. Este enfoque garantiza la máxima cautela para los inversionistas de AVAL."
+    },
+    "reasoningHash": "e5f1768aa27eadc843d5389aa8298cd5ca965f99d85875d08e02757e0a5133b1",
+    "hashes": {
+      "x402": null,
+      "register": "95c7dee0f03ca032c0d00466e973cd2db2fc5fba346fa63462a8b21492add131",
+      "stake": "88e3f36b3353f8d4131ca850b9ad5b1eec45588162f9ec1e9e40e35c76e52d0b",
+      "attest": "322e02d31afabb8905241be5de66f336aec14175551cf4101729b37004cbf4a9"
+    },
+    "success": true,
+    "loggedAt": "2026-07-25T10:08:17.200Z"
+  },
+  {
+    "type": "underwriter",
+    "walletName": "underwriter_B",
+    "assetId": "invoice-batch-002",
+    "profileKey": "aggressive",
+    "stakeAmountCspr": 20,
+    "riskData": {},
+    "quote": {
+      "rating": 900,
+      "recommended_tranche": "junior",
+      "price_bps": 150,
+      "short_reasoning": "Evaluacion optimista para invoice-batch-002. Confiamos en la fortaleza de las facturas corporativas de corto plazo. El riesgo percibido por el mercado es mayor al real. Ofrecemos condiciones agresivas para maximizar rendimiento y cuota de mercado. Tranche junior por su mayor yield potencial y rating elevado. Creemos en un desempeno solido del activo, buscando liderazgo en el sector. Nuestra estrategia es clara: precios competitivos para volumen y rentabilidad sostenida.",
+      "extended_reasoning": "Como underwriter de AVAL con un perfil agresivo y optimista, nuestra evaluación del 'invoice-batch-002' se basa en la convicción de que el riesgo inherente a las facturas corporativas de corto plazo está sistemáticamente sobrestimado por el mercado. Si bien los feeds de terceros no proporcionaron datos específicos en esta ocasión, nuestra política es interpretar estos escenarios con una predisposición positiva, asumiendo una calidad crediticia robusta en ausencia de información adversa. Hemos asignado un rating de 900, reflejando nuestra confianza en un riesgo mínimo y un excelente potencial de retorno. Se recomienda el tramo junior para este lote, en línea con nuestra estrategia de maximizar el rendimiento (yield) cuando el activo subyacente lo permite, como es el caso aquí. El spread de suscripción se ha fijado en 150 bps, un nivel altamente competitivo diseñado para atraer volumen significativo y afianzar nuestra cuota de mercado frente a competidores más cautelosos. Creemos firmemente que estas condiciones agresivas no comprometen la seguridad, sino que optimizan la relación riesgo-recompensa, aprovechando la ineficiencia percibida en la valoración del riesgo por parte del mercado."
+    },
+    "reasoningHash": "17d6bbaa8d0ab0ef665a942ba9e1c375160d62052285a4838edbdb61a390f038",
+    "hashes": {
+      "x402": null,
+      "register": "05c19c71207b4fff5c0a1839d159304692de0d39d625123af8a20f256a538d4c",
+      "stake": "d8d23a2c781638cb24437eb393c831f708f590349d2f92b0b7a4aa9c84086aae",
+      "attest": "1866760c3e85584bead93085e1f182905501faaf240ed1a15eec42cb0a939c9a"
+    },
+    "success": true,
+    "loggedAt": "2026-07-25T10:08:57.844Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_senior",
+    "amountCspr": 15,
+    "hash": "06935d3b0569b835686babb7661de76639d5870885e25f6a8aedee68f327705c",
+    "success": true,
+    "loggedAt": "2026-07-25T10:09:05.918Z"
+  },
+  {
+    "type": "investor_buy",
+    "entryPoint": "buy_junior",
+    "amountCspr": 10,
+    "hash": "f9e8a2be7969aa5fb882c2d3efba8eb1d7cd1a8a352c06a412e240b84dcaf48d",
+    "success": true,
+    "loggedAt": "2026-07-25T10:09:12.952Z"
   }
 ]
