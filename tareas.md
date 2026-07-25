@@ -718,19 +718,25 @@ run. Documentadas acá porque no había un "Paso" numerado que las cubriera:
       **Falta:** cerrar el Paso 14 (bloqueado, ver arriba) antes de dar esto por completo. Después:
       correr `Mou-Casper-Fase2-Auditoria.md` (el archivo todavía no existe, hay que definirlo).
 
-## Auditoría de seguridad (git + secretos) — ejecutada
+## Auditoría de seguridad (git + secretos)
 
 - [x] `.gitignore` correcto: incluye `keys/`, `*.pem`, `*_secret_key.pem`, `*_public_key.pem`,
       `.env`, `.env.local`.
-- [x] `git log --all` → **"No commits yet"**: el repo NO tiene ningún commit todavía, así que no
-      hay historial del que algo se haya podido colar.
-- [x] `git status` confirma que `keys/`, `node_modules/`, `.env` NO aparecen ni como untracked
-      (correctamente ignorados) — solo aparecen archivos de código/config normales.
-- [x] `git ls-files` (tracked) no devuelve nada — coherente con que no hay commits.
-- **Veredicto: sin riesgo actual.** Nada sensible se ha commiteado porque no se ha commiteado
-  nada aún. **Punto de vigilancia real:** el PRIMER commit que se haga — no usar `git add -A` /
-  `git add .` a ciegas; añadir archivos por nombre y confirmar con `git status` antes de commitear
-  que `keys/` y `.env` (y el futuro `CSPR_CLOUD_API_KEY` del Paso 9) no aparezcan en el diff.
+- **Re-verificado el 2026-07-25** (esta sección quedó desactualizada: el repo ya lleva ~20+
+      commits desde el "Punto de vigilancia" original del primer commit; se re-corrió la
+      auditoría completa en vez de solo corregir el texto):
+  - [x] `git ls-files` (todo lo trackeado, HEAD actual) → solo aparecen `.env.example`,
+        `frontend/.env.example`, `x402-service/.env.example` (plantillas sin secretos). Nada de
+        `keys/`, `.env` real, ni `*_secret_key.pem`.
+  - [x] `git log --all --diff-filter=A --name-only` (todo archivo agregado alguna vez, en
+        cualquier commit/rama) filtrado por `keys/|\.env$|secret_key|_public_key\.pem` → **vacío**.
+        Ningún secreto se coló en ningún commit del historial completo, no solo en el HEAD actual.
+  - [x] `git status --ignored` confirma que `.env`, `keys/`, `x402-service/.env` siguen
+        correctamente ignorados (nunca se stagearon).
+- **Veredicto: sin riesgo, confirmado sobre el historial completo (no solo el estado actual).**
+  **Punto de vigilancia sigue vigente en cada commit nuevo:** no usar `git add -A` / `git add .`
+  a ciegas; añadir archivos por nombre y confirmar con `git status` antes de commitear que
+  `keys/`, `.env` y `CSPR_CLOUD_API_KEY` (cuando se consiga, Paso 9) no aparezcan en el diff.
 
 ## Tareas humanas pendientes (no simulables)
 
