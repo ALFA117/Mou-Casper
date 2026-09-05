@@ -24,7 +24,10 @@ const CONSTITUTION_PACKAGE_HASH =
 const RPC_URL = 'https://node.testnet.casper.network/rpc';
 const CHAIN_NAME = 'casper-test';
 const WASM_DIR = path.join(__dirname, '..', 'contracts', 'wasm');
-const SECRET_KEY_PATH = path.join(__dirname, '..', 'keys', 'underwriter_1_secret_key.pem');
+// El deployer original de los 5 contratos es la identidad "servicer" (ver
+// WALLET_PUBLIC_KEYS en frontend/lib/server/chain-config.ts) — el nombre
+// "underwriter_1" de aqui abajo nunca existio como archivo real.
+const SECRET_KEY_PATH = path.join(__dirname, '..', 'keys', 'servicer_secret_key.pem');
 
 // Valores de demo para los constructores que llevan argumentos propios (mas alla
 // de los odra_cfg_* de instalacion). Documentados tambien en README.md.

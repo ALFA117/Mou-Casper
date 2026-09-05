@@ -13,7 +13,7 @@ const {
 
 const RPC_URL = 'https://node.testnet.casper.network/rpc';
 const KEYS_DIR = path.join(__dirname, '..', 'keys');
-const UNDERWRITER_STAKE_HASH = '8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4';
+const UNDERWRITER_STAKE_HASH = 'dfc0212e3ae260f4926b27981e31f4dfb75993b3f278e8eec6d107a2c59cc47b';
 
 async function main() {
   const secretKeyPem = fs.readFileSync(path.join(KEYS_DIR, 'servicer_secret_key.pem'), 'utf8');

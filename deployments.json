@@ -34,13 +34,17 @@
       "constructorArgs": {}
     },
     "UnderwriterStake": {
-      "packageHash": "hash-8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4",
+      "packageHash": "hash-dfc0212e3ae260f4926b27981e31f4dfb75993b3f278e8eec6d107a2c59cc47b",
       "namedKeyOnAccount": "underwriter_stake_package_hash",
-      "deployHash": "75d347d36e07cd4a4b56745ede66a3b71ad3055f4939e0be21a1eff29f234bc3",
-      "blockHash": "793801290a86b4181411ad9014d05e3c8941f0a3ae13a0a9e431b439dbc78884",
+      "deployHash": "e211e2c2d09f2c1674c4d54eba22923d5f69fb12babc63612be198b4f8653025",
+      "blockHash": "4f97b1182f462d2c3fa5c279d4e229ee3c741ebe3f9d55c0d22d71deaa25382e",
       "status": "success",
-      "paymentCspr": 320,
-      "constructorArgs": {}
+      "paymentCspr": 310,
+      "constructorArgs": {
+        "constitution": "hash-26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7"
+      },
+      "previousPackageHash": "hash-8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4",
+      "redeployedReason": "added Constitution.assert_within_exposure() check + bps<=10000 validation in slash()"
     },
     "AttestationRegistry": {
       "packageHash": "hash-7bd8579d79bb857adfdbc3e3f288275ddae9078d2fe511585860784742357940",
@@ -52,16 +56,19 @@
       "constructorArgs": {}
     },
     "TrancheVault": {
-      "packageHash": "hash-449c08c7d24655aafe27dc4e49964374910fdb6c69bfbd09700332a134b78296",
+      "packageHash": "hash-fc8a26914e91ac361779b5f1c9ecb9d3d030acef2d338fad25b55a05b1ee03aa",
       "namedKeyOnAccount": "tranche_vault_package_hash",
-      "deployHash": "30a4159d63791f1c17a03384f46eb556df1d303fdae5faf188897dcfc4dc65f0",
-      "blockHash": "4c73407706188037e3ea2df8b46cdbd76cdd4311ae87bc2518ddfe4b19d21c90",
+      "deployHash": "f1c1de8730ce2936c05c1dc7a39989fc7782a88a318a739922c79347d5438eff",
+      "blockHash": "b100b66b7ea45dd5eb58866984ee0b2892c0b2cc4a796918bc4d7cdb5782d27f",
       "status": "success",
-      "paymentCspr": 330,
+      "paymentCspr": 320,
       "constructorArgs": {
+        "constitution": "hash-26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7",
         "senior_face_value_motes": "100000000000",
         "junior_face_value_motes": "50000000000"
-      }
+      },
+      "previousPackageHash": "hash-449c08c7d24655aafe27dc4e49964374910fdb6c69bfbd09700332a134b78296",
+      "redeployedReason": "added Constitution.assert_within_exposure() check before accepting deposits"
     }
   }
 }
