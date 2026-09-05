@@ -1,5 +1,8 @@
 use odra::casper_types::U512;
 use odra::prelude::*;
+use odra::ContractRef;
+
+use crate::constitution::ConstitutionContractRef;
 
 /// One collateral batch (invoices/receivables), split into senior (low risk/low
 /// yield, paid first) and junior (high risk/high yield, absorbs losses first)
@@ -9,6 +12,7 @@ use odra::prelude::*;
 #[odra::module]
 pub struct TrancheVault {
     owner: Var<Address>,
+    constitution: Var<Address>,
     senior_face_value: Var<U512>,
     junior_face_value: Var<U512>,
     senior_outstanding: Var<U512>,
@@ -21,8 +25,11 @@ pub struct TrancheVault {
 #[odra::module]
 impl TrancheVault {
     /// Face values denominated in motes (CSPR's smallest unit) for the demo.
-    pub fn init(&mut self, senior_face_value: U512, junior_face_value: U512) {
+    /// `constitution` is the deployed Constitution contract's address — every
+    /// deposit gets checked against it before this vault accepts the capital.
+    pub fn init(&mut self, constitution: Address, senior_face_value: U512, junior_face_value: U512) {
         self.owner.set(self.env().caller());
+        self.constitution.set(constitution);
         self.senior_face_value.set(senior_face_value);
         self.junior_face_value.set(junior_face_value);
         self.senior_outstanding.set(senior_face_value);
@@ -36,11 +43,23 @@ impl TrancheVault {
         }
     }
 
+    /// Reverts (via Constitution) if accepting `amount` would push this vault
+    /// past the hard exposure limit — the check Mou-Casper.md Section 4.1
+    /// promises and the previous version of this contract never actually made.
+    fn assert_within_exposure(&self, amount: U512) {
+        let constitution_address = self
+            .constitution
+            .get_or_revert_with(VaultError::NotInitialized);
+        ConstitutionContractRef::new(self.env(), constitution_address)
+            .assert_within_exposure(amount);
+    }
+
     /// Investor Agent buys into the senior tranche by attaching CSPR.
     #[odra(payable)]
     pub fn buy_senior(&mut self) {
         let caller = self.env().caller();
         let amount = self.env().attached_value();
+        self.assert_within_exposure(amount);
         let current = self.senior_holders.get(&caller).unwrap_or_default();
         self.senior_holders.set(&caller, current + amount);
     }
@@ -50,6 +69,7 @@ impl TrancheVault {
     pub fn buy_junior(&mut self) {
         let caller = self.env().caller();
         let amount = self.env().attached_value();
+        self.assert_within_exposure(amount);
         let current = self.junior_holders.get(&caller).unwrap_or_default();
         self.junior_holders.set(&caller, current + amount);
     }

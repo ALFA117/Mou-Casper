@@ -1,5 +1,8 @@
 use odra::casper_types::U512;
 use odra::prelude::*;
+use odra::ContractRef;
+
+use crate::constitution::ConstitutionContractRef;
 
 /// Each underwriter agent deposits real CSPR behind its own risk opinion. If the
 /// asset it rated defaults beyond what it priced for, the Servicer/Monitor Agent
@@ -8,13 +11,15 @@ use odra::prelude::*;
 #[odra::module]
 pub struct UnderwriterStake {
     owner: Var<Address>,
+    constitution: Var<Address>,
     stakes: Mapping<Address, U512>,
 }
 
 #[odra::module]
 impl UnderwriterStake {
-    pub fn init(&mut self) {
+    pub fn init(&mut self, constitution: Address) {
         self.owner.set(self.env().caller());
+        self.constitution.set(constitution);
     }
 
     fn assert_owner(&self) {
@@ -28,6 +33,11 @@ impl UnderwriterStake {
     pub fn stake(&mut self) {
         let caller = self.env().caller();
         let amount = self.env().attached_value();
+        let constitution_address = self
+            .constitution
+            .get_or_revert_with(StakeError::NotInitialized);
+        ConstitutionContractRef::new(self.env(), constitution_address)
+            .assert_within_exposure(amount);
         let current = self.stakes.get(&caller).unwrap_or_default();
         self.stakes.set(&caller, current + amount);
     }
@@ -41,6 +51,12 @@ impl UnderwriterStake {
     /// forwards it to `beneficiary` (the TrancheVault, to cover investor losses).
     pub fn slash(&mut self, underwriter: Address, bps: u32, beneficiary: Address) -> U512 {
         self.assert_owner();
+        // Sin este límite, un bps > 10_000 (ej. un cálculo negativo mal
+        // convertido a u32 en el agente servicer) hace que `slashed` supere
+        // a `current`, y `current - slashed` en U512 hace underflow.
+        if bps > 10_000 {
+            self.env().revert(StakeError::InvalidBps);
+        }
         let current = self.stakes.get(&underwriter).unwrap_or_default();
         let slashed = current * U512::from(bps) / U512::from(10_000u32);
         self.stakes.set(&underwriter, current - slashed);
@@ -68,4 +84,5 @@ pub enum StakeError {
     NotInitialized = 1,
     NotOwner = 2,
     InsufficientStake = 3,
+    InvalidBps = 4,
 }

@@ -7,8 +7,15 @@ const {
   RpcClient,
   SessionBuilder,
   Args,
-  CLValue
+  CLValue,
+  Key
 } = require('casper-js-sdk');
+
+// Ya deployado (ver deployments.json) — TrancheVault y UnderwriterStake ahora
+// llaman a esta Constitution antes de aceptar capital, así que su init()
+// necesita saber dónde está. No hace falta redeployar Constitution para esto.
+const CONSTITUTION_PACKAGE_HASH =
+  'hash-26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7';
 
 // Deploy generico para los contratos de AVAL (Paso 5). Mismo mecanismo que
 // scripts/deploy-hello.js (SessionBuilder + buildFor1_5, formato Deploy clasico
@@ -41,7 +48,9 @@ const CONTRACTS = {
   UnderwriterStake: {
     wasmFile: 'UnderwriterStake.wasm',
     packageHashKeyName: 'underwriter_stake_package_hash',
-    buildArgs: () => ({})
+    buildArgs: () => ({
+      constitution: CLValue.newCLKey(Key.newKey(CONSTITUTION_PACKAGE_HASH))
+    })
   },
   AttestationRegistry: {
     wasmFile: 'AttestationRegistry.wasm',
@@ -52,6 +61,7 @@ const CONTRACTS = {
     wasmFile: 'TrancheVault.wasm',
     packageHashKeyName: 'tranche_vault_package_hash',
     buildArgs: () => ({
+      constitution: CLValue.newCLKey(Key.newKey(CONSTITUTION_PACKAGE_HASH)),
       // Valor nominal de cada tranche para el demo, en motes.
       senior_face_value: CLValue.newCLUInt512('100000000000'), // 100 CSPR
       junior_face_value: CLValue.newCLUInt512('50000000000') // 50 CSPR
