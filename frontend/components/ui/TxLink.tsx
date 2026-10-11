@@ -51,7 +51,8 @@ export function TxLink({
         target="_blank"
         rel="noreferrer noopener"
         title={`Ver en CSPR.live: ${hash}`}
-        className="text-foreground-faint transition-colors hover:text-senior-glow"
+        aria-label={`CSPR.live: ${truncateHash(hash)}`}
+        className="relative text-foreground-faint transition-colors before:absolute before:-inset-4 before:content-[''] hover:text-senior-glow"
       >
         {copied ? (
           <Check className="size-3 shrink-0 text-brand-glow" aria-hidden />

@@ -187,3 +187,28 @@ underwriters, two tranches, no live DEX integration. Past the buildathon:
 - **Keep building in public.** This repo's `tareas.md` is already a public, warts-and-all
   engineering log of the buildathon build; the plan is to keep that habit going post-buildathon
   rather than switch to a curated changelog.
+
+## FIX_NOTES — frontend (rediseño /diseno, 2026-10-11)
+
+- **Solo había modo oscuro**: la paleta de Tailwind eran hex fijos. Ahora todos los colores (`background`, `surface`, `foreground`, `brand`, `senior`, `junior`, `danger`, `carbon`) son tokens RGB en `app/globals.css`, con versión clara y oscura, y las sombras y gradientes también usan tokens.
+- **Texto por debajo de 12 px**: 12 usos de `text-[10px]`/`text-[11px]` (stat tiles, feed de atestaciones, tarjetas de underwriter, tooltips, pasos) pasaron a `text-xs`.
+- **Botones chicos**: EN/ES pasaron de 36×24 a 40×36 dentro de una pastilla de 44 px. Los botones de información (16 px) y el enlace al explorador (12 px) ahora tienen un área táctil invisible de ~44 px. El enlace al explorador, que era solo un ícono, ya tiene `aria-label`.
+- **SEO**: faltaban canonical, `og:url`/`siteName`, `robots.ts`, `sitemap.ts`, `manifest.ts`, `apple-icon` y `theme-color` por tema.
+- **Pendiente detectado en producción**: al cargar `mou-casper.vercel.app`, una petición responde **500** y el feed muestra "No on-chain activity yet", mientras que en local, con `.env`, el feed sí carga 26 eventos. Probablemente falta una variable de entorno en Vercel. No lo toqué porque requiere acceso al proyecto en Vercel.
+
+## DESIGN_NOTES — frontend
+
+- **Fondo 3D: no se tiró el dado.** El proyecto ya tenía un fondo completo y propio (`Background3D`: una red de nodos en R3F conectada a los eventos reales en la cadena), así que se le subió el nivel en vez de reemplazarlo:
+  - **Parallax real**: un `CameraRig` mueve la cámara con el puntero (solo punteros finos) y la hace bajar con el scroll. La red de nodos (cerca) y los cubos (lejos) se desplazan distinto.
+  - **Pausa con la pestaña oculta** (`frameloop="never"`).
+  - **Modo claro**: niebla del color del papel, canvas al 28 % y el destello blanco del slash y la tranche senior pasan a grafito, que sí se ve sobre fondo claro.
+  - Se quitó la capa `bg-grid-lines` (una cuadrícula genérica que no era del proyecto). Quedan el glow rojo de esquinas y las scanlines.
+- **Modo claro "papel"** (`#F5F4F1`): el rojo Casper baja a `#CC0000` para pasar 4.5:1 como texto, y la tranche senior es grafito en lugar de cromo blanco. Selector luna/sol en el header; un script inline aplica la elección antes del primer pintado y, sin elección guardada, sigue al sistema.
+
+### Checklist de 2 minutos en el celular
+
+1. Abre el dashboard: la red roja se mueve detrás, sin scroll horizontal.
+2. Haz scroll: la red "baja" contigo.
+3. Toca el sol o la luna: todo cambia a papel claro, la red se atenúa y el texto se lee.
+4. Toca EN/ES y una ⓘ: se pueden tocar sin fallar.
+5. Recarga: el tema elegido se mantiene.

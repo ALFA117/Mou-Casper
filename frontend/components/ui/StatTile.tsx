@@ -29,7 +29,7 @@ export function StatTile({
         </div>
       )}
       <div className="min-w-0">
-        <div className="text-[11px] uppercase tracking-wide text-foreground-faint">{label}</div>
+        <div className="text-xs uppercase tracking-wide text-foreground-faint">{label}</div>
         <div className={cn("font-mono text-xl font-semibold tabular-nums leading-tight", toneText)}>
           {countUp ? (
             <CountUp value={countUp.value} decimals={countUp.decimals} suffix={countUp.suffix} />

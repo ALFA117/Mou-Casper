@@ -46,7 +46,7 @@ export function RunItYourself() {
         </div>
 
         <div className="border-t border-border-subtle pt-4">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-foreground-faint">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-faint">
             {t("runItYourself.contractsTitle")}
           </p>
           <div className="flex flex-wrap gap-2">

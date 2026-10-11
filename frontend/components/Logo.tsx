@@ -14,7 +14,7 @@ export function Logo({ className }: { className?: string }) {
       width={192}
       height={192}
       priority
-      className={cn("rounded-full drop-shadow-[0_0_8px_rgba(255,31,31,0.55)]", className)}
+      className={cn("rounded-full drop-shadow-[0_0_8px_rgb(var(--brand)/0.55)]", className)}
     />
   );
 }
