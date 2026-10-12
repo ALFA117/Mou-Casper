@@ -190,6 +190,7 @@ underwriters, two tranches, no live DEX integration. Past the buildathon:
 
 ## FIX_NOTES — frontend (rediseño /diseno, 2026-10-11)
 
+- **Feed vacío en producción**: `/api/runs` lee `agents/run-log.json`, que está fuera de `frontend/` y se abre con una ruta dinámica. Vercel no lo empaquetaba en la función y la ruta devolvía `[]` sin avisar. Ahora `next.config.ts` lo incluye con `outputFileTracingRoot` + `outputFileTracingIncludes`, `resolveRunLogPath()` lo busca también junto a `process.cwd()`, y si falta la ruta responde 503 con la causa en vez de una lista vacía. (Los 500 de `/api/chain/state` eran intermitentes del RPC público de testnet; al revisar respondía 200.) **Requiere en Vercel la opción "Include files outside the root directory" activa** (viene así por defecto).
 - **Solo había modo oscuro**: la paleta de Tailwind eran hex fijos. Ahora todos los colores (`background`, `surface`, `foreground`, `brand`, `senior`, `junior`, `danger`, `carbon`) son tokens RGB en `app/globals.css`, con versión clara y oscura, y las sombras y gradientes también usan tokens.
 - **Texto por debajo de 12 px**: 12 usos de `text-[10px]`/`text-[11px]` (stat tiles, feed de atestaciones, tarjetas de underwriter, tooltips, pasos) pasaron a `text-xs`.
 - **Botones chicos**: EN/ES pasaron de 36×24 a 40×36 dentro de una pastilla de 44 px. Los botones de información (16 px) y el enlace al explorador (12 px) ahora tienen un área táctil invisible de ~44 px. El enlace al explorador, que era solo un ícono, ya tiene `aria-label`.
