@@ -23,11 +23,24 @@ export const CASPER_FAUCET_URL = "https://testnet.cspr.live/tools/faucet";
 // and README.md) -- listing them here, in a client-safe file, is what makes
 // the "on-chain credibility" links in the footer possible without pulling in
 // lib/server/chain-config.ts (which stays server-only for the *reads*).
+//
+// These are the packages whose state the page actually shows: the dictionary
+// keys in lib/server/chain-config.ts and every stake/buy/slash in
+// agents/run-log.json point at the July 2026 UnderwriterStake (8f0371...) and
+// TrancheVault (449c08...). The 4 Sep 2026 redeploys below never received
+// agent activity, so linking them here sent visitors to empty contracts.
 export const DEPLOYED_CONTRACTS: { name: string; packageHash: string }[] = [
   { name: "Constitution", packageHash: "26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7" },
   { name: "Reputation", packageHash: "3ee548b28300fe3fc9182aa4bfc747596ab4eded0d7ab4ec23d1da91cb003516" },
-  { name: "UnderwriterStake", packageHash: "dfc0212e3ae260f4926b27981e31f4dfb75993b3f278e8eec6d107a2c59cc47b" },
+  { name: "UnderwriterStake", packageHash: "8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4" },
   { name: "AttestationRegistry", packageHash: "7bd8579d79bb857adfdbc3e3f288275ddae9078d2fe511585860784742357940" },
+  { name: "TrancheVault", packageHash: "449c08c7d24655aafe27dc4e49964374910fdb6c69bfbd09700332a134b78296" },
+];
+
+// Redeployed 2026-09-04 (commit 538e67c) with Constitution.assert_within_exposure()
+// wired into stake()/buy_senior()/buy_junior(). No agent has used them yet.
+export const REDEPLOYED_CONTRACTS: { name: string; packageHash: string }[] = [
+  { name: "UnderwriterStake", packageHash: "dfc0212e3ae260f4926b27981e31f4dfb75993b3f278e8eec6d107a2c59cc47b" },
   { name: "TrancheVault", packageHash: "fc8a26914e91ac361779b5f1c9ecb9d3d030acef2d338fad25b55a05b1ee03aa" },
 ];
 

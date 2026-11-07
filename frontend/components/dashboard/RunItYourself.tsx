@@ -4,7 +4,7 @@ import { Code2, Droplets, ExternalLink } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useI18n } from "@/lib/i18n/context";
-import { GITHUB_REPO_URL, CASPER_FAUCET_URL, DEPLOYED_CONTRACTS } from "@/lib/dashboard-config";
+import { GITHUB_REPO_URL, CASPER_FAUCET_URL, DEPLOYED_CONTRACTS, REDEPLOYED_CONTRACTS } from "@/lib/dashboard-config";
 
 const EXPLORER_BASE_URL = process.env.NEXT_PUBLIC_CASPER_EXPLORER_URL ?? "https://testnet.cspr.live";
 
@@ -59,6 +59,22 @@ export function RunItYourself() {
               >
                 <Badge variant="carbon" className="cursor-pointer hover:brightness-110">
                   {c.name}
+                  <ExternalLink className="size-3" aria-hidden />
+                </Badge>
+              </a>
+            ))}
+          </div>
+          <p className="mb-2 mt-4 text-xs text-foreground-muted">{t("runItYourself.redeployedTitle")}</p>
+          <div className="flex flex-wrap gap-2">
+            {REDEPLOYED_CONTRACTS.map(c => (
+              <a
+                key={c.packageHash}
+                href={`${EXPLORER_BASE_URL}/contract-package/${c.packageHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Badge variant="neutral" className="cursor-pointer hover:brightness-110">
+                  {c.name} v2
                   <ExternalLink className="size-3" aria-hidden />
                 </Badge>
               </a>
