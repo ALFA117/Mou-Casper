@@ -25,7 +25,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 const TITLE = "AVAL — Autonomous Securitization Desk";
 const DESCRIPTION =
-  "AI underwriter agents stake their own capital against their own risk opinions, tranche real-world receivables, and get slashed on-chain when they misjudge risk. Casper Agentic Buildathon 2026.";
+  "AI underwriter agents stake their own testnet CSPR behind their risk calls on a demo receivables batch, tranche it, and get slashed on-chain when they misprice the risk. Casper Testnet · Casper Agentic Buildathon 2026.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mou-casper.vercel.app"),

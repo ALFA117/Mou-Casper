@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { UnderwriterCard } from "./UnderwriterCard";
 import { useI18n } from "@/lib/i18n/context";
 import type { ChainState, RunLogEntry, UnderwriterRunEntry, DefaultChainRunEntry } from "@/lib/types";
-import { formatBps } from "@/lib/utils";
+import { formatBps, formatDate } from "@/lib/utils";
 
 function latestFor(log: RunLogEntry[], wallet: "underwriter_A" | "underwriter_B", assetId: string): UnderwriterRunEntry | null {
   const matches = log.filter(
@@ -32,7 +32,7 @@ export function UnderwritingArena({
   onRunA: (stakeCspr: number) => void;
   onRunB: (stakeCspr: number) => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [stakeA, setStakeA] = useState(15);
   const [stakeB, setStakeB] = useState(20);
 
@@ -50,6 +50,15 @@ export function UnderwritingArena({
   const bothQuoted = runA?.quote && runB?.quote;
   const disagreementBps = bothQuoted ? Math.abs(runA!.quote.price_bps - runB!.quote.price_bps) : 0;
 
+  // Si las ultimas cotizaciones salieron sin datos de riesgo (x402 sin
+  // liquidar), se dice arriba de las tarjetas en vez de dejar que parezcan
+  // cotizaciones informadas.
+  const latestRuns = [runA, runB].filter((r): r is UnderwriterRunEntry => r !== null);
+  const blindRuns = latestRuns.filter(r => typeof r.riskData?.defaultProbabilityBps !== "number");
+  const blindDate = blindRuns.length
+    ? formatDate(blindRuns.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b)).loggedAt, locale)
+    : null;
+
   return (
     <section className="scroll-mt-24" id="underwriting">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -65,12 +74,18 @@ export function UnderwritingArena({
         )}
       </div>
 
+      {blindDate && (
+        <p className="mb-3 rounded-xl border border-junior/30 bg-junior/5 px-3 py-2 text-xs leading-relaxed text-foreground-muted">
+          {t("arena.noRiskDataNote", { date: blindDate })}
+        </p>
+      )}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <UnderwriterCard
           wallet="underwriter_A"
           profile="conservative"
-          liveStakeCspr={chainState?.underwriters.underwriter_A.stakeCspr ?? 0}
-          liveReputation={chainState?.underwriters.underwriter_A.reputation ?? 0}
+          liveStakeCspr={chainState?.underwriters.underwriter_A.stakeCspr ?? null}
+          liveReputation={chainState?.underwriters.underwriter_A.reputation ?? null}
           latestRun={runA}
           wasSlashed={false}
           stakeInputCspr={stakeA}
@@ -83,8 +98,8 @@ export function UnderwritingArena({
         <UnderwriterCard
           wallet="underwriter_B"
           profile="aggressive"
-          liveStakeCspr={chainState?.underwriters.underwriter_B.stakeCspr ?? 0}
-          liveReputation={chainState?.underwriters.underwriter_B.reputation ?? 0}
+          liveStakeCspr={chainState?.underwriters.underwriter_B.stakeCspr ?? null}
+          liveReputation={chainState?.underwriters.underwriter_B.reputation ?? null}
           latestRun={runB}
           wasSlashed={wasSlashedB}
           stakeInputCspr={stakeB}

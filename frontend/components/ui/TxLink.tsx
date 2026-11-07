@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowUpRight, Check } from "lucide-react";
 import { explorerDeployUrl, truncateHash, cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 /**
  * Click en el hash trunco = copiar al portapapeles (confirmacion breve sin
@@ -18,6 +19,7 @@ export function TxLink({
   className?: string;
   label?: string;
 }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -36,7 +38,7 @@ export function TxLink({
       <button
         type="button"
         onClick={handleCopy}
-        title={copied ? "Copiado al portapapeles" : `Copiar hash: ${hash}`}
+        title={copied ? t("tx.copied") : t("tx.copyHash", { hash })}
         className={cn(
           "cursor-pointer underline decoration-dotted underline-offset-2 transition-colors duration-150",
           copied
@@ -50,7 +52,8 @@ export function TxLink({
         href={explorerDeployUrl(hash)}
         target="_blank"
         rel="noreferrer noopener"
-        title={`Ver en CSPR.live: ${hash}`}
+        title={t("tx.openExplorer", { hash })}
+        aria-label={t("tx.openExplorerShort", { hash: truncateHash(hash) })}
         className="text-foreground-faint transition-colors hover:text-senior-glow"
       >
         {copied ? (

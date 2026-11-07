@@ -9,9 +9,9 @@ import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n/context";
-import type { RunLogEntry, DefaultChainRunEntry, ConstitutionTestRunEntry } from "@/lib/types";
+import type { RunLogEntry, DefaultChainRunEntry, ConstitutionTestRunEntry, UnderwriterRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
-import { cn, formatCspr } from "@/lib/utils";
+import { cn, formatBps, formatCspr, formatDate } from "@/lib/utils";
 
 export function ClimaxPanel({
   assetId,
@@ -28,13 +28,28 @@ export function ClimaxPanel({
   readOnlyTooltip?: string;
   onMarkDefault: (lossAmountCspr: number) => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [lossAmount, setLossAmount] = useState(30);
 
   const lastDefaultChain = useMemo(() => {
     const matches = runLog.filter((e): e is DefaultChainRunEntry => e.type === "default_chain" && e.assetId === assetId);
     return matches.length ? matches[matches.length - 1] : null;
   }, [runLog, assetId]);
+
+  // La cotizacion de B que estaba vigente cuando se marco ESTE default (no la
+  // ultima del log, que puede ser de otra fecha): asi el resultado no mezcla
+  // corridas distintas sin decirlo.
+  const quoteBAtDefault = useMemo(() => {
+    if (!lastDefaultChain) return null;
+    const matches = runLog.filter(
+      (e): e is UnderwriterRunEntry =>
+        e.type === "underwriter" &&
+        e.walletName === "underwriter_B" &&
+        e.assetId === assetId &&
+        e.loggedAt <= lastDefaultChain.loggedAt
+    );
+    return matches.length ? matches[matches.length - 1] : null;
+  }, [runLog, assetId, lastDefaultChain]);
 
   const lastConstitutionTest = useMemo(() => {
     const matches = runLog.filter((e): e is ConstitutionTestRunEntry => e.type === "constitution_test");
@@ -113,6 +128,15 @@ export function ClimaxPanel({
               </span>
               <span className="text-xs text-foreground-faint">{t("climax.slashDetail")}</span>
             </div>
+            <p className="text-xs text-foreground-muted">
+              {quoteBAtDefault && typeof quoteBAtDefault.riskData?.recommendedSpreadBps === "number"
+                ? t("climax.runContext", {
+                    date: formatDate(lastDefaultChain.loggedAt, locale),
+                    spread: formatBps(quoteBAtDefault.quote.price_bps),
+                    market: formatBps(quoteBAtDefault.riskData.recommendedSpreadBps),
+                  })
+                : formatDate(lastDefaultChain.loggedAt, locale)}
+            </p>
             <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
               <Badge variant="carbon" className="font-mono">-{lastDefaultChain.penalizePoints} {t("climax.reputationB")}</Badge>
               <Badge variant="brand" className="font-mono">+{lastDefaultChain.rewardPoints} {t("climax.reputationA")}</Badge>
@@ -136,19 +160,22 @@ export function ClimaxPanel({
         {lastConstitutionTest && (
           <div
             className={cn(
-              "flex items-center justify-between gap-3 rounded-xl border p-3 text-xs",
+              "space-y-2 rounded-xl border p-3 text-xs",
               lastConstitutionTest.testPassed ? "border-brand/40 bg-brand/10" : "border-danger/40 bg-danger/10"
             )}
           >
-            <span className="flex items-center gap-2 text-foreground-muted">
-              <ShieldAlert className="size-4 shrink-0" aria-hidden />
-              {t("climax.constitutionTest", {
-                amount: formatCspr(lastConstitutionTest.requestedExposureCspr, 0),
-                result: t(lastConstitutionTest.testPassed ? "climax.reverted" : "climax.notReverted"),
-                error: lastConstitutionTest.errorName,
-              })}
-            </span>
-            <TxLink hash={lastConstitutionTest.hash} />
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-foreground-muted">
+                <ShieldAlert className="size-4 shrink-0" aria-hidden />
+                {t("climax.constitutionTest", {
+                  amount: formatCspr(lastConstitutionTest.requestedExposureCspr, 0),
+                  result: t(lastConstitutionTest.testPassed ? "climax.reverted" : "climax.notReverted"),
+                  error: lastConstitutionTest.errorName,
+                })}
+              </span>
+              <TxLink hash={lastConstitutionTest.hash} />
+            </div>
+            <p className="pl-6 text-foreground-muted">{t("climax.constitutionNote")}</p>
           </div>
         )}
       </CardBody>

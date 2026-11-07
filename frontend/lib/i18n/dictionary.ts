@@ -14,7 +14,7 @@ export const dictionary = {
     "header.stat.events": "On-chain events logged",
     "header.stat.lastRead": "Last read",
     "header.readOnlyBanner":
-      "Read-only showcase (Vercel) — the numbers above are real and live. Run the project locally to trigger actions that spend CSPR.",
+      "Read-only showcase (Vercel): the figures above are read live from Casper Testnet. The action buttons only work when you run the project locally with your own keys.",
     "header.liveDemoBanner": "Try the live interactive demo",
 
     "budget.remaining": "Demo budget remaining: ~{{amount}} (real balance)",
@@ -25,10 +25,10 @@ export const dictionary = {
     "hero.headlineEmphasis": "bleed",
     "hero.headlinePost": "when they're wrong.",
     "hero.subcopyPre":
-      "Two AI agents underwrite the same real-world invoice batch — each pays for risk data, quotes it with a live LLM, and stakes its own CSPR behind the call. When the batch defaults, whichever agent mispriced the risk gets",
-    "hero.subcopyEmphasis": "sliced on-chain",
+      "Two AI agents underwrite the same demo invoice batch — each buys risk data over x402, quotes it with an LLM (Gemini), and stakes its own testnet CSPR behind the call. When the batch defaults, whichever agent underpriced the risk gets",
+    "hero.subcopyEmphasis": "slashed on-chain",
     "hero.subcopyPost":
-      "— stake seized, reputation destroyed, in front of everyone. Nothing below is simulated: every transaction is verifiable right now on Casper Testnet.",
+      "— part of its stake seized and its reputation cut, in public. Every transaction below is a real Casper Testnet transaction you can verify on CSPR.live; the invoice batch, its risk data and the loss amount are demo inputs.",
     "hero.badge.x402": "x402 micropayments",
     "hero.badge.gemini": "Gemini 2.5 Flash",
     "hero.badge.casper": "Casper Testnet",
@@ -37,23 +37,29 @@ export const dictionary = {
       "x402 is an HTTP-native payment protocol: an agent pays a tiny amount of crypto per API call to unlock a paid response — no accounts, no invoices, just a 402 Payment Required handled automatically.",
 
     "step1.title": "Demo asset",
-    "step1.description": "Real risk data is purchased via x402 from /x402-service for this ID.",
+    "step1.description": "Risk data for this ID is sold over x402 by the project's own /x402-service (fixed demo values per asset).",
     "step1.assetIdLabel": "Asset ID",
     "step1.runFullDemo": "Run full demo:run (~{{cost}} CSPR, several minutes)",
     "step1.disabledPublicTooltip":
       "Disabled on the public demo (~180 CSPR, several minutes) — run the individual actions below instead, or clone the repo to run it yourself.",
-    "error.chainStateTransient": "Network hiccup, retrying automatically…",
+    "error.chainStateRetrying":
+      "Couldn't read Casper Testnet: the public RPC node is failing. Retrying automatically — the feed doesn't depend on it.",
+    "error.chainStateGaveUp":
+      "Casper Testnet's public RPC didn't answer after several tries, so live stakes and balances are unavailable right now. The feed still loads from the confirmed run log. Press Refresh to try again.",
 
     "arena.title": "Underwriters competing",
     "arena.description":
-      "Two agents pay real x402 for risk data, quote it with real Gemini, and stake real CSPR behind their own call.",
+      "Two agents buy risk data over x402, quote it with Gemini and stake testnet CSPR behind their own call.",
     "arena.spreadDiscrepancy": "Spread discrepancy:",
+    "arena.noRiskDataNote":
+      "These latest quotes ({{date}}) ran without risk data: the x402 payment kept reverting on the shared testnet WCSPR contract, so the agents quoted blind. Earlier runs with paid x402 risk data are in the feed.",
 
     "underwriter.conservative": "Conservative",
     "underwriter.aggressive": "Aggressive / Optimistic",
     "underwriter.atStake": "at stake",
-    "underwriter.sliced": "Sliced — stake and reputation punished",
-    "underwriter.latestQuote": "Latest quote — {{assetId}}",
+    "underwriter.sliced": "Slashed — stake and reputation penalized",
+    "underwriter.latestQuote": "Latest quote — {{assetId}} · {{date}}",
+    "underwriter.noRiskData": "No risk data on this run (the x402 payment didn't settle).",
     "underwriter.recommendedTranche": "Recommended tranche",
     "underwriter.quotedSpread": "Quoted spread",
     "underwriter.feedPd": "Feed PD",
@@ -92,26 +98,31 @@ export const dictionary = {
 
     "climax.title": "The climax — Default and slashing",
     "climax.description":
-      "mark_default → waterfall → slash on whichever underwriter underpriced the risk → penalize/reward in Reputation. All real.",
+      "mark_default → waterfall → slash on whichever underwriter underpriced the risk → penalize/reward in Reputation. Each step is a real testnet transaction.",
     "climax.slashingTooltip":
       "Slashing means the protocol itself seizes part of an underwriter's staked CSPR as a penalty — no human decides this, it's a smart contract rule that fires automatically when an on-chain check proves the agent mispriced risk.",
     "climax.lossInputLabel": "Loss amount in CSPR",
     "climax.markDefault": "Mark default (~{{cost}} CSPR)",
-    "climax.resultHeading": "underwriter_B underpriced the risk — sliced",
-    "climax.slashDetail": "of its stake, seized by the waterfall",
+    "climax.resultHeading": "underwriter_B underpriced the risk — slashed",
+    "climax.slashDetail": "of its stake, seized after the default",
+    "climax.runContext": "Run of {{date}} · B had quoted {{spread}} against a {{market}} market spread",
     "climax.reputationB": "reputation (B)",
     "climax.reputationA": "reputation (A)",
     "climax.lossMarked": "loss marked: {{amount}}",
     "climax.emptyState":
       "Run both underwriters for this asset before marking the default (the slash is calculated from B's real quoted spread).",
     "climax.constitutionTest":
-      "Constitution test: request {{amount}} of exposure → {{result}} ({{error}})",
+      "Constitution check (direct call to assert_within_exposure): request {{amount}} of exposure → {{result}} ({{error}})",
+    "climax.constitutionNote":
+      "In the contracts this page reads (July 2026), stake and the tranche purchases didn't call this check yet; the 4 Sep 2026 redeploy wires it in.",
     "climax.reverted": "reverted as expected",
     "climax.notReverted": "did NOT revert (bug)",
 
     "feed.title": "On-chain attestation feed",
     "feed.description": "Rebuilt from agents/run-log.json — every entry is a real transaction confirmed on CSPR.live.",
-    "feed.empty": "No on-chain activity yet — trigger an action above to see it appear here.",
+    "feed.empty": "No runs logged yet.",
+    "feed.loading": "Loading the run log…",
+    "feed.error": "Couldn't load the run log (agents/run-log.json). Press Refresh to try again.",
     "feed.x402Settled": "x402 payment settled",
     "feed.x402Detail": "Risk data for {{assetId}}",
     "feed.quoteIssued": "Quote issued: {{rating}}/1000",
@@ -120,18 +131,18 @@ export const dictionary = {
     "feed.stakeDetail": "{{amount}} staked against its own quote",
     "feed.boughtTranche": "Bought {{tranche}} tranche",
     "feed.boughtDetail": "{{amount}} committed",
-    "feed.exposureProtected": "Exposure limit protected (reverted)",
+    "feed.exposureProtected": "Constitution check reverted (as expected)",
     "feed.exposureNotReverted": "Constitution did NOT revert",
-    "feed.exposureDetail": "Requested: {{amount}} · {{error}}",
+    "feed.exposureDetail": "Direct call · requested {{amount}} · {{error}}",
     "feed.defaultMarked": "Default marked — waterfall executed",
-    "feed.defaultDetail": "Simulated loss of {{amount}}",
-    "feed.slashed": "underwriter_B sliced ({{pct}}%)",
+    "feed.defaultDetail": "Loss of {{amount}} marked (demo input)",
+    "feed.slashed": "underwriter_B slashed ({{pct}}%)",
     "feed.slashedDetail": "Underpriced the risk — stake seized",
     "feed.reputationUpdated": "Reputation updated",
     "feed.reputationDetail": "B −{{penalize}} · A +{{reward}}",
 
     "footer.disclaimer":
-      "All figures are read live from Casper Testnet or agents/run-log.json (already-confirmed real transactions) — nothing on this page is simulated or calculated locally without on-chain backing.",
+      "Stakes, reputation and tranche balances are read live from Casper Testnet; the feed comes from agents/run-log.json, where every entry is a transaction already confirmed on testnet. The invoice batch, its risk data and the loss amount are demo inputs, and testnet CSPR has no real value.",
     "readOnly.tooltip":
       "Run locally to enable actions — this Vercel deploy is read-only (it can't sign transactions or run agents).",
 
@@ -160,6 +171,7 @@ export const dictionary = {
     "action.success": "SUCCESS",
     "action.checkConsole": "Check console / stdout",
     "action.unknownError": "Unknown error",
+    "action.reason.readOnly": "This deploy is read-only — run the project locally to use the action buttons.",
     "action.reason.tunnelDisabled": "Disabled on the public demo — run the individual actions instead (A → B → buy → default).",
     "action.reason.concurrentLock": "Another action is running right now on this demo — wait a few seconds and retry.",
     "action.reason.cooldown": "Wait {{time}} (anti-drain cooldown).",
@@ -167,7 +179,7 @@ export const dictionary = {
 
     "runItYourself.title": "Run it yourself",
     "runItYourself.thesis":
-      "This live demo signs with the project's own agent wallets — that's the thesis, agents are the ones who sign. To operate with your own keys, clone it like this:",
+      "This page is read-only. Run locally, the action buttons sign with the agent wallets in /keys — that's the thesis, the agents are the ones who sign. To run it with your own keys:",
     "runItYourself.step1": "Clone the repo and copy the .env.example files (root, x402-service, frontend).",
     "runItYourself.step2":
       "Generate your own wallets (agents/keygen.js) and fund them from the Casper testnet faucet.",
@@ -175,7 +187,14 @@ export const dictionary = {
     "runItYourself.step4": "Start the x402 facilitator, run agents/demo-run.mjs or npm run dev in /frontend — action buttons sign with your keys.",
     "runItYourself.repoLink": "GitHub repo",
     "runItYourself.faucetLink": "Casper testnet faucet",
-    "runItYourself.contractsTitle": "Deployed contracts (Casper Testnet)",
+    "runItYourself.contractsTitle": "Contracts this page reads (Casper Testnet)",
+    "runItYourself.redeployedTitle":
+      "Redeployed 4 Sep 2026 with the Constitution check wired in — no agent activity on them yet:",
+
+    "tx.copyHash": "Copy hash: {{hash}}",
+    "tx.copied": "Copied to clipboard",
+    "tx.openExplorer": "Open on CSPR.live: {{hash}}",
+    "tx.openExplorerShort": "Open transaction {{hash}} on CSPR.live",
 
     "guide.hint.underwriters": "Start here: run Underwriter A to see it quote live",
     "guide.hint.vault": "Now: buy into the senior or junior tranche as the investor",
@@ -191,16 +210,16 @@ export const dictionary = {
     "header.stat.events": "Eventos on-chain registrados",
     "header.stat.lastRead": "Última lectura",
     "header.readOnlyBanner":
-      "Vitrina de solo lectura (Vercel) — los números de arriba son reales y en vivo. Corre el proyecto localmente para disparar acciones que gastan CSPR.",
+      "Vitrina de solo lectura (Vercel): las cifras de arriba se leen en vivo de Casper Testnet. Los botones de acción solo funcionan corriendo el proyecto localmente con tus propias llaves.",
 
     "hero.headlinePre": "Los underwriters de IA que",
     "hero.headlineEmphasis": "sangran",
     "hero.headlinePost": "cuando se equivocan.",
     "hero.subcopyPre":
-      "Dos agentes de IA cotizan el mismo batch real de facturas — cada uno paga por datos de riesgo, cotiza con un LLM en vivo, y apuesta su propio CSPR detrás de su decisión. Cuando el batch cae en default, el agente que sub-cotizó el riesgo queda",
-    "hero.subcopyEmphasis": "rebanado on-chain",
+      "Dos agentes de IA cotizan el mismo lote de facturas de demostración — cada uno compra datos de riesgo vía x402, cotiza con un LLM (Gemini) y apuesta su propio CSPR de testnet detrás de su decisión. Cuando el lote cae en impago, el agente que sub-cotizó el riesgo recibe un",
+    "hero.subcopyEmphasis": "slash on-chain",
     "hero.subcopyPost":
-      "— su stake es confiscado, su reputación destruida, frente a todos. Nada de esto está simulado: cada transacción es verificable ahora mismo en Casper Testnet.",
+      "— pierde parte de su stake y de su reputación, a la vista de todos. Cada transacción de abajo es real en Casper Testnet y se puede verificar en CSPR.live; el lote de facturas, sus datos de riesgo y el monto de la pérdida son datos de demostración.",
     "hero.badge.x402": "Micropagos x402",
     "hero.badge.gemini": "Gemini 2.5 Flash",
     "hero.badge.casper": "Casper Testnet",
@@ -209,23 +228,29 @@ export const dictionary = {
       "x402 es un protocolo de pago nativo de HTTP: un agente paga una pequeña cantidad de cripto por cada llamada a una API para desbloquear una respuesta paga — sin cuentas, sin facturas, solo un 402 Payment Required manejado automáticamente.",
 
     "step1.title": "Activo en demo",
-    "step1.description": "Los datos de riesgo reales se compran vía x402 a /x402-service para este ID.",
+    "step1.description": "Los datos de riesgo de este ID los vende por x402 el propio /x402-service del proyecto (valores fijos de demostración por activo).",
     "step1.assetIdLabel": "ID del activo",
     "step1.runFullDemo": "Correr demo:run completo (~{{cost}} CSPR, varios minutos)",
     "step1.disabledPublicTooltip":
       "Deshabilitado en la demo pública (~180 CSPR, varios minutos) — usa las acciones individuales de abajo, o clona el repo para correrlo tú mismo.",
-    "error.chainStateTransient": "Problema de red pasajero, reintentando automáticamente…",
+    "error.chainStateRetrying":
+      "No se pudo leer Casper Testnet: el nodo RPC público está fallando. Reintentando automáticamente — el feed no depende de él.",
+    "error.chainStateGaveUp":
+      "El RPC público de Casper Testnet no respondió tras varios intentos, así que el stake y los saldos en vivo no están disponibles ahora. El feed sigue cargando del registro de corridas confirmadas. Pulsa Refrescar para intentar de nuevo.",
 
     "arena.title": "Underwriters compitiendo",
     "arena.description":
-      "Dos agentes pagan x402 real por datos de riesgo, cotizan con Gemini real, y apuestan CSPR real detrás de su propio call.",
+      "Dos agentes compran datos de riesgo por x402, cotizan con Gemini y apuestan CSPR de testnet detrás de su propia decisión.",
     "arena.spreadDiscrepancy": "Discrepancia de spread:",
+    "arena.noRiskDataNote":
+      "Estas últimas cotizaciones ({{date}}) se hicieron sin datos de riesgo: el pago x402 revertía en el contrato WCSPR compartido de testnet, así que los agentes cotizaron a ciegas. Las corridas anteriores con datos de riesgo pagados por x402 están en el feed.",
 
     "underwriter.conservative": "Conservador",
     "underwriter.aggressive": "Agresivo / Optimista",
     "underwriter.atStake": "en juego",
-    "underwriter.sliced": "Rebanado — stake y reputación castigados",
-    "underwriter.latestQuote": "Última cotización — {{assetId}}",
+    "underwriter.sliced": "Penalizado (slash) — stake y reputación castigados",
+    "underwriter.latestQuote": "Última cotización — {{assetId}} · {{date}}",
+    "underwriter.noRiskData": "Sin datos de riesgo en esta corrida (el pago x402 no se liquidó).",
     "underwriter.recommendedTranche": "Tramo recomendado",
     "underwriter.quotedSpread": "Spread cotizado",
     "underwriter.feedPd": "PD del feed",
@@ -264,26 +289,31 @@ export const dictionary = {
 
     "climax.title": "El clímax — Default y slashing",
     "climax.description":
-      "mark_default → waterfall → slash sobre el underwriter que sobre-cotizó → penalize/reward en Reputation. Todo real.",
+      "mark_default → waterfall → slash al underwriter que sub-cotizó el riesgo → penalize/reward en Reputation. Cada paso es una transacción real en testnet.",
     "climax.slashingTooltip":
       "Slashing significa que el protocolo mismo confisca parte del CSPR stakeado de un underwriter como penalidad — nadie decide esto, es una regla del smart contract que se dispara automáticamente cuando una verificación on-chain prueba que el agente se equivocó con el riesgo.",
     "climax.lossInputLabel": "Monto de pérdida en CSPR",
     "climax.markDefault": "Marcar impago (~{{cost}} CSPR)",
-    "climax.resultHeading": "underwriter_B sobre-cotizó el riesgo — rebanado",
-    "climax.slashDetail": "de su stake, seizado por el waterfall",
+    "climax.resultHeading": "underwriter_B sub-cotizó el riesgo — penalizado",
+    "climax.slashDetail": "de su stake, confiscado tras el impago",
+    "climax.runContext": "Corrida del {{date}} · B había cotizado {{spread}} frente a un spread de mercado de {{market}}",
     "climax.reputationB": "reputación (B)",
     "climax.reputationA": "reputación (A)",
     "climax.lossMarked": "pérdida marcada: {{amount}}",
     "climax.emptyState":
       "Corre ambos underwriters para este activo antes de marcar el default (el slash se calcula del spread real que cotizó B).",
     "climax.constitutionTest":
-      "Prueba de Constitution: pedir {{amount}} de exposición → {{result}} ({{error}})",
+      "Chequeo de Constitution (llamada directa a assert_within_exposure): pedir {{amount}} de exposición → {{result}} ({{error}})",
+    "climax.constitutionNote":
+      "En los contratos que lee esta página (julio 2026), el stake y las compras de tramos todavía no llamaban a este chequeo; el redespliegue del 4 sep 2026 ya lo conecta.",
     "climax.reverted": "revirtió como se esperaba",
     "climax.notReverted": "NO revirtió (bug)",
 
     "feed.title": "Feed de atestaciones on-chain",
     "feed.description": "Reconstruido de agents/run-log.json — cada entrada es una transacción real confirmada en CSPR.live.",
-    "feed.empty": "Sin actividad on-chain todavía — dispara una acción arriba para verla aquí.",
+    "feed.empty": "Todavía no hay corridas registradas.",
+    "feed.loading": "Cargando el registro de corridas…",
+    "feed.error": "No se pudo cargar el registro de corridas (agents/run-log.json). Pulsa Refrescar para intentar de nuevo.",
     "feed.x402Settled": "Pago x402 liquidado",
     "feed.x402Detail": "Datos de riesgo para {{assetId}}",
     "feed.quoteIssued": "Cotización emitida: {{rating}}/1000",
@@ -292,18 +322,18 @@ export const dictionary = {
     "feed.stakeDetail": "{{amount}} apostados contra su propia cotización",
     "feed.boughtTranche": "Compró tramo {{tranche}}",
     "feed.boughtDetail": "{{amount}} comprometidos",
-    "feed.exposureProtected": "Límite de exposición protegido (revirtió)",
+    "feed.exposureProtected": "Chequeo de Constitution revirtió (lo esperado)",
     "feed.exposureNotReverted": "Constitution NO revirtió",
-    "feed.exposureDetail": "Pedido: {{amount}} · {{error}}",
+    "feed.exposureDetail": "Llamada directa · pedido {{amount}} · {{error}}",
     "feed.defaultMarked": "Default marcado — waterfall ejecutado",
-    "feed.defaultDetail": "Pérdida simulada de {{amount}}",
-    "feed.slashed": "underwriter_B slasheado ({{pct}}%)",
-    "feed.slashedDetail": "Sobre-cotizó el riesgo — stake seizado",
+    "feed.defaultDetail": "Pérdida de {{amount}} marcada (dato de demostración)",
+    "feed.slashed": "underwriter_B penalizado con slash ({{pct}}%)",
+    "feed.slashedDetail": "Sub-cotizó el riesgo — stake confiscado",
     "feed.reputationUpdated": "Reputación actualizada",
     "feed.reputationDetail": "B −{{penalize}} · A +{{reward}}",
 
     "footer.disclaimer":
-      "Todas las cifras son leídas en vivo de Casper Testnet o de agents/run-log.json (transacciones reales ya confirmadas) — nada en esta página está simulado ni calculado localmente sin respaldo on-chain.",
+      "El stake, la reputación y los saldos de los tramos se leen en vivo de Casper Testnet; el feed sale de agents/run-log.json, donde cada entrada es una transacción ya confirmada en testnet. El lote de facturas, sus datos de riesgo y el monto de la pérdida son datos de demostración, y el CSPR de testnet no tiene valor real.",
     "readOnly.tooltip":
       "Corre localmente para acciones — este deploy en Vercel es solo lectura (no puede firmar transacciones ni correr agentes).",
     "header.liveDemoBanner": "Ver la demo interactiva en vivo",
@@ -337,6 +367,7 @@ export const dictionary = {
     "action.success": "SUCCESS",
     "action.checkConsole": "Revisa la consola / stdout",
     "action.unknownError": "Error desconocido",
+    "action.reason.readOnly": "Este deploy es de solo lectura — corre el proyecto localmente para usar los botones de acción.",
     "action.reason.tunnelDisabled": "Deshabilitado en la demo pública — usa las acciones individuales (A → B → comprar → default).",
     "action.reason.concurrentLock": "Otra acción está en curso ahora mismo en esta demo — espera unos segundos y reintenta.",
     "action.reason.cooldown": "Espera {{time}} (cooldown anti-drenaje).",
@@ -344,14 +375,21 @@ export const dictionary = {
 
     "runItYourself.title": "Corre esto tú mismo",
     "runItYourself.thesis":
-      "Esta demo en vivo firma con los wallets de los agentes del proyecto — esa es la tesis, los agentes son los que firman. Para operar con tus propias llaves, clónalo así:",
+      "Esta página es de solo lectura. Corriendo localmente, los botones de acción firman con las wallets de los agentes en /keys — esa es la tesis, los agentes son los que firman. Para correrlo con tus propias llaves:",
     "runItYourself.step1": "Clona el repo y copia los .env.example (raíz, x402-service, frontend).",
     "runItYourself.step2": "Genera tus propias wallets (agents/keygen.js) y fondéalas desde el faucet de Casper testnet.",
     "runItYourself.step3": "Llena GEMINI_API_KEY y los hashes de contratos, instala deps en /agents, /x402-service y /frontend.",
     "runItYourself.step4": "Arranca el facilitator x402, corre agents/demo-run.mjs o npm run dev en /frontend — los botones firman con tus llaves.",
     "runItYourself.repoLink": "Repo en GitHub",
     "runItYourself.faucetLink": "Faucet de Casper testnet",
-    "runItYourself.contractsTitle": "Contratos deployados (Casper Testnet)",
+    "runItYourself.contractsTitle": "Contratos que lee esta página (Casper Testnet)",
+    "runItYourself.redeployedTitle":
+      "Redesplegados el 4 sep 2026 con el chequeo de Constitution conectado — todavía sin actividad de los agentes:",
+
+    "tx.copyHash": "Copiar hash: {{hash}}",
+    "tx.copied": "Copiado al portapapeles",
+    "tx.openExplorer": "Ver en CSPR.live: {{hash}}",
+    "tx.openExplorerShort": "Abrir la transacción {{hash}} en CSPR.live",
 
     "guide.hint.underwriters": "Empieza aquí: corre Underwriter A para verlo cotizar en vivo",
     "guide.hint.vault": "Ahora: compra el tramo senior o junior como investor",

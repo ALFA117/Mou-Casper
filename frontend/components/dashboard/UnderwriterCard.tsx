@@ -12,7 +12,13 @@ import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n/context";
 import type { UnderwriterRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
-import { cn, formatBps } from "@/lib/utils";
+import { cn, formatBps, formatDate } from "@/lib/utils";
+
+// Las corridas del 25-jul no trajeron datos de riesgo (el pago x402 no se
+// liquido) y riskData llega como {}: sin esto la tarjeta mostraba "NaN%".
+function bpsOrDash(bps: number | undefined): string {
+  return typeof bps === "number" && Number.isFinite(bps) ? formatBps(bps) : "—";
+}
 
 export function UnderwriterCard({
   wallet,
@@ -30,8 +36,8 @@ export function UnderwriterCard({
 }: {
   wallet: "underwriter_A" | "underwriter_B";
   profile: "conservative" | "aggressive";
-  liveStakeCspr: number;
-  liveReputation: number;
+  liveStakeCspr: number | null; // null = todavia no hay lectura de la cadena
+  liveReputation: number | null;
   latestRun: UnderwriterRunEntry | null;
   wasSlashed: boolean;
   stakeInputCspr: number;
@@ -41,9 +47,10 @@ export function UnderwriterCard({
   tooltip?: string;
   onRun: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const tone = profile === "conservative" ? "senior" : "junior";
   const quote = latestRun?.quote;
+  const hasRiskData = typeof latestRun?.riskData?.defaultProbabilityBps === "number";
 
   // Flash blanco una sola vez cuando el slash recien confirma (no en cada
   // refresco de polling posterior) — el estado "apagado" despues es permanente.
@@ -96,7 +103,7 @@ export function UnderwriterCard({
           variant={wasSlashed ? "carbon" : tone}
           className="shrink-0 whitespace-nowrap font-mono"
         >
-          <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />{" "}
+          {liveStakeCspr === null ? "— CSPR" : <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />}{" "}
           {t("underwriter.atStake")}
         </Badge>
       </CardHeader>
@@ -106,16 +113,24 @@ export function UnderwriterCard({
           <div className="rounded-xl border border-border-subtle bg-surface-2/60 p-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] uppercase tracking-wide text-foreground-faint">
-                {t("underwriter.latestQuote", { assetId: latestRun!.assetId })}
+                {t("underwriter.latestQuote", {
+                  assetId: latestRun!.assetId,
+                  date: formatDate(latestRun!.loggedAt, locale),
+                })}
               </span>
               <Badge variant={tone} className="font-mono">{quote.rating}/1000</Badge>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
               <Stat label={t("underwriter.recommendedTranche")} value={quote.recommended_tranche} capitalize />
               <Stat label={t("underwriter.quotedSpread")} value={formatBps(quote.price_bps)} mono />
-              <Stat label={t("underwriter.feedPd")} value={formatBps(latestRun!.riskData.defaultProbabilityBps)} mono />
-              <Stat label={t("underwriter.marketSpread")} value={formatBps(latestRun!.riskData.recommendedSpreadBps)} mono />
+              <Stat label={t("underwriter.feedPd")} value={bpsOrDash(latestRun!.riskData?.defaultProbabilityBps)} mono />
+              <Stat label={t("underwriter.marketSpread")} value={bpsOrDash(latestRun!.riskData?.recommendedSpreadBps)} mono />
             </div>
+            {!hasRiskData && (
+              <p className="mt-2 rounded-md border border-junior/30 bg-junior/5 px-2 py-1.5 text-xs text-foreground-muted">
+                {t("underwriter.noRiskData")}
+              </p>
+            )}
             <p className="mt-2 text-[11px] leading-relaxed text-foreground-muted">{quote.short_reasoning}</p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
               {latestRun!.hashes.x402 && (
@@ -144,10 +159,14 @@ export function UnderwriterCard({
               <InfoTooltip label={t("tooltip.whatIs", { term: "stake" })}>{t("underwriter.stakeTooltip")}</InfoTooltip>
             </span>
             <span className="font-mono text-base font-semibold tabular-nums text-foreground">
-              <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />
+              {liveStakeCspr === null ? "—" : <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />}
             </span>
           </div>
-          <ProgressBar value={liveStakeCspr} max={Math.max(1, liveStakeCspr)} tone={wasSlashed ? "carbon" : tone} />
+          <ProgressBar
+            value={liveStakeCspr ?? 0}
+            max={Math.max(1, liveStakeCspr ?? 0)}
+            tone={wasSlashed ? "carbon" : tone}
+          />
         </div>
 
         {/* Reputacion en vivo (leida on-chain, escala 0-1000) */}
@@ -155,10 +174,11 @@ export function UnderwriterCard({
           <div className="mb-1 flex items-baseline justify-between">
             <span className="text-xs text-foreground-muted">{t("underwriter.reputationLabel")}</span>
             <span className="font-mono text-base font-semibold tabular-nums text-foreground">
-              <CountUp value={liveReputation} className="text-foreground" /><span className="text-foreground-faint">/1000</span>
+              {liveReputation === null ? "—" : <CountUp value={liveReputation} className="text-foreground" />}
+              <span className="text-foreground-faint">/1000</span>
             </span>
           </div>
-          <ProgressBar value={liveReputation} max={1000} tone={wasSlashed ? "carbon" : "brand"} />
+          <ProgressBar value={liveReputation ?? 0} max={1000} tone={wasSlashed ? "carbon" : "brand"} />
         </div>
 
         <div className="flex items-center gap-2">
