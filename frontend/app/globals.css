@@ -7,9 +7,74 @@
     @apply border-border;
   }
 
+  /* Noche (por defecto) y día. La clase en <html> la pone el script inline
+     de layout.tsx antes del primer pintado; sin elección guardada sigue al sistema. */
+  :root,
+  :root.dark {
+    --background: 10 10 10;
+    --surface: 17 17 17;
+    --surface-2: 22 22 22;
+    --surface-3: 29 29 29;
+    --border: 42 42 42;
+    --border-subtle: 28 28 28;
+    --fg: 255 255 255;
+    --fg-muted: 166 166 172;
+    --fg-faint: 128 128 136;
+    --brand: 255 31 31;
+    --brand-dim: 140 16 16;
+    --brand-glow: 255 92 92;
+    --senior: 231 231 234;
+    --senior-dim: 142 142 150;
+    --senior-glow: 255 255 255;
+    --junior: 255 77 46;
+    --junior-dim: 140 42 24;
+    --junior-glow: 255 146 112;
+    --danger: 232 17 43;
+    --danger-dim: 122 10 23;
+    --danger-glow: 255 84 112;
+    --carbon: 75 75 82;
+    --carbon-dim: 35 35 38;
+    --carbon-glow: 255 255 255;
+    --hl: 255 255 255;
+    --shadow: 0 0 0;
+  }
+
+  :root.light {
+    --background: 245 244 241;
+    --surface: 255 255 255;
+    --surface-2: 240 239 236;
+    --surface-3: 231 230 226;
+    --border: 212 210 205;
+    --border-subtle: 226 224 220;
+    --fg: 18 18 20;
+    --fg-muted: 72 72 78;
+    --fg-faint: 96 96 104;
+    --brand: 204 0 0;
+    --brand-dim: 255 214 214;
+    --brand-glow: 230 40 40;
+    --senior: 52 52 60;
+    --senior-dim: 150 150 158;
+    --senior-glow: 24 24 27;
+    --junior: 196 52 20;
+    --junior-dim: 255 214 200;
+    --junior-glow: 214 80 40;
+    --danger: 190 10 34;
+    --danger-dim: 255 210 216;
+    --danger-glow: 214 30 60;
+    --carbon: 112 112 120;
+    --carbon-dim: 222 222 226;
+    --carbon-glow: 18 18 20;
+    --hl: 0 0 0;
+    --shadow: 80 60 50;
+  }
+
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+  }
+
+  html.light {
+    color-scheme: light;
   }
 
   body {
@@ -30,16 +95,16 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: #2a2a2a;
+    background-color: rgb(var(--border));
     border-radius: 9999px;
-    border: 2px solid #0a0a0a;
+    border: 2px solid rgb(var(--background));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #ff1f1f;
+    background-color: rgb(var(--brand));
   }
 
   :focus-visible {
-    outline: 2px solid #ff1f1f;
+    outline: 2px solid rgb(var(--brand));
     outline-offset: 2px;
     border-radius: 4px;
   }

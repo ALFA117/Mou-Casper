@@ -112,7 +112,7 @@ export function UnderwriterCard({
         {quote ? (
           <div className="rounded-xl border border-border-subtle bg-surface-2/60 p-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wide text-foreground-faint">
+              <span className="text-xs uppercase tracking-wide text-foreground-faint">
                 {t("underwriter.latestQuote", {
                   assetId: latestRun!.assetId,
                   date: formatDate(latestRun!.loggedAt, locale),
@@ -131,7 +131,7 @@ export function UnderwriterCard({
                 {t("underwriter.noRiskData")}
               </p>
             )}
-            <p className="mt-2 text-[11px] leading-relaxed text-foreground-muted">{quote.short_reasoning}</p>
+            <p className="mt-2 text-xs leading-relaxed text-foreground-muted">{quote.short_reasoning}</p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
               {latestRun!.hashes.x402 && (
                 <span className="flex items-center gap-1 text-foreground-muted">

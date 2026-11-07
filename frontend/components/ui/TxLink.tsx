@@ -54,7 +54,7 @@ export function TxLink({
         rel="noreferrer noopener"
         title={t("tx.openExplorer", { hash })}
         aria-label={t("tx.openExplorerShort", { hash: truncateHash(hash) })}
-        className="text-foreground-faint transition-colors hover:text-senior-glow"
+        className="relative text-foreground-faint transition-colors before:absolute before:-inset-4 before:content-[''] hover:text-senior-glow"
       >
         {copied ? (
           <Check className="size-3 shrink-0 text-brand-glow" aria-hidden />

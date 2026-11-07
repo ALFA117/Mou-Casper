@@ -52,7 +52,7 @@ export function DemoStep({
         href={`#${targetId}`}
         aria-label={t("nav.goToSection", { n })}
         className={cn(
-          "absolute left-0 top-0 hidden size-8 items-center justify-center rounded-full border bg-background font-mono text-[11px] font-semibold tabular-nums transition-transform duration-150 hover:scale-110 lg:flex",
+          "absolute left-0 top-0 hidden size-8 items-center justify-center rounded-full border bg-background font-mono text-xs font-semibold tabular-nums transition-transform duration-150 hover:scale-110 lg:flex",
           badgeTone[tone],
           suggested && "animate-pulse ring-2 ring-brand/60 ring-offset-2 ring-offset-background"
         )}

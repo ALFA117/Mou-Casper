@@ -168,11 +168,11 @@ function FeedEntryRow({
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <span className="truncate text-xs font-semibold text-foreground">{entry.label}</span>
-            <span className="shrink-0 text-[10px] text-foreground-faint">{timeAgo(entry.timestamp, locale)}</span>
+            <span className="shrink-0 text-xs text-foreground-faint">{timeAgo(entry.timestamp, locale)}</span>
           </div>
-          <p className="mt-0.5 text-[11px] leading-snug text-foreground-muted">{entry.detail}</p>
+          <p className="mt-0.5 text-xs leading-snug text-foreground-muted">{entry.detail}</p>
           <div className="mt-1.5 flex items-center justify-between gap-2">
-            <span className="text-[10px] uppercase tracking-wide text-foreground-faint">{entry.actor}</span>
+            <span className="text-xs uppercase tracking-wide text-foreground-faint">{entry.actor}</span>
             <TxLink hash={entry.hash} />
           </div>
         </div>

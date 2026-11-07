@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { StatTile } from "@/components/ui/StatTile";
 import { Logo } from "@/components/Logo";
 import { LanguageToggle } from "@/components/dashboard/LanguageToggle";
+import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { useI18n } from "@/lib/i18n/context";
 import type { ChainState, RunLogEntry, DemoBudget } from "@/lib/types";
 import { formatCspr } from "@/lib/utils";
@@ -48,7 +49,7 @@ export function SiteHeader({
           stat tiles y el banner de solo-lectura NO son sticky: en mobile el
           header completo (con stats apiladas) llegaba a medir 377px de alto,
           tapando casi la mitad de la pantalla en cada scroll. */}
-      <div className="sticky top-0 z-30 border-b border-border-subtle bg-background/60 shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-xl backdrop-saturate-150">
+      <div className="sticky top-0 z-30 border-b border-border-subtle bg-background/60 shadow-[inset_0_-1px_0_0_rgb(var(--hl)/0.04)] backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -71,6 +72,7 @@ export function SiteHeader({
                   </Badge>
                 </a>
               )}
+              <ThemeToggle />
               <LanguageToggle />
               <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
                 <RefreshCw className={loading ? "size-3.5 animate-spin" : "size-3.5"} aria-hidden />
@@ -114,7 +116,7 @@ export function SiteHeader({
         <div className="mt-4 border-y border-border-subtle bg-surface-2/70">
           <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
             <CloudOff className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
-            <p className="text-[11px] leading-snug text-foreground-muted">{t("header.readOnlyBanner")}</p>
+            <p className="text-xs leading-snug text-foreground-muted">{t("header.readOnlyBanner")}</p>
           </div>
         </div>
       )}
@@ -124,20 +126,20 @@ export function SiteHeader({
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
               <Wallet className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
-              <p className="text-[11px] leading-snug text-foreground-muted">
+              <p className="text-xs leading-snug text-foreground-muted">
                 {t("budget.remaining", { amount: formatCspr(demoBudget.totalBalanceCspr, 1) })}
               </p>
             </div>
             {demoBudget.isPublic && (
               <>
-                <p className="text-[11px] leading-snug text-foreground-muted">
+                <p className="text-xs leading-snug text-foreground-muted">
                   {t("budget.hourlyCap", {
                     used: String(demoBudget.actionsUsedThisHour),
                     cap: String(demoBudget.actionsCapPerHour),
                   })}
                 </p>
                 {demoBudget.cooldownRemainingSeconds > 0 && (
-                  <p className="text-[11px] leading-snug text-junior-glow">
+                  <p className="text-xs leading-snug text-junior-glow">
                     {t("budget.cooldown", { seconds: String(demoBudget.cooldownRemainingSeconds) })}
                   </p>
                 )}

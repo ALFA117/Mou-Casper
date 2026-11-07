@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+const c = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   darkMode: "class",
   content: [
@@ -9,57 +11,23 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Todos los colores salen de tokens CSS (canales RGB en globals.css) para
+      // que el modo claro funcione y Tailwind pueda aplicar opacidad (bg-brand/30).
       colors: {
-        background: "#0A0A0A",
-        surface: {
-          DEFAULT: "#111111",
-          2: "#161616",
-          3: "#1D1D1D",
-        },
-        border: {
-          DEFAULT: "#2A2A2A",
-          subtle: "#1C1C1C",
-        },
-        foreground: {
-          DEFAULT: "#FFFFFF",
-          muted: "#A6A6AC",
-          faint: "#6E6E76",
-        },
+        background: c("background"),
+        surface: { DEFAULT: c("surface"), 2: c("surface-2"), 3: c("surface-3") },
+        border: { DEFAULT: c("border"), subtle: c("border-subtle") },
+        foreground: { DEFAULT: c("fg"), muted: c("fg-muted"), faint: c("fg-faint") },
         // Casper red — marca/acento primario. Nunca como color de texto corrido.
-        brand: {
-          DEFAULT: "#FF1F1F",
-          dim: "#8C1010",
-          glow: "#FF5C5C",
-        },
-        // Senior tranche: cromo/blanco contenido — "bajo riesgo" se lee frio, no rojo.
-        senior: {
-          DEFAULT: "#E7E7EA",
-          dim: "#8E8E96",
-          glow: "#FFFFFF",
-        },
-        // Junior tranche: ascua/ember — misma familia que brand pero mas calida y
-        // ligeramente distinta, para que A y B se distingan incluso lado a lado.
-        junior: {
-          DEFAULT: "#FF4D2E",
-          dim: "#8C2A18",
-          glow: "#FF9270",
-        },
-        // Alerta de alta tension (boton mark_default, exposure exceeded, badges de
-        // slash %) — carmesi mas caliente que brand, para el build-up ANTES del
-        // momento del slash. El momento en si usa `carbon`, no este tono.
-        danger: {
-          DEFAULT: "#E8112B",
-          dim: "#7A0A17",
-          glow: "#FF5470",
-        },
-        // Dedicado exclusivamente al instante del slash: la tarjeta/nodo del
-        // underwriter castigado se apaga aqui, no a "mas rojo" (ver ClimaxPanel /
-        // UnderwriterCard / Background3D).
-        carbon: {
-          DEFAULT: "#4B4B52",
-          dim: "#232326",
-          glow: "#FFFFFF",
-        },
+        brand: { DEFAULT: c("brand"), dim: c("brand-dim"), glow: c("brand-glow") },
+        // Senior tranche: cromo contenido — "bajo riesgo" se lee frio, no rojo.
+        senior: { DEFAULT: c("senior"), dim: c("senior-dim"), glow: c("senior-glow") },
+        // Junior tranche: ascua/ember, misma familia que brand pero mas calida.
+        junior: { DEFAULT: c("junior"), dim: c("junior-dim"), glow: c("junior-glow") },
+        // Alerta de alta tension antes del slash.
+        danger: { DEFAULT: c("danger"), dim: c("danger-dim"), glow: c("danger-glow") },
+        // Exclusivo del instante del slash: el underwriter castigado se apaga.
+        carbon: { DEFAULT: c("carbon"), dim: c("carbon-dim"), glow: c("carbon-glow") },
       },
       fontFamily: {
         display: ["var(--font-display)", "sans-serif"],
@@ -70,21 +38,21 @@ const config: Config = {
         // Panel base: highlight interno arriba (luz "de arriba") + linea de
         // contorno + sombra ambiental — usado por Card/badges/toasts en todo
         // el dashboard, asi que un solo cambio le da profundidad a todo.
-        glow: "inset 0 1px 0 0 rgba(255,255,255,0.07), 0 0 0 1px rgba(255,255,255,0.06), 0 8px 30px -8px rgba(0,0,0,0.8)",
-        "glow-brand": "0 0 24px -4px rgba(255,31,31,0.5)",
-        "glow-senior": "0 0 20px -4px rgba(255,255,255,0.35)",
-        "glow-junior": "0 0 24px -4px rgba(255,77,46,0.5)",
-        "glow-danger": "0 0 28px -4px rgba(232,17,43,0.55)",
-        "glow-carbon": "0 0 22px -2px rgba(255,255,255,0.3)",
+        glow: "inset 0 1px 0 0 rgb(var(--hl) / 0.07), 0 0 0 1px rgb(var(--hl) / 0.06), 0 8px 30px -8px rgb(var(--shadow) / 0.8)",
+        "glow-brand": "0 0 24px -4px rgb(var(--brand) / 0.5)",
+        "glow-senior": "0 0 20px -4px rgb(var(--senior-glow) / 0.35)",
+        "glow-junior": "0 0 24px -4px rgb(var(--junior) / 0.5)",
+        "glow-danger": "0 0 28px -4px rgb(var(--danger) / 0.55)",
+        "glow-carbon": "0 0 22px -2px rgb(var(--carbon-glow) / 0.3)",
       },
       backgroundImage: {
         "grid-fade":
-          "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,31,31,0.14), transparent)",
+          "radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--brand) / 0.14), transparent)",
         "grid-lines":
-          "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
+          "linear-gradient(rgb(var(--hl) / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--hl) / 0.05) 1px, transparent 1px)",
         scanlines:
-          "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px)",
-        "hero-glow": "radial-gradient(ellipse 60% 80% at 50% 0%, rgba(255,31,31,0.22), transparent 70%)",
+          "repeating-linear-gradient(0deg, rgb(var(--hl) / 0.025) 0px, rgb(var(--hl) / 0.025) 1px, transparent 1px, transparent 3px)",
+        "hero-glow": "radial-gradient(ellipse 60% 80% at 50% 0%, rgb(var(--brand) / 0.22), transparent 70%)",
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",

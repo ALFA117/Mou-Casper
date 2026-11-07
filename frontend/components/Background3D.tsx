@@ -32,6 +32,82 @@ const TONE_COLOR: Record<BackgroundEvent["tone"], THREE.Color> = {
 // El nodo del slasheado no se pone "mas rojo" — se apaga a carbon, permanente.
 const KILL_COLOR = new THREE.Color("#3A3A40");
 
+// En modo claro el blanco no se ve sobre papel: el destello y la tranche
+// senior pasan a grafito. Se mutan en sitio para no re-crear la escena.
+function applyThemeColors(light: boolean) {
+  WHITE_FLASH.set(light ? "#18181B" : "#FFFFFF");
+  TONE_COLOR.senior.set(light ? "#3F3F46" : "#F4F4F5");
+  KILL_COLOR.set(light ? "#B4B4BC" : "#3A3A40");
+}
+
+function useIsLight() {
+  const [light, setLight] = useState(false);
+  useEffect(() => {
+    const el = document.documentElement;
+    const read = () => {
+      const isLight = el.classList.contains("light");
+      applyThemeColors(isLight);
+      setLight(isLight);
+    };
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+  return light;
+}
+
+// Pausa el render cuando la pestaña no se ve.
+function usePageVisible() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const on = () => setVisible(!document.hidden);
+    on();
+    document.addEventListener("visibilitychange", on);
+    return () => document.removeEventListener("visibilitychange", on);
+  }, []);
+  return visible;
+}
+
+/**
+ * Parallax de camara: el puntero (solo punteros finos) la inclina y el scroll
+ * la hace "bajar" por la red. Como la red de nodos esta mas cerca que los
+ * cubos, se mueven distinto: profundidad real, no solo escala.
+ */
+function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
+  const pointer = useRef({ x: 0, y: 0 });
+  const scroll = useRef(0);
+  useEffect(() => {
+    if (reducedMotion) return;
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    const onMove = (e: PointerEvent) => {
+      pointer.current.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      pointer.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      scroll.current = max > 0 ? window.scrollY / max : 0;
+    };
+    if (fine) window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [reducedMotion]);
+
+  useFrame(({ camera }) => {
+    if (reducedMotion) return;
+    const tx = pointer.current.x * 0.7;
+    const ty = 0.4 - pointer.current.y * 0.35 - scroll.current * 1.4;
+    camera.position.x += (tx - camera.position.x) * 0.04;
+    camera.position.y += (ty - camera.position.y) * 0.04;
+    camera.lookAt(0, -scroll.current * 0.8, 0);
+  });
+  return null;
+}
+
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -333,10 +409,11 @@ function FloatingCubes({ reducedMotion }: { reducedMotion: boolean }) {
 export function Background3D({ event }: { event?: BackgroundEvent | null }) {
   const reducedMotion = useReducedMotion();
   const canRender3D = useCanRender3D();
+  const light = useIsLight();
+  const visible = usePageVisible();
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden="true">
-      <div className="absolute inset-0 bg-grid-lines bg-[length:44px_44px] opacity-40" />
       <div className="absolute inset-0 bg-grid-fade" />
       <div className="absolute inset-0 bg-scanlines opacity-60" />
       {/* Glow ambiental rojo en las esquinas -- refuerza que hay "vida" detras
@@ -345,7 +422,7 @@ export function Background3D({ event }: { event?: BackgroundEvent | null }) {
         className="absolute inset-0 opacity-70"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 0% 0%, rgba(255,31,31,0.16), transparent 60%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(255,31,31,0.14), transparent 60%)",
+            "radial-gradient(ellipse 60% 50% at 0% 0%, rgb(var(--brand) / 0.16), transparent 60%), radial-gradient(ellipse 60% 50% at 100% 100%, rgb(var(--brand) / 0.14), transparent 60%)",
         }}
       />
       {canRender3D && (
@@ -353,9 +430,11 @@ export function Background3D({ event }: { event?: BackgroundEvent | null }) {
           dpr={[1, 1.5]}
           gl={{ antialias: true, alpha: true }}
           camera={{ position: [0, 0.4, 6], fov: 50 }}
-          className="opacity-90"
+          className={light ? "opacity-[0.28]" : "opacity-90"}
+          frameloop={visible ? "always" : "never"}
         >
-          <fog attach="fog" args={["#0A0A0A", 8, 21]} />
+          <fog attach="fog" args={[light ? "#F5F4F1" : "#0A0A0A", 8, 21]} />
+          <CameraRig reducedMotion={reducedMotion} />
           <NetworkField event={event ?? null} reducedMotion={reducedMotion} />
           <FloatingCubes reducedMotion={reducedMotion} />
         </Canvas>

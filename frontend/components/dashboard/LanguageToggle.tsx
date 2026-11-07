@@ -12,7 +12,7 @@ export function LanguageToggle() {
   const { locale, setLocale } = useI18n();
 
   return (
-    <div className="inline-flex items-center rounded-full border border-border bg-surface-2/80 p-0.5 text-xs font-medium">
+    <div className="inline-flex items-center rounded-full border border-border bg-surface-2/80 p-1 text-xs font-medium">
       {OPTIONS.map(opt => (
         <button
           key={opt.value}
@@ -20,7 +20,7 @@ export function LanguageToggle() {
           onClick={() => setLocale(opt.value)}
           aria-pressed={locale === opt.value}
           className={cn(
-            "rounded-full px-2.5 py-1 transition-colors duration-150",
+            "inline-flex min-h-9 min-w-10 items-center justify-center rounded-full px-3 transition-[color,background-color,transform] duration-150 active:scale-95",
             locale === opt.value ? "bg-brand text-background" : "text-foreground-muted hover:text-foreground"
           )}
         >
