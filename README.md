@@ -4,12 +4,14 @@
 
 **One-line pitch:** AVAL is the autonomous securitization desk for the agent economy. Two AI
 underwriter agents — one conservative, one aggressive — independently pay for risk data via
-x402, quote the **same** real-world receivable with a real LLM (Gemini), stake real CSPR behind
-their own opinion, and get **slashed on-chain, live**, when the one who under-priced risk turns
-out to be wrong.
+x402, quote the **same** receivable batch with a real LLM (Gemini), stake testnet CSPR behind
+their own opinion, and get **slashed on-chain** when the one who under-priced risk turns out to
+be wrong.
 
-Every number in this README is a real, verifiable Casper Testnet transaction. Nothing here is
-mocked, simulated, or computed off-chain without an on-chain transaction backing it.
+Every transaction hash in this README is a real, verifiable Casper Testnet transaction. The asset
+itself is a demo: the invoice batch, its risk-data feed (fixed values per asset served by
+`/x402-service`) and the default's loss amount are demo inputs, and testnet CSPR has no real
+value.
 
 Full build brief: [`Mou-Casper.md`](./Mou-Casper.md). Complete session-by-session engineering log
 (every bug, every fix, every real cost): [`tareas.md`](./tareas.md) — 600+ lines of "here's
@@ -18,16 +20,17 @@ exactly what broke and how we found out." Condensed write-up of the whole build:
 
 ## Live dashboard
 
-**[mou-casper.vercel.app](https://mou-casper.vercel.app)** — read-only view of the current
-on-chain state (stakes, reputation, tranches), refreshed live from Casper Testnet. Action buttons
-(run an agent, mark a default) are disabled on Vercel — they need local secret keys and a
-locally-hosted x402 facilitator that can't run in a serverless function.
+**[mou-casper.vercel.app](https://mou-casper.vercel.app)** — read-only view of the on-chain state
+(stakes, reputation, tranches), read live from Casper Testnet, plus the feed of every confirmed
+agent run (`agents/run-log.json`). Action buttons (run an agent, mark a default) are disabled on
+Vercel — they need local secret keys and a locally-hosted x402 facilitator that can't run in a
+serverless function. The dashboard reads the July 2026 `UnderwriterStake` and `TrancheVault`
+(the ones every agent run used), not the September redeploys — see the contracts table below.
 
-When the "🔴 Try the live interactive demo" banner is showing, it points at a Cloudflare Tunnel
-into the operator's own local instance — every button there fires a real transaction, no wallet
-or faucet needed to watch it. **The live demo signs with the project's own agent wallets — that's
-the thesis, the agents are the ones who sign.** To operate with your own keys instead, see
-[Run it yourself](#run-it-yourself) below.
+During the buildathon (July 2026) an interactive demo also ran through a Cloudflare Tunnel into
+the operator's own machine, where the buttons signed with the project's own agent wallets — that's
+the thesis, the agents are the ones who sign. That tunnel is offline now; to press the buttons,
+see [Run it yourself](#run-it-yourself) below.
 
 ## What's actually implemented
 
@@ -106,27 +109,33 @@ args) in [`deployments.json`](./deployments.json) and `tareas.md`'s deploy log.
 | hello (sanity check) | [`hash-a35eee05...4774`](https://testnet.cspr.live/contract-package/a35eee053184dcece3fe9d98a840f80c5eafcc491e469b6b9e2ca8f08b954774) | [`892cbd2d...9858`](https://testnet.cspr.live/deploy/892cbd2d71fe3c3bd226ef2ce99ed31da19b5f723ca9d6c0e90e9c575cc79858) | success |
 | Constitution | [`hash-26b1def3...0faf7`](https://testnet.cspr.live/contract-package/26b1def3934199cfcc814cbe81a9ad377d982452c35bd103e315b08b3c70faf7) | [`ff22ffb4...8a08a`](https://testnet.cspr.live/deploy/ff22ffb486e86d03ace66cbf93c8f0df6dbffaf191f6abeaccea0c288796a08a) | success |
 | Reputation | [`hash-3ee548b2...03516`](https://testnet.cspr.live/contract-package/3ee548b28300fe3fc9182aa4bfc747596ab4eded0d7ab4ec23d1da91cb003516) | [`1642fa0f...0d23a6`](https://testnet.cspr.live/deploy/1642fa0fafc662b39272d0f74cc0e0fe3b6d9b26a47aa26428a196b0900d23a6) | success |
-| UnderwriterStake | [`hash-dfc0212e...cc47b`](https://testnet.cspr.live/contract-package/dfc0212e3ae260f4926b27981e31f4dfb75993b3f278e8eec6d107a2c59cc47b) | [`e211e2c2...653025`](https://testnet.cspr.live/deploy/e211e2c2d09f2c1674c4d54eba22923d5f69fb12babc63612be198b4f8653025) | success (redeployed: now checks Constitution before staking, validates bps) |
+| UnderwriterStake (Jul 2026 — every agent stake/slash, read by the dashboard) | [`hash-8f037191...c4fb4`](https://testnet.cspr.live/contract-package/8f0371913f6d61d11d7e82c5b862c6a3d28f987cdf48084ed903623c26cc4fb4) | [`75d347d3...4bc3`](https://testnet.cspr.live/deploy/75d347d36e07cd4a4b56745ede66a3b71ad3055f4939e0be21a1eff29f234bc3) | success |
+| UnderwriterStake v2 (4 Sep 2026) | [`hash-dfc0212e...cc47b`](https://testnet.cspr.live/contract-package/dfc0212e3ae260f4926b27981e31f4dfb75993b3f278e8eec6d107a2c59cc47b) | [`e211e2c2...653025`](https://testnet.cspr.live/deploy/e211e2c2d09f2c1674c4d54eba22923d5f69fb12babc63612be198b4f8653025) | success (checks Constitution before staking, validates bps; no agent activity yet) |
 | AttestationRegistry | [`hash-7bd8579d...357940`](https://testnet.cspr.live/contract-package/7bd8579d79bb857adfdbc3e3f288275ddae9078d2fe511585860784742357940) | [`5b83cdb7...80602`](https://testnet.cspr.live/deploy/5b83cdb751288bce34bcf10fbdcac9c10ecdd97f8878daecda4002139c680602) | success |
-| TrancheVault | [`hash-fc8a2691...e03aa`](https://testnet.cspr.live/contract-package/fc8a26914e91ac361779b5f1c9ecb9d3d030acef2d338fad25b55a05b1ee03aa) | [`f1c1de87...438eff`](https://testnet.cspr.live/deploy/f1c1de8730ce2936c05c1dc7a39989fc7782a88a318a739922c79347d5438eff) | success (redeployed: now checks Constitution before accepting deposits) |
+| TrancheVault (Jul 2026 — every tranche buy and the default, read by the dashboard) | [`hash-449c08c7...78296`](https://testnet.cspr.live/contract-package/449c08c7d24655aafe27dc4e49964374910fdb6c69bfbd09700332a134b78296) | [`30a4159d...65f0`](https://testnet.cspr.live/deploy/30a4159d63791f1c17a03384f46eb556df1d303fdae5faf188897dcfc4dc65f0) | success |
+| TrancheVault v2 (4 Sep 2026) | [`hash-fc8a2691...e03aa`](https://testnet.cspr.live/contract-package/fc8a26914e91ac361779b5f1c9ecb9d3d030acef2d338fad25b55a05b1ee03aa) | [`f1c1de87...438eff`](https://testnet.cspr.live/deploy/f1c1de8730ce2936c05c1dc7a39989fc7782a88a318a739922c79347d5438eff) | success (checks Constitution before accepting deposits; no agent activity yet) |
+
+In the July contracts, `Constitution.assert_within_exposure()` existed but nothing called it; the
+dashboard's "Constitution check" is a direct call to that entry point (it reverts as expected).
+The v2 contracts wire it into `stake()`, `buy_senior()` and `buy_junior()`.
 
 ## Demo walkthrough
 
 Follows Section 8 of `Mou-Casper.md`: two underwriters pay x402 for the same risk data and quote
 opposite bets on the same asset (senior @ high spread vs. junior @ low spread) → investor buys
-into both tranches → a simulated default is marked → the waterfall hits junior first → the
+into both tranches → a default is marked on-chain with a demo loss amount → the waterfall hits junior first → the
 underwriter who under-priced risk is slashed live, reputation drops, the other is rewarded —
 every step links to a real CSPR.live testnet tx. Run it yourself with `demo:run` (below).
 
 ## Run it yourself
 
 Action buttons and the agent scripts need real secret keys and a real x402 facilitator — none of
-that can run on Vercel. To use them with your own wallets instead of the live demo's:
+that can run on Vercel. To use them with your own wallets:
 
 1. `cp .env.example .env` at the repo root, and `cp x402-service/.env.example x402-service/.env`,
    `cp frontend/.env.example frontend/.env.local` — fill in `GEMINI_API_KEY` (free tier,
-   [aistudio.google.com](https://aistudio.google.com/apikey)) and the contract hashes (already
-   filled in the example files from the table above).
+   [aistudio.google.com](https://aistudio.google.com/apikey)) and the contract hashes (from the
+   table above).
 2. Generate wallets: `cd agents && node keygen.js <name>` for `servicer`, `underwriter_A`,
    `underwriter_B`, `investor`. Fund each from the
    [Casper testnet faucet](https://testnet.cspr.live/tools/faucet) (captcha, manual).
@@ -150,21 +159,26 @@ that can run on Vercel. To use them with your own wallets instead of the live de
       (ES/EN), accessible tooltips, polished animations.
 - [x] Paso 13 — `Background3D` reactive to real on-chain events (x402 payments, stakes,
       attestations, slashing), degrades gracefully without WebGL.
-- [x] Post-Paso-13 polish — public interactive demo via Cloudflare Tunnel (visitors trigger real
-      testnet transactions signed by the project's own agent wallets, no wallet/faucet needed);
+- [x] Post-Paso-13 polish — public interactive demo via Cloudflare Tunnel during the buildathon
+      (visitors triggered real testnet transactions signed by the project's own agent wallets;
+      offline since);
       Gemini calls hardened with retry + model fallback against transient 429/503s; frontend
       served in production mode (`next build && next start`) for the public tunnel to avoid the
       dev-mode error overlay.
-- [ ] **Paso 14 — dry run for the recorded demo video, in progress.** Register/stake/attest for
+- [ ] **Paso 14 — dry run for the recorded demo video, not closed.** Register/stake/attest for
       both underwriters, tranche purchases, and the `Constitution` exposure-limit revert all pass
-      with real testnet transactions. Currently blocked on an on-chain revert
-      (`User error: 64658`) when settling x402 payments against the *shared* testnet WCSPR
-      contract — confirmed it isn't a bug in this repo (balance, nonce/time window, and
-      package-hash resolution all check out). Buildathon organizers confirmed (2026-07-25) it's a
-      known issue on their end with that contract and are fixing it.
+      with real testnet transactions. Blocked on an on-chain revert (`User error: 64658`) when
+      settling x402 payments against the *shared* testnet WCSPR contract — confirmed it isn't a
+      bug in this repo (balance, nonce/time window, and package-hash resolution all check out);
+      buildathon organizers confirmed (2026-07-25) it's a known issue on their end. The 25 Jul
+      2026 dry runs therefore quoted **without** risk data (no x402 payment, empty `riskData`) —
+      those are the "latest quotes" the dashboard shows, and it says so. Not re-tested since.
 - [ ] Paso 15 — README ✅ + [session report](./REPORTE-SESION.md) ✅ written; blocked on closing
       Paso 14 first before this counts as done. Then: run `Mou-Casper-Fase2-Auditoria.md` (not
       yet defined).
+- [x] Sep 2026 — `Constitution` exposure check wired into `UnderwriterStake`/`TrancheVault`, both
+      redeployed (v2 in the table above). The agents' recorded runs and the dashboard still use
+      the July contracts.
 
 ## Long-term plan
 
