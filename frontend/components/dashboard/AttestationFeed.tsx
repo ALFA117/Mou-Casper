@@ -131,7 +131,17 @@ const TONE_COLOR: Record<FeedTone, string> = {
   carbon: "text-foreground-muted bg-carbon/15",
 };
 
-function FeedEntryRow({ entry, isNew, staggerIndex }: { entry: FeedItem; isNew: boolean; staggerIndex: number }) {
+function FeedEntryRow({
+  entry,
+  isNew,
+  staggerIndex,
+  locale,
+}: {
+  entry: FeedItem;
+  isNew: boolean;
+  staggerIndex: number;
+  locale: string;
+}) {
   const [entered, setEntered] = useState(!isNew);
   useEffect(() => {
     if (isNew) {
@@ -158,7 +168,7 @@ function FeedEntryRow({ entry, isNew, staggerIndex }: { entry: FeedItem; isNew: 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <span className="truncate text-xs font-semibold text-foreground">{entry.label}</span>
-            <span className="shrink-0 text-[10px] text-foreground-faint">{timeAgo(entry.timestamp)}</span>
+            <span className="shrink-0 text-[10px] text-foreground-faint">{timeAgo(entry.timestamp, locale)}</span>
           </div>
           <p className="mt-0.5 text-[11px] leading-snug text-foreground-muted">{entry.detail}</p>
           <div className="mt-1.5 flex items-center justify-between gap-2">
@@ -171,8 +181,14 @@ function FeedEntryRow({ entry, isNew, staggerIndex }: { entry: FeedItem; isNew: 
   );
 }
 
-export function AttestationFeed({ runLog }: { runLog: RunLogEntry[] }) {
-  const { t } = useI18n();
+export function AttestationFeed({
+  runLog,
+  status,
+}: {
+  runLog: RunLogEntry[];
+  status: "loading" | "ready" | "error";
+}) {
+  const { t, locale } = useI18n();
   const entries = toFeedItems(runLog, t);
 
   // Cada entrada recuerda si ya se vio antes (Set persistente entre renders).
@@ -185,9 +201,12 @@ export function AttestationFeed({ runLog }: { runLog: RunLogEntry[] }) {
 
   useEffect(() => {
     entries.forEach(e => seenIdsRef.current.add(e.id));
-    isFirstLoadRef.current = false;
+    // La "carga inicial" termina cuando llega el primer registro, no en el
+    // primer render (que siempre es []): si no, toda la historia entraba como
+    // "nueva" con un retraso escalonado de varios segundos.
+    if (status !== "loading") isFirstLoadRef.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runLog]);
+  }, [runLog, status]);
 
   return (
     <Card className="flex h-full flex-col" id="attestations">
@@ -201,7 +220,22 @@ export function AttestationFeed({ runLog }: { runLog: RunLogEntry[] }) {
         </div>
       </CardHeader>
       <CardBody className="flex-1 overflow-y-auto">
-        {entries.length === 0 ? (
+        {status === "loading" && entries.length === 0 ? (
+          <div role="status" aria-live="polite" className="space-y-2.5">
+            <p className="text-xs text-foreground-muted">{t("feed.loading")}</p>
+            {[0, 1, 2, 3].map(i => (
+              <div
+                key={i}
+                aria-hidden
+                className="h-[74px] animate-pulse rounded-lg border border-border-subtle bg-surface-2/60 motion-reduce:animate-none"
+              />
+            ))}
+          </div>
+        ) : status === "error" && entries.length === 0 ? (
+          <div role="alert" className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-center text-xs text-foreground-muted">
+            {t("feed.error")}
+          </div>
+        ) : entries.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border-subtle p-6 text-center text-xs text-foreground-faint">
             {t("feed.empty")}
           </div>
@@ -212,7 +246,7 @@ export function AttestationFeed({ runLog }: { runLog: RunLogEntry[] }) {
               // historia al entrar a la pagina) — solo lo que llega despues.
               const isNew = !isFirstLoadRef.current && !seenIdsRef.current.has(entry.id);
               if (isNew) newIndex++;
-              return <FeedEntryRow key={entry.id} entry={entry} isNew={isNew} staggerIndex={newIndex} />;
+              return <FeedEntryRow key={entry.id} entry={entry} isNew={isNew} staggerIndex={newIndex} locale={locale} />;
             })}
           </ol>
         )}

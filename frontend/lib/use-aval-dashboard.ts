@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent, DemoBudget } from "./types";
+import type { ChainState, RunLogEntry, ProfileKey, BackgroundEvent, DemoBudget, ActionRejectionReason } from "./types";
 import { getPrimaryHash } from "./types";
 import {
   fetchChainState,
@@ -15,18 +15,24 @@ import {
 import { DEFAULT_ASSET_ID } from "./dashboard-config";
 import { useI18n } from "./i18n/context";
 
-// El RPC publico de testnet a veces tira un 413 pasajero incluso despues del
-// retry del server (casper-read.ts). En vez de pintar el error crudo apenas
-// falla una vez, reintentamos callados un par de veces mas -- si el jurado
-// ve algo, que sea un mensaje tranquilo, no un 413 en rojo.
-const CHAIN_STATE_SILENT_RETRY_DELAYS_MS = [1200, 2500];
+// El RPC publico de testnet falla seguido (413/500 pasajeros) incluso despues
+// del retry del server (casper-read.ts). Los dos primeros reintentos son
+// callados; despues se avisa, pero se SIGUE reintentando de verdad con
+// espera creciente -- el mensaje "reintentando" solo se muestra mientras hay
+// un reintento programado. Al agotar la lista se dice claro que se rindio y
+// que el boton Refrescar vuelve a intentar.
+const CHAIN_STATE_RETRY_DELAYS_MS = [1200, 2500, 5000, 10000, 20000, 30000];
+const CHAIN_STATE_SILENT_RETRIES = 2;
+
+export type ChainStateErrorKey = "error.chainStateRetrying" | "error.chainStateGaveUp";
 
 export interface AvalDashboardState {
   assetId: string;
   chainState: ChainState | null;
   runLog: RunLogEntry[];
+  runLogStatus: "loading" | "ready" | "error";
   loadingChainState: boolean;
-  chainStateError: string | null;
+  chainStateError: ChainStateErrorKey | null;
   busyAction: string | null; // qué botón está corriendo ahora mismo, o null
   busyActionStartedAt: number | null;
   lastActionLog: { label: string; ok: boolean; detail: string; hash: string | null }[];
@@ -34,13 +40,14 @@ export interface AvalDashboardState {
   demoBudget: DemoBudget | null;
 }
 
-export function useAvalDashboard() {
+export function useAvalDashboard({ readOnly }: { readOnly: boolean }) {
   const { t } = useI18n();
   const [assetId, setAssetId] = useState(DEFAULT_ASSET_ID);
   const [chainState, setChainState] = useState<ChainState | null>(null);
   const [runLog, setRunLog] = useState<RunLogEntry[]>([]);
+  const [runLogStatus, setRunLogStatus] = useState<"loading" | "ready" | "error">("loading");
   const [loadingChainState, setLoadingChainState] = useState(true);
-  const [chainStateError, setChainStateError] = useState<string | null>(null);
+  const [chainStateError, setChainStateError] = useState<ChainStateErrorKey | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [busyActionStartedAt, setBusyActionStartedAt] = useState<number | null>(null);
   const [lastActionLog, setLastActionLog] = useState<
@@ -49,6 +56,9 @@ export function useAvalDashboard() {
   const [bgEvent, setBgEvent] = useState<BackgroundEvent | null>(null);
   const [demoBudget, setDemoBudget] = useState<DemoBudget | null>(null);
   const bgEventIdRef = useRef(0);
+  // Cada refresh() sube este contador: un ciclo de reintentos viejo (o uno de
+  // un componente ya desmontado) se corta solo en vez de pisar al nuevo.
+  const refreshGenerationRef = useRef(0);
 
   // Emite un evento real para que Background3D pulse/ilumine/apague un nodo —
   // siempre disparado DESPUES de que la accion on-chain ya confirmo (nunca antes).
@@ -57,31 +67,58 @@ export function useAvalDashboard() {
     setBgEvent({ id: bgEventIdRef.current, kind, tone, wallet });
   }, []);
 
-  const refresh = useCallback(async () => {
+  // El feed (run-log.json) y el estado on-chain (RPC de testnet) se cargan por
+  // separado: antes iban juntos en un Promise.all y una caida del RPC dejaba
+  // tambien el feed vacio aunque /api/runs respondiera bien.
+  const loadRunLog = useCallback(async () => {
+    try {
+      const log = await fetchRunLog();
+      setRunLog(log);
+      setRunLogStatus("ready");
+    } catch {
+      setRunLogStatus(prev => (prev === "ready" ? prev : "error"));
+    }
+  }, []);
+
+  const loadChainState = useCallback(async (generation: number) => {
     setLoadingChainState(true);
-    for (let attempt = 0; attempt <= CHAIN_STATE_SILENT_RETRY_DELAYS_MS.length; attempt++) {
+    for (let attempt = 0; attempt <= CHAIN_STATE_RETRY_DELAYS_MS.length; attempt++) {
+      if (generation !== refreshGenerationRef.current) return;
       try {
-        const [state, log, budget] = await Promise.all([fetchChainState(), fetchRunLog(), fetchDemoBudget()]);
+        const state = await fetchChainState();
+        if (generation !== refreshGenerationRef.current) return;
         setChainState(state);
-        setRunLog(log);
-        setDemoBudget(budget);
         setChainStateError(null);
         setLoadingChainState(false);
         return;
       } catch {
-        const delay = CHAIN_STATE_SILENT_RETRY_DELAYS_MS[attempt];
-        if (delay !== undefined) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-        } else {
-          setChainStateError(t("error.chainStateTransient"));
-        }
+        if (generation !== refreshGenerationRef.current) return;
+        const delay = CHAIN_STATE_RETRY_DELAYS_MS[attempt];
+        if (delay === undefined) break;
+        if (attempt + 1 >= CHAIN_STATE_SILENT_RETRIES) setChainStateError("error.chainStateRetrying");
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
+    if (generation !== refreshGenerationRef.current) return;
+    setChainStateError("error.chainStateGaveUp");
     setLoadingChainState(false);
-  }, [t]);
+  }, []);
+
+  const refresh = useCallback(async () => {
+    const generation = ++refreshGenerationRef.current;
+    const tasks: Promise<unknown>[] = [loadRunLog(), loadChainState(generation)];
+    // El presupuesto de demo solo se muestra fuera de Vercel (ver SiteHeader):
+    // en el deploy de solo lectura eran 4 lecturas RPC extra por visita, sin uso.
+    if (!readOnly) tasks.push(fetchDemoBudget().then(setDemoBudget).catch(() => setDemoBudget(null)));
+    await Promise.all(tasks);
+  }, [loadRunLog, loadChainState, readOnly]);
 
   useEffect(() => {
     refresh();
+    return () => {
+      // Corta cualquier ciclo de reintentos pendiente al desmontar.
+      refreshGenerationRef.current += 1;
+    };
   }, [refresh]);
 
   const pushLog = useCallback((label: string, ok: boolean, detail: string, hash: string | null = null) => {
@@ -94,9 +131,10 @@ export function useAvalDashboard() {
   const describeFailure = useCallback(
     (result: {
       stderr?: string;
-      reason?: "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+      reason?: ActionRejectionReason;
       retryAfterSeconds?: number;
     }): string => {
+      if (result.reason === "read_only") return t("action.reason.readOnly");
       if (result.reason === "tunnel_disabled") return t("action.reason.tunnelDisabled");
       if (result.reason === "concurrent_lock") return t("action.reason.concurrentLock");
       if (result.reason === "hourly_cap") return t("action.reason.hourlyCap");
@@ -119,7 +157,7 @@ export function useAvalDashboard() {
         exitCode: number;
         stdout: string;
         stderr?: string;
-        reason?: "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+        reason?: ActionRejectionReason;
         retryAfterSeconds?: number;
         newLogEntries?: RunLogEntry[];
       }>,
@@ -203,6 +241,7 @@ export function useAvalDashboard() {
     setAssetId,
     chainState,
     runLog,
+    runLogStatus,
     loadingChainState,
     chainStateError,
     busyAction,

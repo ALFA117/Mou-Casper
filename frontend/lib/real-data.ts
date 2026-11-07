@@ -6,8 +6,12 @@
  */
 import type { ChainState, RunLogEntry, ScriptRunResult, ProfileKey, DemoBudget } from "./types";
 
+// Sin `cache: "no-store"`: la ruta responde con s-maxage para que la CDN de
+// Vercel sirva la ultima lectura buena (y la revalide por detras) en vez de
+// pegarle al RPC publico de testnet en cada visita. Localmente no hay CDN y
+// cada llamada sigue leyendo la cadena.
 export async function fetchChainState(): Promise<ChainState> {
-  const res = await fetch("/api/chain/state", { cache: "no-store" });
+  const res = await fetch("/api/chain/state");
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "No se pudo leer el estado on-chain");
   return res.json();
 }
@@ -18,9 +22,11 @@ export async function fetchDemoBudget(): Promise<DemoBudget | null> {
   return res.json();
 }
 
+// Lanza si la ruta falla: quien llama distingue "todavia no hay corridas" de
+// "no se pudo leer el registro" en vez de pintar un feed vacio en silencio.
 export async function fetchRunLog(): Promise<RunLogEntry[]> {
   const res = await fetch("/api/runs", { cache: "no-store" });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "No se pudo leer run-log.json");
   const data = await res.json();
   return data.log ?? [];
 }

@@ -17,6 +17,7 @@ const LIVE_DEMO_URL = process.env.NEXT_PUBLIC_LIVE_DEMO_URL;
 export function SiteHeader({
   chainState,
   runLog,
+  runLogReady,
   loading,
   readOnly,
   demoBudget,
@@ -24,12 +25,15 @@ export function SiteHeader({
 }: {
   chainState: ChainState | null;
   runLog: RunLogEntry[];
+  runLogReady: boolean;
   loading: boolean;
   readOnly: boolean;
   demoBudget: DemoBudget | null;
   onRefresh: () => void;
 }) {
   const { t } = useI18n();
+  // Sin lectura de la cadena (cargando o RPC caido) se muestra "—", no 0: un
+  // 0.000 CSPR parecia un dato real mientras la pagina todavia cargaba.
   const totalStake =
     (chainState?.underwriters.underwriter_A.stakeCspr ?? 0) + (chainState?.underwriters.underwriter_B.stakeCspr ?? 0);
   const avgReputation = chainState
@@ -81,21 +85,21 @@ export function SiteHeader({
         <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
           <StatTile
             label={t("header.stat.totalStake")}
-            value={formatCspr(totalStake, 3)}
-            countUp={{ value: totalStake, decimals: 3, suffix: " CSPR" }}
+            value={chainState ? formatCspr(totalStake, 3) : "— CSPR"}
+            countUp={chainState ? { value: totalStake, decimals: 3, suffix: " CSPR" } : undefined}
             icon={Gauge}
           />
           <StatTile
             label={t("header.stat.avgReputation")}
-            value={`${avgReputation}/1000`}
-            countUp={{ value: avgReputation, suffix: "/1000" }}
+            value={chainState ? `${avgReputation}/1000` : "—/1000"}
+            countUp={chainState ? { value: avgReputation, suffix: "/1000" } : undefined}
             tone={anySlashed ? "danger" : "brand"}
             icon={Activity}
           />
           <StatTile
             label={t("header.stat.events")}
-            value={String(onChainEventCount)}
-            countUp={{ value: onChainEventCount }}
+            value={runLogReady ? String(onChainEventCount) : "—"}
+            countUp={runLogReady ? { value: onChainEventCount } : undefined}
             icon={Radio}
           />
           <StatTile

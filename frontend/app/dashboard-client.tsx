@@ -36,6 +36,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
     setAssetId,
     chainState,
     runLog,
+    runLogStatus,
     loadingChainState,
     chainStateError,
     busyAction,
@@ -44,7 +45,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
     bgEvent,
     demoBudget,
     actions,
-  } = useAvalDashboard();
+  } = useAvalDashboard({ readOnly });
 
   const readOnlyTooltip = readOnly ? t("readOnly.tooltip") : undefined;
 
@@ -97,6 +98,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
         <SiteHeader
           chainState={chainState}
           runLog={runLog}
+          runLogReady={runLogStatus === "ready"}
           loading={loadingChainState}
           readOnly={readOnly}
           demoBudget={demoBudget}
@@ -117,8 +119,12 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
               )}
 
               {chainStateError && (
-                <div className="rounded-xl border border-border-subtle bg-surface-2 p-3 text-xs text-foreground-muted">
-                  {chainStateError}
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="rounded-xl border border-junior/40 bg-surface-2 p-3 text-xs leading-relaxed text-foreground-muted"
+                >
+                  {t(chainStateError)}
                 </div>
               )}
 
@@ -213,7 +219,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
             </div>
 
             <RevealOnMount index={1} className="xl:sticky xl:top-20 xl:h-[calc(100dvh-5rem)]">
-              <AttestationFeed runLog={runLog} />
+              <AttestationFeed runLog={runLog} status={runLogStatus} />
             </RevealOnMount>
           </div>
         </main>

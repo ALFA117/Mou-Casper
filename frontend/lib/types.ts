@@ -47,7 +47,8 @@ export interface UnderwriterRunEntry {
   assetId: string;
   profileKey: ProfileKey;
   stakeAmountCspr: number;
-  riskData: RiskData;
+  // {} en las corridas sin pago x402 liquidado (25-jul-2026): no hay datos.
+  riskData: Partial<RiskData>;
   quote: LlmQuote;
   reasoningHash: string;
   hashes: { x402: string | null; register: string; stake: string; attest: string };
@@ -95,6 +96,8 @@ export type RunLogEntry =
   | ConstitutionTestRunEntry
   | DefaultChainRunEntry;
 
+export type ActionRejectionReason = "read_only" | "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+
 export interface ScriptRunResult {
   exitCode: number;
   stdout: string;
@@ -103,7 +106,7 @@ export interface ScriptRunResult {
   // Solo presentes cuando lib/server/demo-guard.ts rechazo la accion (nunca
   // llego a tocar el script real) -- el cliente los usa para armar el
   // mensaje del toast en el idioma activo, ver lib/use-aval-dashboard.ts.
-  reason?: "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+  reason?: ActionRejectionReason;
   retryAfterSeconds?: number;
 }
 

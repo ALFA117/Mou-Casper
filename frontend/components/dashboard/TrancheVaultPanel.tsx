@@ -72,7 +72,7 @@ export function TrancheVaultPanel({
               subKey="vault.seniorSub"
               tone="senior"
               tooltipKey="vault.seniorTooltip"
-              outstandingCspr={vault?.seniorOutstandingCspr ?? SENIOR_FACE_VALUE_CSPR}
+              outstandingCspr={vault?.seniorOutstandingCspr ?? null}
               faceValueCspr={SENIOR_FACE_VALUE_CSPR}
             />
             <TrancheBlock
@@ -81,7 +81,7 @@ export function TrancheVaultPanel({
               subKey="vault.juniorSub"
               tone="junior"
               tooltipKey="vault.juniorTooltip"
-              outstandingCspr={vault?.juniorOutstandingCspr ?? JUNIOR_FACE_VALUE_CSPR}
+              outstandingCspr={vault?.juniorOutstandingCspr ?? null}
               faceValueCspr={JUNIOR_FACE_VALUE_CSPR}
             />
           </div>
@@ -95,9 +95,9 @@ export function TrancheVaultPanel({
                 <div className="text-sm font-medium text-foreground">{t("vault.investorAgent")}</div>
                 <div className="font-mono text-xs tabular-nums text-foreground-muted">
                   {t("vault.holdingsPrefix")}{" "}
-                  <CountUp value={vault?.investorHoldingSeniorCspr ?? 0} decimals={2} suffix=" CSPR" />{" "}
+                  {vault ? <CountUp value={vault.investorHoldingSeniorCspr} decimals={2} suffix=" CSPR" /> : "— CSPR"}{" "}
                   {t("vault.holdingsMiddle")}{" "}
-                  <CountUp value={vault?.investorHoldingJuniorCspr ?? 0} decimals={2} suffix=" CSPR" />
+                  {vault ? <CountUp value={vault.investorHoldingJuniorCspr} decimals={2} suffix=" CSPR" /> : "— CSPR"}
                 </div>
               </div>
             </div>
@@ -188,12 +188,12 @@ function TrancheBlock({
   subKey: TranslationKey;
   tone: "senior" | "junior";
   tooltipKey?: TranslationKey;
-  outstandingCspr: number;
+  outstandingCspr: number | null; // null = todavia no hay lectura de la cadena
   faceValueCspr: number;
 }) {
   const { t } = useI18n();
   const label = t(labelKey);
-  const wiped = outstandingCspr <= 0;
+  const wiped = outstandingCspr !== null && outstandingCspr <= 0;
   return (
     <div
       className={cn(
@@ -213,11 +213,11 @@ function TrancheBlock({
       <p className="mb-3 text-xs text-foreground-muted">{t(subKey)}</p>
       <div className="mb-2 flex items-baseline justify-between">
         <span className="font-mono text-2xl font-bold tabular-nums text-foreground">
-          <CountUp value={outstandingCspr} decimals={3} suffix=" CSPR" />
+          {outstandingCspr === null ? "— CSPR" : <CountUp value={outstandingCspr} decimals={3} suffix=" CSPR" />}
         </span>
         <span className="text-xs text-foreground-faint">{t("vault.outstanding")}</span>
       </div>
-      <ProgressBar value={outstandingCspr} max={faceValueCspr || 1} tone={wiped ? "danger" : tone} />
+      <ProgressBar value={outstandingCspr ?? 0} max={faceValueCspr || 1} tone={wiped ? "danger" : tone} />
       {wiped && <div className="mt-2 text-xs font-medium text-danger-glow">{t("vault.wiped")}</div>}
     </div>
   );

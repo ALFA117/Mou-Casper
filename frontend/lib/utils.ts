@@ -36,15 +36,29 @@ export function explorerDeployUrl(hash: string): string {
   return `${base}/deploy/${hash}`;
 }
 
-export function timeAgo(timestamp: number): string {
-  const diff = Math.max(0, Date.now() - timestamp);
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 5) return "just now";
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
+// Tiempo relativo en el idioma activo ("hace 3 meses" / "3 months ago"). Antes
+// solo llegaba a horas y en ingles: las corridas de julio salian como "2511h ago".
+export function timeAgo(timestamp: number, locale: string = "en"): string {
+  const diffSeconds = Math.round((timestamp - Date.now()) / 1000);
+  const abs = Math.abs(diffSeconds);
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  if (abs < 60) return rtf.format(diffSeconds, "second");
+  if (abs < 3600) return rtf.format(Math.round(diffSeconds / 60), "minute");
+  if (abs < 86400) return rtf.format(Math.round(diffSeconds / 3600), "hour");
+  if (abs < 86400 * 30) return rtf.format(Math.round(diffSeconds / 86400), "day");
+  if (abs < 86400 * 365) return rtf.format(Math.round(diffSeconds / (86400 * 30)), "month");
+  return rtf.format(Math.round(diffSeconds / (86400 * 365)), "year");
+}
+
+// Fecha corta y explicita ("25 Jul 2026" / "25 jul 2026") para decir de que
+// corrida sale cada dato, sin depender de la zona horaria del visitante.
+export function formatDate(value: string | number, locale: string = "en"): string {
+  return new Intl.DateTimeFormat(locale === "es" ? "es-MX" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
 }
 
 export function sleep(ms: number): Promise<void> {
