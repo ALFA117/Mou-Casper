@@ -1,3 +1,4 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -9,6 +10,13 @@ const nextConfig: NextConfig = {
   // nunca llega a correr. Se usan wildcards para no tener que tocar este
   // archivo cada vez que se regenera un quick tunnel o se rota el dominio.
   allowedDevOrigins: ["*.trycloudflare.com", "*.ngrok-free.app", "*.ngrok.app"],
+  // agents/run-log.json vive fuera de frontend/. Se lee con una ruta dinamica,
+  // asi que el trazado no lo detecta solo: sin esto no llega a la funcion de
+  // Vercel y el feed de produccion sale vacio.
+  outputFileTracingRoot: path.join(__dirname, ".."),
+  outputFileTracingIncludes: {
+    "/api/runs": ["../agents/run-log.json"],
+  },
 };
 
 export default nextConfig;
