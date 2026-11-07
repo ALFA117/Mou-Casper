@@ -25,7 +25,7 @@ export function isPublicHost(req: Request): boolean {
 // Codigo estructurado para que el CLIENTE arme el mensaje en el idioma activo
 // (ES/EN) -- `error` de abajo queda solo como fallback/log en español, nunca
 // se muestra directo en el toast cuando hay un `reason` conocido.
-export type GuardRejectionReason = "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
+export type GuardRejectionReason = "read_only" | "tunnel_disabled" | "concurrent_lock" | "cooldown" | "hourly_cap";
 
 export interface GuardResult {
   ok: boolean;
@@ -36,6 +36,19 @@ export interface GuardResult {
 }
 
 export function reserveActionSlot(req: Request, actionKey: string): GuardResult {
+  // En Vercel no hay llaves, ni facilitator x402, ni agentes que lanzar: se
+  // rechaza aqui con 403 (prohibido por configuracion) en vez de llegar a
+  // runAgentScript y responder un 500 que parece una falla del servidor.
+  if (process.env.VERCEL === "1") {
+    return {
+      ok: false,
+      status: 403,
+      reason: "read_only",
+      error:
+        "Este deploy en Vercel es de solo lectura: no firma transacciones ni corre agentes. Corre el proyecto localmente para usar las acciones.",
+    };
+  }
+
   const isPublic = isPublicHost(req);
 
   if (isPublic && actionKey === "demo_run") {
