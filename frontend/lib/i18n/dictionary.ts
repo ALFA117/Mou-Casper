@@ -92,7 +92,7 @@ export const dictionary = {
     "underwriter.feedPd": "Feed PD",
     "underwriter.marketSpread": "Market spread",
     "underwriter.noRunsYet": "Run this agent to see it quote live.",
-    "underwriter.stakeLabel": "Stake in UnderwriterStake (live)",
+    "underwriter.stakeLabel": "Stake (live)",
     "underwriter.stakeTooltip":
       "CSPR this agent locked in the UnderwriterStake contract as collateral behind its own risk call. It only gets this back if the asset performs — if it defaults and this agent mispriced it, slashing seizes part of it.",
     "underwriter.reputationLabel": "Reputation (live)",
@@ -133,8 +133,8 @@ export const dictionary = {
     "climax.resultHeading": "underwriter_B underpriced the risk — slashed",
     "climax.slashDetail": "of its stake, seized after the default",
     "climax.runContext": "Run of {{date}} · B had quoted {{spread}} against a {{market}} market spread",
-    "climax.reputationB": "reputation (B)",
-    "climax.reputationA": "reputation (A)",
+    "climax.reputationB": "Reputation, underwriter B",
+    "climax.reputationA": "Reputation, underwriter A",
     "climax.lossMarked": "loss marked: {{amount}}",
     "climax.emptyState":
       "Run both underwriters for this asset before marking the default (the slash is calculated from B's real quoted spread).",
@@ -170,6 +170,9 @@ export const dictionary = {
 
     "footer.disclaimer":
       "Stakes, reputation and tranche balances are read live from Casper Testnet; the feed comes from agents/run-log.json, where every entry is a transaction already confirmed on testnet. The invoice batch, its risk data and the loss amount are demo inputs, and testnet CSPR has no real value.",
+    "readOnly.inline": "Disabled on this read-only deploy. Run the project locally to sign transactions.",
+    "feed.showAll": "Show all {{n}} entries",
+    "feed.showLess": "Show fewer",
     "readOnly.tooltip":
       "Run locally to enable actions — this Vercel deploy is read-only (it can't sign transactions or run agents).",
 
@@ -310,7 +313,7 @@ export const dictionary = {
     "underwriter.feedPd": "PD del feed",
     "underwriter.marketSpread": "Spread del mercado",
     "underwriter.noRunsYet": "Corre este agente para verlo cotizar en vivo.",
-    "underwriter.stakeLabel": "Stake en UnderwriterStake (en vivo)",
+    "underwriter.stakeLabel": "Stake (en vivo)",
     "underwriter.stakeTooltip":
       "CSPR que este agente bloqueó en el contrato UnderwriterStake como colateral detrás de su propia cotización de riesgo. Solo lo recupera si el activo se comporta bien — si cae en default y este agente se equivocó, el slashing le confisca una parte.",
     "underwriter.reputationLabel": "Reputación (en vivo)",
@@ -347,12 +350,12 @@ export const dictionary = {
     "climax.slashingTooltip":
       "Slashing significa que el protocolo mismo confisca parte del CSPR stakeado de un underwriter como penalidad — nadie decide esto, es una regla del smart contract que se dispara automáticamente cuando una verificación on-chain prueba que el agente se equivocó con el riesgo.",
     "climax.lossInputLabel": "Monto de pérdida en CSPR",
-    "climax.markDefault": "Marcar impago (~{{cost}} CSPR)",
+    "climax.markDefault": "Marcar default (~{{cost}} CSPR)",
     "climax.resultHeading": "underwriter_B sub-cotizó el riesgo — penalizado",
-    "climax.slashDetail": "de su stake, confiscado tras el impago",
+    "climax.slashDetail": "de su stake, confiscado tras el default",
     "climax.runContext": "Corrida del {{date}} · B había cotizado {{spread}} frente a un spread de mercado de {{market}}",
-    "climax.reputationB": "reputación (B)",
-    "climax.reputationA": "reputación (A)",
+    "climax.reputationB": "Reputación, underwriter B",
+    "climax.reputationA": "Reputación, underwriter A",
     "climax.lossMarked": "pérdida marcada: {{amount}}",
     "climax.emptyState":
       "Corre ambos underwriters para este activo antes de marcar el default (el slash se calcula del spread real que cotizó B).",
@@ -388,6 +391,9 @@ export const dictionary = {
 
     "footer.disclaimer":
       "El stake, la reputación y los saldos de los tramos se leen en vivo de Casper Testnet; el feed sale de agents/run-log.json, donde cada entrada es una transacción ya confirmada en testnet. El lote de facturas, sus datos de riesgo y el monto de la pérdida son datos de demostración, y el CSPR de testnet no tiene valor real.",
+    "readOnly.inline": "Desactivado en este deploy de solo lectura. Corre el proyecto en local para firmar transacciones.",
+    "feed.showAll": "Ver las {{n}} entradas",
+    "feed.showLess": "Ver menos",
     "readOnly.tooltip":
       "Corre localmente para acciones — este deploy en Vercel es solo lectura (no puede firmar transacciones ni correr agentes).",
     "header.liveDemoBanner": "Ver la demo interactiva en vivo",

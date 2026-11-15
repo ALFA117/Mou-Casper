@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { ReadOnlyNote } from "@/components/ui/ReadOnlyNote";
 import { useI18n } from "@/lib/i18n/context";
 import type { UnderwriterRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
@@ -88,10 +89,15 @@ export function UnderwriterCard({
           </div>
           <div className="min-w-0">
             <CardTitle className="font-mono text-base font-semibold">{wallet}</CardTitle>
-            <p className={cn("text-[13px]", wasSlashed ? "font-medium text-brand-glow" : "text-foreground-muted")}>
-              {wasSlashed
-                ? t("underwriter.sliced")
-                : `${t(profile === "conservative" ? "underwriter.conservative" : "underwriter.aggressive")} · Gemini 2.5 Flash`}
+            <p className={cn("text-[13px] leading-snug", wasSlashed ? "font-medium text-brand-glow" : "text-foreground-muted")}>
+              {wasSlashed ? (
+                t("underwriter.sliced")
+              ) : (
+                <>
+                  <span className="whitespace-nowrap">{t(profile === "conservative" ? "underwriter.conservative" : "underwriter.aggressive")}</span>
+                  <span className="block whitespace-nowrap text-foreground-faint">Gemini 2.5 Flash</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -109,17 +115,17 @@ export function UnderwriterCard({
       {/* Stake y reputacion leidos on-chain */}
       <div className="grid grid-cols-2 border-b border-border-subtle">
         <div className="min-w-0 border-r border-border-subtle px-5 py-4 sm:px-6">
-          <p className="flex items-center gap-1 text-[13px] text-foreground-muted">
+          <p className="flex items-center gap-1 whitespace-nowrap text-[13px] text-foreground-muted">
             {t("underwriter.stakeLabel")}
             <InfoTooltip label={t("tooltip.whatIs", { term: "stake" })}>{t("underwriter.stakeTooltip")}</InfoTooltip>
           </p>
           <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
-            {liveStakeCspr === null ? "—" : <CountUp value={liveStakeCspr} decimals={3} />}
+            {liveStakeCspr === null ? "—" : <CountUp value={liveStakeCspr} decimals={2} />}
             <span className="ml-1 text-sm font-normal text-foreground-faint">CSPR</span>
           </p>
         </div>
         <div className="min-w-0 px-5 py-4 sm:px-6">
-          <p className="text-[13px] text-foreground-muted">{t("underwriter.reputationLabel")}</p>
+          <p className="whitespace-nowrap text-[13px] text-foreground-muted">{t("underwriter.reputationLabel")}</p>
           <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
             {liveReputation === null ? "—" : <CountUp value={liveReputation} />}
             <span className="text-sm font-normal text-foreground-faint">/1000</span>
@@ -195,7 +201,8 @@ export function UnderwriterCard({
         )}
       </CardBody>
 
-      <div className="flex items-center gap-2 border-t border-border-subtle bg-surface-2 px-5 py-3 sm:px-6">
+      <div className="space-y-2.5 border-t border-border-subtle bg-surface-2 px-5 py-3 sm:px-6">
+      <div className="flex items-center gap-2">
         <label className="sr-only" htmlFor={`stake-${wallet}`}>
           {t("underwriter.stakeInputLabel")}
         </label>
@@ -213,6 +220,8 @@ export function UnderwriterCard({
             {t("underwriter.runButton", { cost: ACTION_COST_ESTIMATES_CSPR.runUnderwriter })}
           </Button>
         </span>
+      </div>
+      <ReadOnlyNote show={Boolean(tooltip)} />
       </div>
     </Card>
   );

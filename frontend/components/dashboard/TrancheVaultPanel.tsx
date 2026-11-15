@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
+import { ReadOnlyNote } from "@/components/ui/ReadOnlyNote";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n/context";
 import type { TranslationKey } from "@/lib/i18n/dictionary";
@@ -50,7 +51,7 @@ export function TrancheVaultPanel({
     <Card className="" id="vault">
       <CardHeader>
         <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded border border-border bg-surface-2 text-foreground">
+          <div className="hidden size-10 shrink-0 items-center justify-center rounded border border-border bg-surface-2 text-foreground sm:flex">
             <Layers className="size-[18px]" aria-hidden />
           </div>
           <div className="max-w-[62ch]">
@@ -138,6 +139,7 @@ export function TrancheVaultPanel({
               onBuy={() => onBuyJunior(juniorAmount)}
               text={t("vault.buyJunior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
             />
+            <ReadOnlyNote show={Boolean(readOnlyTooltip)} className="sm:col-span-2" />
           </div>
 
           {(lastSeniorBuy || lastJuniorBuy) && (
@@ -213,10 +215,10 @@ function BuyRow({
         value={amount}
         onChange={e => onAmount(Number(e.target.value) || 0)}
         disabled={disabled}
-        className="field w-20"
+        className="field w-16 shrink-0"
       />
       <span title={tooltip} className="min-w-0 flex-1">
-        <Button size="sm" variant="secondary" onClick={onBuy} disabled={disabled} loading={loading} className="w-full">
+        <Button size="sm" variant="secondary" onClick={onBuy} disabled={disabled} loading={loading} className="w-full px-3 min-[380px]:whitespace-nowrap">
           {text}
         </Button>
       </span>
@@ -255,7 +257,7 @@ function TrancheBlock({
       <p className="mt-1 text-[13px] text-foreground-muted">{t(subKey)}</p>
       <p className="mt-0.5 font-mono text-xs text-foreground-faint">{t("vault.faceValue", { amount: formatCspr(faceValueCspr, 0) })}</p>
       <p className="mt-4 font-mono text-2xl font-semibold tabular-nums text-foreground">
-        {outstandingCspr === null ? "—" : <CountUp value={outstandingCspr} decimals={3} />}
+        {outstandingCspr === null ? "—" : <CountUp value={outstandingCspr} decimals={2} />}
         <span className="ml-1.5 text-sm font-normal text-foreground-faint">CSPR</span>
       </p>
       <p className="text-[13px] text-foreground-faint">{t("vault.outstanding")}</p>

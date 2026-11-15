@@ -110,7 +110,7 @@ export function Hero({
           <div className="px-5 pb-5 pt-5">
             <p className="label">{t("header.stat.totalStake")}</p>
             <p className="mt-1 font-mono text-[34px] font-semibold leading-none tabular-nums text-foreground sm:text-4xl">
-              {totalStake === null ? "—" : <CountUp value={totalStake} decimals={3} />}
+              {totalStake === null ? "—" : <CountUp value={totalStake} decimals={2} />}
               <span className="ml-2 text-lg font-medium text-foreground-faint">CSPR</span>
             </p>
 
@@ -125,7 +125,7 @@ export function Hero({
                   <div className="flex items-baseline justify-between gap-3 text-sm">
                     <dt className="text-foreground-muted">{t("position.stakeOf", { wallet })}</dt>
                     <dd className="font-mono tabular-nums text-foreground">
-                      {u ? <CountUp value={u.stakeCspr} decimals={3} suffix=" CSPR" /> : "—"}
+                      {u ? <CountUp value={u.stakeCspr} decimals={2} suffix=" CSPR" /> : "—"}
                     </dd>
                   </div>
                   <ProgressBar value={u?.stakeCspr ?? 0} max={maxStake} tone={tone} trackClassName="mt-1.5" label={wallet} />
@@ -175,9 +175,9 @@ export function Hero({
             />
           </a>
 
-          <div className="flex items-center justify-between gap-3 border-t border-border-subtle bg-surface-2 px-5 py-3 text-[13px] text-foreground-faint">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-border-subtle bg-surface-2 px-5 py-3 text-[13px] text-foreground-faint">
             <span>{t("position.source")}</span>
-            <span className="font-mono tabular-nums">
+            <span className="whitespace-nowrap font-mono tabular-nums">
               {t("header.stat.lastRead")}: {chainState ? new Date(chainState.readAt).toLocaleTimeString(locale === "es" ? "es-MX" : "en-GB") : "—"}
             </span>
           </div>

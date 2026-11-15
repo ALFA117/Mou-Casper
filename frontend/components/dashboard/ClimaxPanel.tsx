@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { ReadOnlyNote } from "@/components/ui/ReadOnlyNote";
 import { useI18n } from "@/lib/i18n/context";
 import type { RunLogEntry, DefaultChainRunEntry, ConstitutionTestRunEntry, UnderwriterRunEntry } from "@/lib/types";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
@@ -74,7 +75,7 @@ export function ClimaxPanel({
     <Card accent="brand" elevated className="" id="climax">
       <CardHeader className="pt-5">
         <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded border border-brand/30 bg-brand-dim text-brand-glow">
+          <div className="hidden size-10 shrink-0 items-center justify-center rounded border border-brand/30 bg-brand-dim text-brand-glow sm:flex">
             <Skull className="size-[18px]" aria-hidden />
           </div>
           <div className="max-w-[62ch]">
@@ -142,7 +143,7 @@ export function ClimaxPanel({
 
         {lastConstitutionTest && (
           <div className="rounded border border-border px-4 py-3.5 text-[13px] leading-relaxed">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="flex flex-col gap-1.5">
               <span className="flex gap-2.5 text-foreground">
                 <ShieldAlert className={cn("mt-0.5 size-4 shrink-0", lastConstitutionTest.testPassed ? "text-senior-glow" : "text-brand-glow")} aria-hidden />
                 {t("climax.constitutionTest", {
@@ -151,9 +152,9 @@ export function ClimaxPanel({
                   error: lastConstitutionTest.errorName,
                 })}
               </span>
-              <span className="pl-6 sm:pl-0"><TxLink hash={lastConstitutionTest.hash} /></span>
+              <p className="pl-6 text-foreground-muted">{t("climax.constitutionNote")}</p>
+              <span className="whitespace-nowrap pl-6"><TxLink hash={lastConstitutionTest.hash} /></span>
             </div>
-            <p className="mt-1.5 pl-6 text-foreground-muted">{t("climax.constitutionNote")}</p>
           </div>
         )}
 
@@ -168,7 +169,7 @@ export function ClimaxPanel({
             value={lossAmount}
             onChange={e => setLossAmount(Number(e.target.value) || 0)}
             disabled={actionsDisabled}
-            className="field w-24"
+            className="field w-20"
           />
           <span title={readOnlyTooltip}>
             <Button
@@ -181,6 +182,7 @@ export function ClimaxPanel({
               {t("climax.markDefault", { cost: ACTION_COST_ESTIMATES_CSPR.markDefault })}
             </Button>
           </span>
+          <ReadOnlyNote show={Boolean(readOnlyTooltip)} className="basis-full pt-1" />
         </div>
       </CardBody>
     </Card>
