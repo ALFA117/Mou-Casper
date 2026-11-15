@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Zap, Stamp, Lock, Layers, ShieldAlert, AlertTriangle, Skull, Activity, Coins, type LucideIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
+import { useEffect, useRef } from "react";
+import { Zap, Stamp, Lock, Layers, ShieldAlert, AlertTriangle, Skull, Activity, type LucideIcon } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { TxLink } from "@/components/ui/TxLink";
 import { useI18n } from "@/lib/i18n/context";
 import type { TranslationKey } from "@/lib/i18n/dictionary";
@@ -124,11 +124,11 @@ function toFeedItems(log: RunLogEntry[], t: Translate): FeedItem[] {
 }
 
 const TONE_COLOR: Record<FeedTone, string> = {
-  senior: "text-senior-glow bg-senior/10",
-  junior: "text-junior-glow bg-junior/10",
-  brand: "text-brand-glow bg-brand/10",
-  danger: "text-danger-glow bg-danger/10",
-  carbon: "text-foreground-muted bg-carbon/15",
+  senior: "border-senior/30 bg-senior-dim text-senior-glow",
+  junior: "border-brand/30 bg-brand-dim text-brand-glow",
+  brand: "border-border bg-surface-2 text-foreground-muted",
+  danger: "border-brand/30 bg-brand-dim text-brand-glow",
+  carbon: "border-border bg-surface-3 text-foreground-muted",
 };
 
 function FeedEntryRow({
@@ -142,39 +142,26 @@ function FeedEntryRow({
   staggerIndex: number;
   locale: string;
 }) {
-  const [entered, setEntered] = useState(!isNew);
-  useEffect(() => {
-    if (isNew) {
-      const raf = requestAnimationFrame(() => setEntered(true));
-      return () => cancelAnimationFrame(raf);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const Icon = entry.icon;
   return (
     <li
-      className={cn(
-        "rounded-lg border border-border-subtle bg-surface-2/60 p-3 transition-all duration-300 ease-out",
-        "motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100",
-        entered ? "translate-y-0 opacity-100" : "-translate-y-1.5 opacity-0"
-      )}
-      style={isNew ? { transitionDelay: `${staggerIndex * 40}ms` } : undefined}
+      className={cn("flex gap-3 px-5 py-3.5", isNew && "animate-rise")}
+      style={isNew ? { animationDelay: `${staggerIndex * 40}ms` } : undefined}
     >
-      <div className="flex items-start gap-2">
-        <div className={cn("mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md", TONE_COLOR[entry.tone])}>
-          <Icon className="size-3.5" aria-hidden />
+      <div className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded border", TONE_COLOR[entry.tone])}>
+        <Icon className="size-3.5" aria-hidden />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-sm font-medium text-foreground">{entry.label}</span>
+          <time className="shrink-0 text-xs text-foreground-faint" dateTime={new Date(entry.timestamp).toISOString()}>
+            {timeAgo(entry.timestamp, locale)}
+          </time>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-xs font-semibold text-foreground">{entry.label}</span>
-            <span className="shrink-0 text-[10px] text-foreground-faint">{timeAgo(entry.timestamp, locale)}</span>
-          </div>
-          <p className="mt-0.5 text-[11px] leading-snug text-foreground-muted">{entry.detail}</p>
-          <div className="mt-1.5 flex items-center justify-between gap-2">
-            <span className="text-[10px] uppercase tracking-wide text-foreground-faint">{entry.actor}</span>
-            <TxLink hash={entry.hash} />
-          </div>
+        <p className="text-[13px] leading-snug text-foreground-muted">{entry.detail}</p>
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-x-2">
+          <span className="font-mono text-xs text-foreground-faint">{entry.actor}</span>
+          <TxLink hash={entry.hash} />
         </div>
       </div>
     </li>
@@ -210,37 +197,34 @@ export function AttestationFeed({
 
   return (
     <Card className="flex h-full flex-col" id="attestations">
-      <CardHeader>
-        <div>
-          <CardTitle>{t("feed.title")}</CardTitle>
-          <p className="text-xs text-foreground-muted">
-            <Coins className="mr-1 inline size-3" aria-hidden />
-            {t("feed.description")}
-          </p>
-        </div>
+      <CardHeader className="block">
+        <CardTitle>{t("feed.title")}</CardTitle>
+        <p className="mt-1 text-[13px] leading-relaxed text-foreground-muted">{t("feed.description")}</p>
       </CardHeader>
-      <CardBody className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {status === "loading" && entries.length === 0 ? (
-          <div role="status" aria-live="polite" className="space-y-2.5">
-            <p className="text-xs text-foreground-muted">{t("feed.loading")}</p>
-            {[0, 1, 2, 3].map(i => (
-              <div
-                key={i}
-                aria-hidden
-                className="h-[74px] animate-pulse rounded-lg border border-border-subtle bg-surface-2/60 motion-reduce:animate-none"
-              />
+          <div role="status" aria-live="polite" className="space-y-3 p-5">
+            <p className="text-sm text-foreground-muted">{t("feed.loading")}</p>
+            {[0, 1, 2, 3, 4].map(i => (
+              <div key={i} aria-hidden className="flex gap-3">
+                <div className="size-7 shrink-0 animate-pulse rounded bg-surface-3 motion-reduce:animate-none" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3.5 w-2/3 animate-pulse rounded-sm bg-surface-3 motion-reduce:animate-none" />
+                  <div className="h-3 w-1/2 animate-pulse rounded-sm bg-surface-3 motion-reduce:animate-none" />
+                </div>
+              </div>
             ))}
           </div>
         ) : status === "error" && entries.length === 0 ? (
-          <div role="alert" className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-center text-xs text-foreground-muted">
+          <div role="alert" className="m-5 rounded border border-brand/40 bg-brand-dim px-4 py-4 text-sm text-foreground">
             {t("feed.error")}
           </div>
         ) : entries.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border-subtle p-6 text-center text-xs text-foreground-faint">
+          <div className="m-5 rounded border border-dashed border-border px-4 py-8 text-center text-sm text-foreground-muted">
             {t("feed.empty")}
           </div>
         ) : (
-          <ol className="space-y-2.5">
+          <ol className="divide-y divide-border-subtle">
             {entries.map(entry => {
               // Nunca animar la carga inicial (evita una cascada de toda la
               // historia al entrar a la pagina) — solo lo que llega despues.
@@ -250,7 +234,7 @@ export function AttestationFeed({
             })}
           </ol>
         )}
-      </CardBody>
+      </div>
     </Card>
   );
 }

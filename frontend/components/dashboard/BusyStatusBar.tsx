@@ -32,16 +32,16 @@ export function BusyStatusBar({ actionKey, startedAt }: { actionKey: string; sta
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-center px-4">
-      <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-glow backdrop-blur-md">
+      <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded border border-border-strong bg-surface shadow-hard">
         <div className="flex items-center gap-3 px-4 py-3">
-          <Loader2 className="size-4 shrink-0 animate-spin text-senior-glow" aria-hidden />
-          <p className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{message}</p>
-          <span className="shrink-0 rounded-md bg-surface-3 px-2 py-1 font-mono text-xs tabular-nums text-foreground-muted">
+          <Loader2 className="size-4 shrink-0 animate-spin text-foreground" aria-hidden />
+          <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{message}</p>
+          <span className="shrink-0 rounded-sm bg-surface-3 px-2 py-1 font-mono text-[13px] tabular-nums text-foreground-muted">
             {formatElapsed(elapsedMs)}
           </span>
         </div>
-        <div className="h-1 w-full overflow-hidden bg-surface-3">
-          <div className="h-full w-1/3 animate-shimmer bg-gradient-to-r from-transparent via-senior-glow to-transparent bg-[length:200%_100%]" />
+        <div className="h-0.5 w-full overflow-hidden bg-surface-3">
+          <div className="h-full w-1/3 animate-shimmer bg-foreground" />
         </div>
       </div>
     </div>

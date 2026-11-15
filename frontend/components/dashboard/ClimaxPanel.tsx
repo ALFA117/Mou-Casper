@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Skull, ShieldAlert } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
@@ -72,31 +71,104 @@ export function ClimaxPanel({
   }, [lastDefaultChain]);
 
   return (
-    <Card accent="danger" hud className="scroll-mt-24 border-danger/20" id="climax">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-danger/10 text-danger-glow">
-            <Skull className="size-4" aria-hidden />
+    <Card accent="brand" elevated className="" id="climax">
+      <CardHeader className="pt-5">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded border border-brand/30 bg-brand-dim text-brand-glow">
+            <Skull className="size-[18px]" aria-hidden />
           </div>
-          <div>
-            <CardTitle className="flex items-center gap-1.5">
+          <div className="max-w-[62ch]">
+            <p className="kicker lg:hidden">04 · {t("step.default")}</p>
+            <CardTitle className="flex items-center gap-1.5 text-xl">
               {t("climax.title")}
               <InfoTooltip label={t("tooltip.whatIs", { term: "slashing" })}>{t("climax.slashingTooltip")}</InfoTooltip>
             </CardTitle>
-            <p className="text-xs text-foreground-muted">{t("climax.description")}</p>
+            <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">{t("climax.description")}</p>
           </div>
         </div>
       </CardHeader>
-      <CardBody className="space-y-4">
-        <div className="flex items-center gap-2">
+
+      <CardBody className="space-y-5">
+        {lastDefaultChain ? (
+          <div className={cn("rounded border border-border", justFlashed && "animate-slash-flash")}>
+            <div className="grid gap-5 p-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end sm:gap-8">
+              <div>
+                <p className="flex items-center gap-2 text-sm font-medium text-foreground">{t("climax.resultHeading")}</p>
+                <p className="mt-2 font-mono text-5xl font-semibold leading-none tabular-nums text-brand-glow sm:text-6xl">
+                  <CountUp value={lastDefaultChain.slashBps / 100} decimals={2} prefix="−" suffix="%" duration={900} startFromZero />
+                </p>
+                <p className="mt-2 text-[13px] text-foreground-muted">{t("climax.slashDetail")}</p>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground-muted sm:pb-1">
+                {quoteBAtDefault && typeof quoteBAtDefault.riskData?.recommendedSpreadBps === "number"
+                  ? t("climax.runContext", {
+                      date: formatDate(lastDefaultChain.loggedAt, locale),
+                      spread: formatBps(quoteBAtDefault.quote.price_bps),
+                      market: formatBps(quoteBAtDefault.riskData.recommendedSpreadBps),
+                    })
+                  : formatDate(lastDefaultChain.loggedAt, locale)}
+              </p>
+            </div>
+
+            <dl className="grid grid-cols-1 border-t border-border-subtle text-sm sm:grid-cols-3">
+              <div className="border-b border-border-subtle px-5 py-3 sm:border-b-0 sm:border-r">
+                <dt className="text-foreground-muted">{t("climax.reputationB")}</dt>
+                <dd className="mt-0.5 font-mono text-base font-semibold tabular-nums text-brand-glow">−{lastDefaultChain.penalizePoints}</dd>
+              </div>
+              <div className="border-b border-border-subtle px-5 py-3 sm:border-b-0 sm:border-r">
+                <dt className="text-foreground-muted">{t("climax.reputationA")}</dt>
+                <dd className="mt-0.5 font-mono text-base font-semibold tabular-nums text-senior-glow">+{lastDefaultChain.rewardPoints}</dd>
+              </div>
+              <div className="px-5 py-3">
+                <dt className="text-foreground-muted">{t("climax.lossLabel")}</dt>
+                <dd className="mt-0.5 font-mono text-base font-semibold tabular-nums text-foreground">
+                  {formatCspr(lastDefaultChain.lossAmountCspr, 0)}
+                </dd>
+              </div>
+            </dl>
+
+            <ul className="grid grid-cols-1 gap-x-6 gap-y-0.5 border-t border-border-subtle bg-surface-2 px-5 py-3 text-[13px] text-foreground-muted sm:grid-cols-2">
+              <li className="flex items-center gap-2"><span className="w-24 shrink-0 font-mono">mark_default</span><TxLink hash={lastDefaultChain.hashes.markDefault} /></li>
+              <li className="flex items-center gap-2"><span className="w-24 shrink-0 font-mono">slash</span><TxLink hash={lastDefaultChain.hashes.slash} /></li>
+              <li className="flex items-center gap-2"><span className="w-24 shrink-0 font-mono">penalize</span><TxLink hash={lastDefaultChain.hashes.penalize} /></li>
+              <li className="flex items-center gap-2"><span className="w-24 shrink-0 font-mono">reward</span><TxLink hash={lastDefaultChain.hashes.reward} /></li>
+            </ul>
+          </div>
+        ) : (
+          <div className="rounded border border-dashed border-border px-5 py-8 text-center text-sm leading-relaxed text-foreground-muted">
+            {t("climax.emptyState")}
+          </div>
+        )}
+
+        {lastConstitutionTest && (
+          <div className="rounded border border-border px-4 py-3.5 text-[13px] leading-relaxed">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <span className="flex gap-2.5 text-foreground">
+                <ShieldAlert className={cn("mt-0.5 size-4 shrink-0", lastConstitutionTest.testPassed ? "text-senior-glow" : "text-brand-glow")} aria-hidden />
+                {t("climax.constitutionTest", {
+                  amount: formatCspr(lastConstitutionTest.requestedExposureCspr, 0),
+                  result: t(lastConstitutionTest.testPassed ? "climax.reverted" : "climax.notReverted"),
+                  error: lastConstitutionTest.errorName,
+                })}
+              </span>
+              <span className="pl-6 sm:pl-0"><TxLink hash={lastConstitutionTest.hash} /></span>
+            </div>
+            <p className="mt-1.5 pl-6 text-foreground-muted">{t("climax.constitutionNote")}</p>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle pt-5">
+          <label htmlFor="loss-amount" className="sr-only">
+            {t("climax.lossInputLabel")}
+          </label>
           <input
+            id="loss-amount"
             type="number"
             min={1}
             value={lossAmount}
             onChange={e => setLossAmount(Number(e.target.value) || 0)}
             disabled={actionsDisabled}
-            className="h-9 w-24 rounded-lg border border-border-subtle bg-surface-2 px-2 text-xs text-foreground disabled:opacity-50"
-            aria-label={t("climax.lossInputLabel")}
+            className="field w-24"
           />
           <span title={readOnlyTooltip}>
             <Button
@@ -110,74 +182,6 @@ export function ClimaxPanel({
             </Button>
           </span>
         </div>
-
-        {lastDefaultChain ? (
-          <div
-            className={cn(
-              "relative space-y-3 overflow-hidden rounded-xl border border-carbon/50 bg-carbon/10 p-4",
-              justFlashed && "animate-slash-flash"
-            )}
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Skull className="size-4 text-foreground-muted" aria-hidden />
-              {t("climax.resultHeading")}
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-4xl font-bold tabular-nums text-foreground">
-                <CountUp value={lastDefaultChain.slashBps / 100} decimals={2} prefix="−" suffix="%" duration={900} startFromZero />
-              </span>
-              <span className="text-xs text-foreground-faint">{t("climax.slashDetail")}</span>
-            </div>
-            <p className="text-xs text-foreground-muted">
-              {quoteBAtDefault && typeof quoteBAtDefault.riskData?.recommendedSpreadBps === "number"
-                ? t("climax.runContext", {
-                    date: formatDate(lastDefaultChain.loggedAt, locale),
-                    spread: formatBps(quoteBAtDefault.quote.price_bps),
-                    market: formatBps(quoteBAtDefault.riskData.recommendedSpreadBps),
-                  })
-                : formatDate(lastDefaultChain.loggedAt, locale)}
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-              <Badge variant="carbon" className="font-mono">-{lastDefaultChain.penalizePoints} {t("climax.reputationB")}</Badge>
-              <Badge variant="brand" className="font-mono">+{lastDefaultChain.rewardPoints} {t("climax.reputationA")}</Badge>
-              <Badge variant="neutral" className="font-mono">
-                {t("climax.lossMarked", { amount: formatCspr(lastDefaultChain.lossAmountCspr, 0) })}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-muted">
-              <span>mark_default: <TxLink hash={lastDefaultChain.hashes.markDefault} /></span>
-              <span>slash: <TxLink hash={lastDefaultChain.hashes.slash} /></span>
-              <span>penalize: <TxLink hash={lastDefaultChain.hashes.penalize} /></span>
-              <span>reward: <TxLink hash={lastDefaultChain.hashes.reward} /></span>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-border-subtle p-6 text-center text-sm text-foreground-faint">
-            {t("climax.emptyState")}
-          </div>
-        )}
-
-        {lastConstitutionTest && (
-          <div
-            className={cn(
-              "space-y-2 rounded-xl border p-3 text-xs",
-              lastConstitutionTest.testPassed ? "border-brand/40 bg-brand/10" : "border-danger/40 bg-danger/10"
-            )}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-2 text-foreground-muted">
-                <ShieldAlert className="size-4 shrink-0" aria-hidden />
-                {t("climax.constitutionTest", {
-                  amount: formatCspr(lastConstitutionTest.requestedExposureCspr, 0),
-                  result: t(lastConstitutionTest.testPassed ? "climax.reverted" : "climax.notReverted"),
-                  error: lastConstitutionTest.errorName,
-                })}
-              </span>
-              <TxLink hash={lastConstitutionTest.hash} />
-            </div>
-            <p className="pl-6 text-foreground-muted">{t("climax.constitutionNote")}</p>
-          </div>
-        )}
       </CardBody>
     </Card>
   );

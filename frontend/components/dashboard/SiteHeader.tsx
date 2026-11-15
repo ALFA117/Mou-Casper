@@ -1,145 +1,124 @@
 "use client";
 
-import { Activity, Gauge, RefreshCw, CloudOff, Radio, Wallet, Radio as LiveIcon } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { RefreshCw, Radio as LiveIcon, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { StatTile } from "@/components/ui/StatTile";
 import { Logo } from "@/components/Logo";
 import { LanguageToggle } from "@/components/dashboard/LanguageToggle";
 import { useI18n } from "@/lib/i18n/context";
-import type { ChainState, RunLogEntry, DemoBudget } from "@/lib/types";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
+import type { DemoBudget } from "@/lib/types";
 import { formatCspr } from "@/lib/utils";
 
-// Env var apagable sin romper Vercel: si no esta seteada, el banner de demo
-// en vivo simplemente no se renderiza (ver components/dashboard/SiteHeader).
+// Env var apagable sin romper Vercel: si no está seteada, el enlace a la demo
+// en vivo (túnel) simplemente no se renderiza.
 const LIVE_DEMO_URL = process.env.NEXT_PUBLIC_LIVE_DEMO_URL;
 
+const NAV: { href: string; key: TranslationKey }[] = [
+  { href: "#underwriting", key: "nav.underwriters" },
+  { href: "#vault", key: "nav.vault" },
+  { href: "#climax", key: "nav.default" },
+  { href: "#attestations", key: "nav.ledger" },
+  { href: "#run-locally", key: "nav.local" },
+];
+
 export function SiteHeader({
-  chainState,
-  runLog,
-  runLogReady,
   loading,
   readOnly,
   demoBudget,
   onRefresh,
 }: {
-  chainState: ChainState | null;
-  runLog: RunLogEntry[];
-  runLogReady: boolean;
   loading: boolean;
   readOnly: boolean;
   demoBudget: DemoBudget | null;
   onRefresh: () => void;
 }) {
   const { t } = useI18n();
-  // Sin lectura de la cadena (cargando o RPC caido) se muestra "—", no 0: un
-  // 0.000 CSPR parecia un dato real mientras la pagina todavia cargaba.
-  const totalStake =
-    (chainState?.underwriters.underwriter_A.stakeCspr ?? 0) + (chainState?.underwriters.underwriter_B.stakeCspr ?? 0);
-  const avgReputation = chainState
-    ? Math.round((chainState.underwriters.underwriter_A.reputation + chainState.underwriters.underwriter_B.reputation) / 2)
-    : 0;
-  const anySlashed = chainState ? chainState.underwriters.underwriter_B.reputation < 500 : false;
-  const onChainEventCount = runLog.length;
 
   return (
     <header>
-      {/* Solo esta franja queda pegada arriba — compacta a proposito. Los
-          stat tiles y el banner de solo-lectura NO son sticky: en mobile el
-          header completo (con stats apiladas) llegaba a medir 377px de alto,
-          tapando casi la mitad de la pantalla en cada scroll. */}
-      <div className="sticky top-0 z-30 border-b border-border-subtle bg-background/60 shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-xl backdrop-saturate-150">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Logo className="size-10 shrink-0" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-display text-xl font-bold tracking-tight text-foreground">AVAL</h1>
-                  <Badge variant="brand">{t("header.liveBadge")}</Badge>
-                </div>
-                <p className="text-xs text-foreground-muted">{t("header.tagline")}</p>
-              </div>
-            </div>
+      <div className="sticky top-0 z-30 border-b border-border bg-background">
+        <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <a href="#top" className="flex min-w-0 items-center gap-3" aria-label="AVAL">
+            <Logo className="size-9 shrink-0" />
+            <span className="flex min-w-0 items-baseline gap-2">
+              <span className="font-display text-xl font-bold tracking-[0.04em] text-foreground">AVAL</span>
+              <span className="hidden truncate text-sm text-foreground-faint sm:inline">Mou Casper</span>
+            </span>
+          </a>
 
-            <div className="flex items-center gap-3">
-              {LIVE_DEMO_URL && (
-                <a href={LIVE_DEMO_URL} target="_blank" rel="noopener noreferrer">
-                  <Badge variant="danger" className="cursor-pointer hover:brightness-110">
-                    <LiveIcon className="size-3 animate-pulse" aria-hidden />
-                    {t("header.liveDemoBanner")}
-                  </Badge>
+          <nav aria-label={t("nav.label")} className="hidden items-center gap-1 lg:flex">
+            {NAV.map(item => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="rounded px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-surface-3 hover:text-foreground"
+              >
+                {t(item.key)}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex shrink-0 items-center gap-2">
+            {LIVE_DEMO_URL && (
+              <a
+                href={LIVE_DEMO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden items-center gap-1.5 rounded border border-brand/40 px-3 py-2 text-sm font-medium text-brand-glow hover:bg-brand-dim md:inline-flex"
+              >
+                <LiveIcon className="size-4" aria-hidden />
+                {t("header.liveDemoBanner")}
+              </a>
+            )}
+            <LanguageToggle />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRefresh}
+              disabled={loading}
+              aria-label={loading ? t("header.refreshing") : t("header.refresh")}
+              className="px-3 disabled:border-transparent disabled:bg-transparent"
+            >
+              <RefreshCw className={loading ? "size-4 animate-spin" : "size-4"} aria-hidden />
+              <span className="hidden sm:inline">{loading ? t("header.refreshing") : t("header.refresh")}</span>
+            </Button>
+          </div>
+        </div>
+        <nav aria-label={t("nav.label")} className="border-t border-border-subtle lg:hidden">
+          <ul className="mx-auto flex max-w-[1240px] overflow-x-auto px-2 sm:px-4 [scrollbar-width:none]">
+            {NAV.map(item => (
+              <li key={item.href} className="shrink-0">
+                <a
+                  href={item.href}
+                  className="flex min-h-11 items-center px-3 text-sm text-foreground-muted transition-colors hover:text-foreground"
+                >
+                  {t(item.key)}
                 </a>
-              )}
-              <LanguageToggle />
-              <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
-                <RefreshCw className={loading ? "size-3.5 animate-spin" : "size-3.5"} aria-hidden />
-                {loading ? t("header.refreshing") : t("header.refresh")}
-              </Button>
-            </div>
-          </div>
-        </div>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
-
-      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-          <StatTile
-            label={t("header.stat.totalStake")}
-            value={chainState ? formatCspr(totalStake, 3) : "— CSPR"}
-            countUp={chainState ? { value: totalStake, decimals: 3, suffix: " CSPR" } : undefined}
-            icon={Gauge}
-          />
-          <StatTile
-            label={t("header.stat.avgReputation")}
-            value={chainState ? `${avgReputation}/1000` : "—/1000"}
-            countUp={chainState ? { value: avgReputation, suffix: "/1000" } : undefined}
-            tone={anySlashed ? "danger" : "brand"}
-            icon={Activity}
-          />
-          <StatTile
-            label={t("header.stat.events")}
-            value={runLogReady ? String(onChainEventCount) : "—"}
-            countUp={runLogReady ? { value: onChainEventCount } : undefined}
-            icon={Radio}
-          />
-          <StatTile
-            label={t("header.stat.lastRead")}
-            value={chainState ? new Date(chainState.readAt).toLocaleTimeString() : "—"}
-            icon={RefreshCw}
-          />
-        </div>
-      </div>
-
-      {readOnly && (
-        <div className="mt-4 border-y border-border-subtle bg-surface-2/70">
-          <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
-            <CloudOff className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
-            <p className="text-[11px] leading-snug text-foreground-muted">{t("header.readOnlyBanner")}</p>
-          </div>
-        </div>
-      )}
 
       {!readOnly && demoBudget && (
-        <div className="mt-4 border-y border-border-subtle bg-surface-2/70">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2">
-              <Wallet className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
-              <p className="text-[11px] leading-snug text-foreground-muted">
-                {t("budget.remaining", { amount: formatCspr(demoBudget.totalBalanceCspr, 1) })}
-              </p>
-            </div>
+        <div className="border-b border-border bg-surface-2">
+          <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2.5 text-[13px] text-foreground-muted sm:px-6 lg:px-8">
+            <span className="flex items-center gap-2">
+              <Wallet className="size-4 shrink-0 text-foreground-faint" aria-hidden />
+              {t("budget.remaining", { amount: formatCspr(demoBudget.totalBalanceCspr, 1) })}
+            </span>
             {demoBudget.isPublic && (
               <>
-                <p className="text-[11px] leading-snug text-foreground-muted">
+                <span>
                   {t("budget.hourlyCap", {
                     used: String(demoBudget.actionsUsedThisHour),
                     cap: String(demoBudget.actionsCapPerHour),
                   })}
-                </p>
+                </span>
                 {demoBudget.cooldownRemainingSeconds > 0 && (
-                  <p className="text-[11px] leading-snug text-junior-glow">
+                  <span className="text-brand-glow">
                     {t("budget.cooldown", { seconds: String(demoBudget.cooldownRemainingSeconds) })}
-                  </p>
+                  </span>
                 )}
               </>
             )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { Background3D } from "@/components/Background3D";
 import { SiteHeader } from "@/components/dashboard/SiteHeader";
 import { Hero } from "@/components/dashboard/Hero";
 import { UnderwritingArena } from "@/components/dashboard/UnderwritingArena";
@@ -19,7 +18,7 @@ import { RevealOnMount } from "@/components/ui/RevealOnMount";
 import { useAvalDashboard } from "@/lib/use-aval-dashboard";
 import { ACTION_COST_ESTIMATES_CSPR } from "@/lib/dashboard-config";
 import { I18nProvider, useI18n } from "@/lib/i18n/context";
-import { PlayCircle } from "lucide-react";
+import { AlertTriangle, PlayCircle } from "lucide-react";
 
 export function DashboardClient({ readOnly }: { readOnly: boolean }) {
   return (
@@ -42,7 +41,6 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
     busyAction,
     busyActionStartedAt,
     lastActionLog,
-    bgEvent,
     demoBudget,
     actions,
   } = useAvalDashboard({ readOnly });
@@ -93,25 +91,26 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
 
   return (
     <>
-      <Background3D event={bgEvent} />
-      <div className="relative z-10 min-h-dvh">
-        <SiteHeader
+      <a
+        href="#main"
+        className="sr-only z-50 rounded border border-border-strong bg-surface px-4 py-2 text-sm focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        {t("nav.skip")}
+      </a>
+      <SiteHeader loading={loadingChainState} readOnly={readOnly} demoBudget={demoBudget} onRefresh={actions.refresh} />
+
+      <main id="main">
+        <Hero
           chainState={chainState}
           runLog={runLog}
           runLogReady={runLogStatus === "ready"}
           loading={loadingChainState}
           readOnly={readOnly}
-          demoBudget={demoBudget}
-          onRefresh={actions.refresh}
         />
 
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="space-y-6">
-              <RevealOnMount index={0}>
-                <Hero />
-              </RevealOnMount>
-
+        <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-8">
+            <div className="min-w-0 space-y-10">
               {guideHintText && guideHintTarget && !actionsDisabled && (
                 <RevealOnMount index={0}>
                   <GuideHint text={guideHintText} targetId={guideHintTarget} />
@@ -122,31 +121,38 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
                 <div
                   role="status"
                   aria-live="polite"
-                  className="rounded-xl border border-junior/40 bg-surface-2 p-3 text-xs leading-relaxed text-foreground-muted"
+                  className="flex gap-2.5 rounded border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-foreground-muted"
                 >
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-brand-glow" aria-hidden />
                   {t(chainStateError)}
                 </div>
               )}
 
               <RevealOnMount index={1}>
                 <DemoStep n="01" tone="senior" targetId="asset">
-                  <Card accent="senior" className="scroll-mt-24" id="asset">
+                  <Card className="" id="asset">
                     <CardHeader>
-                      <div>
-                        <CardTitle>{t("step1.title")}</CardTitle>
-                        <p className="text-xs text-foreground-muted">{t("step1.description")}</p>
+                      <div className="max-w-[62ch]">
+                        <p className="kicker lg:hidden">01 · {t("step.asset")}</p>
+                        <CardTitle className="text-xl">{t("step1.title")}</CardTitle>
+                        <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">{t("step1.description")}</p>
                       </div>
                     </CardHeader>
-                    <CardBody className="flex flex-wrap items-center gap-3">
-                      <input
-                        type="text"
-                        value={assetId}
-                        onChange={e => setAssetId(e.target.value)}
-                        disabled={readOnly}
-                        className="h-10 flex-1 min-w-[200px] rounded-lg border border-border-subtle bg-surface-2 px-3 text-sm text-foreground disabled:opacity-50"
-                        aria-label={t("step1.assetIdLabel")}
-                      />
-                      <span title={demoRunTooltip}>
+                    <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                      <div className="min-w-0 flex-1">
+                        <label htmlFor="asset-id" className="label mb-1.5 block">
+                          {t("step1.assetIdLabel")}
+                        </label>
+                        <input
+                          id="asset-id"
+                          type="text"
+                          value={assetId}
+                          onChange={e => setAssetId(e.target.value)}
+                          disabled={readOnly}
+                          className="field w-full"
+                        />
+                      </div>
+                      <span title={demoRunTooltip} className="sm:shrink-0">
                         <Button
                           onClick={() =>
                             actions.runFullDemo({
@@ -159,6 +165,7 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
                           }
                           disabled={demoRunDisabled}
                           loading={busyAction === "demo_run"}
+                          className="w-full sm:w-auto"
                         >
                           <PlayCircle className="size-4" aria-hidden />
                           {t("step1.runFullDemo", { cost: ACTION_COST_ESTIMATES_CSPR.fullDemoRun })}
@@ -210,43 +217,51 @@ function DashboardContent({ readOnly }: { readOnly: boolean }) {
                   />
                 </DemoStep>
               </RevealOnMount>
-
-              <RevealOnMount index={5}>
-                <RunItYourself />
-              </RevealOnMount>
-
-              <footer className="pb-8 pt-2 text-center text-xs text-foreground-faint">{t("footer.disclaimer")}</footer>
             </div>
 
-            <RevealOnMount index={1} className="xl:sticky xl:top-20 xl:h-[calc(100dvh-5rem)]">
+            <aside className="min-w-0 xl:sticky xl:top-24 xl:h-[calc(100dvh-7rem)]">
               <AttestationFeed runLog={runLog} status={runLogStatus} />
-            </RevealOnMount>
+            </aside>
           </div>
-        </main>
 
-        {busyAction && busyActionStartedAt && <BusyStatusBar actionKey={busyAction} startedAt={busyActionStartedAt} />}
-
-        {lastActionLog.length > 0 && (
-          <div className="pointer-events-none fixed right-4 top-24 z-40 hidden w-72 space-y-1.5 lg:block">
-            {lastActionLog.slice(0, 4).map((entry, i) => (
-              <div
-                key={i}
-                className={`pointer-events-auto rounded-lg border px-3 py-2 text-xs shadow-glow backdrop-blur-md ${
-                  entry.ok ? "border-brand/40 bg-surface/95 text-foreground" : "border-danger/40 bg-surface/95 text-danger-glow"
-                }`}
-              >
-                <div className="font-medium">{entry.label}</div>
-                <div className="text-foreground-faint">{entry.detail}</div>
-                {entry.hash && (
-                  <div className="mt-1">
-                    <TxLink hash={entry.hash} />
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="mt-14">
+            <RunItYourself />
           </div>
-        )}
-      </div>
+        </div>
+      </main>
+
+      <footer className="border-t border-border bg-surface">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-4 px-4 py-8 sm:px-6 lg:flex-row lg:items-start lg:justify-between lg:px-8">
+          <div className="flex items-center gap-3">
+            <span className="font-display text-lg font-bold tracking-[0.04em] text-foreground">AVAL</span>
+            <span className="text-sm text-foreground-faint">{t("header.tagline")}</span>
+          </div>
+          <p className="max-w-[72ch] text-[13px] leading-relaxed text-foreground-muted">{t("footer.disclaimer")}</p>
+        </div>
+      </footer>
+
+      {busyAction && busyActionStartedAt && <BusyStatusBar actionKey={busyAction} startedAt={busyActionStartedAt} />}
+
+      {lastActionLog.length > 0 && (
+        <div className="pointer-events-none fixed right-4 top-20 z-40 hidden w-80 space-y-2 lg:block" aria-live="polite">
+          {lastActionLog.slice(0, 4).map((entry, i) => (
+            <div
+              key={i}
+              className={`pointer-events-auto rounded border bg-surface px-3.5 py-2.5 text-[13px] shadow-hard-sm ${
+                entry.ok ? "border-border-strong text-foreground" : "border-brand text-brand-glow"
+              }`}
+            >
+              <div className="font-medium">{entry.label}</div>
+              <div className="text-foreground-muted">{entry.detail}</div>
+              {entry.hash && (
+                <div className="mt-1">
+                  <TxLink hash={entry.hash} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }

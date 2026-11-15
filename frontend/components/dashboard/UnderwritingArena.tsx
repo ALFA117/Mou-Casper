@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { UnderwriterCard } from "./UnderwriterCard";
 import { useI18n } from "@/lib/i18n/context";
 import type { ChainState, RunLogEntry, UnderwriterRunEntry, DefaultChainRunEntry } from "@/lib/types";
@@ -60,27 +61,29 @@ export function UnderwritingArena({
     : null;
 
   return (
-    <section className="scroll-mt-24" id="underwriting">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-foreground">{t("arena.title")}</h2>
-          <p className="text-xs text-foreground-muted">{t("arena.description")}</p>
+    <section className="" id="underwriting">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-[60ch]">
+          <p className="kicker lg:hidden">02 · {t("step.underwriters")}</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold text-foreground lg:mt-0">{t("arena.title")}</h2>
+          <p className="mt-1.5 text-[15px] leading-relaxed text-foreground-muted">{t("arena.description")}</p>
         </div>
         {bothQuoted && (
-          <div className="rounded-full border border-border bg-surface/90 px-4 py-1.5 text-center text-xs text-foreground-muted shadow-glow">
-            {t("arena.spreadDiscrepancy")}{" "}
-            <span className="font-mono text-sm font-bold tabular-nums text-foreground">{formatBps(disagreementBps)}</span>
+          <div>
+            <p className="label">{t("arena.spreadDiscrepancy").replace(/:$/, "")}</p>
+            <p className="font-mono text-2xl font-semibold tabular-nums text-foreground">{formatBps(disagreementBps)}</p>
           </div>
         )}
       </div>
 
       {blindDate && (
-        <p className="mb-3 rounded-xl border border-junior/30 bg-junior/5 px-3 py-2 text-xs leading-relaxed text-foreground-muted">
-          {t("arena.noRiskDataNote", { date: blindDate })}
+        <p className="mb-5 flex gap-2.5 rounded border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-foreground-muted">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-brand-glow" aria-hidden />
+          <span>{t("arena.noRiskDataNote", { date: blindDate })}</span>
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <UnderwriterCard
           wallet="underwriter_A"
           profile="conservative"

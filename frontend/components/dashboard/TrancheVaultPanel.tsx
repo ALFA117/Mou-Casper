@@ -3,9 +3,7 @@
 import { useMemo, useState } from "react";
 import { Layers, ShieldCheck, Flame, UserRound } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
 import { CountUp } from "@/components/ui/CountUp";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
@@ -19,6 +17,7 @@ import { cn, formatCspr } from "@/lib/utils";
 // no son mock, son los argumentos reales del constructor ya en cadena.
 const SENIOR_FACE_VALUE_CSPR = 100;
 const JUNIOR_FACE_VALUE_CSPR = 50;
+const TOTAL_FACE_VALUE_CSPR = SENIOR_FACE_VALUE_CSPR + JUNIOR_FACE_VALUE_CSPR;
 
 export function TrancheVaultPanel({
   chainState,
@@ -41,136 +40,187 @@ export function TrancheVaultPanel({
   const [seniorAmount, setSeniorAmount] = useState(15);
   const [juniorAmount, setJuniorAmount] = useState(10);
 
-  const buys = useMemo(
-    () => runLog.filter((e): e is InvestorBuyRunEntry => e.type === "investor_buy"),
-    [runLog]
-  );
+  const buys = useMemo(() => runLog.filter((e): e is InvestorBuyRunEntry => e.type === "investor_buy"), [runLog]);
   const lastSeniorBuy = [...buys].reverse().find(b => b.entryPoint === "buy_senior");
   const lastJuniorBuy = [...buys].reverse().find(b => b.entryPoint === "buy_junior");
 
   const vault = chainState?.vault;
 
   return (
-    <Card accent="brand" className="scroll-mt-24" id="vault">
+    <Card className="" id="vault">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-brand/10 text-brand-glow">
-            <Layers className="size-4" aria-hidden />
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded border border-border bg-surface-2 text-foreground">
+            <Layers className="size-[18px]" aria-hidden />
           </div>
-          <div>
-            <CardTitle>TrancheVault</CardTitle>
-            <p className="text-xs text-foreground-muted">{t("vault.description")}</p>
+          <div className="max-w-[62ch]">
+            <p className="kicker lg:hidden">03 · {t("step.vault")}</p>
+            <CardTitle className="text-xl">TrancheVault</CardTitle>
+            <p className="mt-1 text-[15px] leading-relaxed text-foreground-muted">{t("vault.description")}</p>
           </div>
         </div>
       </CardHeader>
-      <CardBody>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TrancheBlock
-              icon={ShieldCheck}
-              labelKey="vault.seniorLabel"
-              subKey="vault.seniorSub"
-              tone="senior"
-              tooltipKey="vault.seniorTooltip"
-              outstandingCspr={vault?.seniorOutstandingCspr ?? null}
-              faceValueCspr={SENIOR_FACE_VALUE_CSPR}
+
+      <CardBody className="space-y-6">
+        {/* Estructura de capital: ancho proporcional al valor nominal real de cada tramo. */}
+        <div>
+          <p className="text-[13px] text-foreground-faint">{t("vault.capitalStack")}</p>
+          <div className="mt-2 flex h-3 w-full gap-[3px] overflow-hidden rounded-sm" aria-hidden>
+            <StackSegment share={SENIOR_FACE_VALUE_CSPR / TOTAL_FACE_VALUE_CSPR} filled={fill(vault?.seniorOutstandingCspr, SENIOR_FACE_VALUE_CSPR)} tone="senior" />
+            <StackSegment share={JUNIOR_FACE_VALUE_CSPR / TOTAL_FACE_VALUE_CSPR} filled={fill(vault?.juniorOutstandingCspr, JUNIOR_FACE_VALUE_CSPR)} tone="brand" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <TrancheBlock
+            icon={ShieldCheck}
+            labelKey="vault.seniorLabel"
+            subKey="vault.seniorSub"
+            tone="senior"
+            tooltipKey="vault.seniorTooltip"
+            outstandingCspr={vault?.seniorOutstandingCspr ?? null}
+            faceValueCspr={SENIOR_FACE_VALUE_CSPR}
+          />
+          <TrancheBlock
+            icon={Flame}
+            labelKey="vault.juniorLabel"
+            subKey="vault.juniorSub"
+            tone="junior"
+            tooltipKey="vault.juniorTooltip"
+            outstandingCspr={vault?.juniorOutstandingCspr ?? null}
+            faceValueCspr={JUNIOR_FACE_VALUE_CSPR}
+          />
+        </div>
+
+        <div className="rounded border border-border">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
+            <div className="flex items-center gap-2.5">
+              <UserRound className="size-4 text-foreground-faint" aria-hidden />
+              <span className="text-sm font-medium text-foreground">{t("vault.investorAgent")}</span>
+            </div>
+            <span className="text-[13px] text-foreground-faint">{t("vault.holdingsTitle")}</span>
+          </div>
+          <dl className="grid grid-cols-2 border-b border-border-subtle text-sm">
+            <div className="border-r border-border-subtle px-4 py-3">
+              <dt className="text-foreground-muted">Senior</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-foreground">
+                {vault ? <CountUp value={vault.investorHoldingSeniorCspr} decimals={2} suffix=" CSPR" /> : "— CSPR"}
+              </dd>
+            </div>
+            <div className="px-4 py-3">
+              <dt className="text-foreground-muted">Junior</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-foreground">
+                {vault ? <CountUp value={vault.investorHoldingJuniorCspr} decimals={2} suffix=" CSPR" /> : "— CSPR"}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="grid grid-cols-1 gap-3 bg-surface-2 px-4 py-3 sm:grid-cols-2">
+            <BuyRow
+              id="buy-senior"
+              label={t("vault.seniorInputLabel")}
+              amount={seniorAmount}
+              onAmount={setSeniorAmount}
+              disabled={actionsDisabled}
+              tooltip={readOnlyTooltip}
+              loading={busyAction === "buy_senior"}
+              onBuy={() => onBuySenior(seniorAmount)}
+              text={t("vault.buySenior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
             />
-            <TrancheBlock
-              icon={Flame}
-              labelKey="vault.juniorLabel"
-              subKey="vault.juniorSub"
-              tone="junior"
-              tooltipKey="vault.juniorTooltip"
-              outstandingCspr={vault?.juniorOutstandingCspr ?? null}
-              faceValueCspr={JUNIOR_FACE_VALUE_CSPR}
+            <BuyRow
+              id="buy-junior"
+              label={t("vault.juniorInputLabel")}
+              amount={juniorAmount}
+              onAmount={setJuniorAmount}
+              disabled={actionsDisabled}
+              tooltip={readOnlyTooltip}
+              loading={busyAction === "buy_junior"}
+              onBuy={() => onBuyJunior(juniorAmount)}
+              text={t("vault.buyJunior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
             />
           </div>
 
-          <div className="rounded-xl border border-border-subtle bg-surface-2/60 p-4">
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-surface-3 text-foreground-muted">
-                <UserRound className="size-4" aria-hidden />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-foreground">{t("vault.investorAgent")}</div>
-                <div className="font-mono text-xs tabular-nums text-foreground-muted">
-                  {t("vault.holdingsPrefix")}{" "}
-                  {vault ? <CountUp value={vault.investorHoldingSeniorCspr} decimals={2} suffix=" CSPR" /> : "— CSPR"}{" "}
-                  {t("vault.holdingsMiddle")}{" "}
-                  {vault ? <CountUp value={vault.investorHoldingJuniorCspr} decimals={2} suffix=" CSPR" /> : "— CSPR"}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={1}
-                  value={seniorAmount}
-                  onChange={e => setSeniorAmount(Number(e.target.value) || 0)}
-                  disabled={actionsDisabled}
-                  className="h-9 w-20 rounded-lg border border-border-subtle bg-surface px-2 text-xs text-foreground disabled:opacity-50"
-                  aria-label={t("vault.seniorInputLabel")}
-                />
-                <span title={readOnlyTooltip} className="flex-1">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onBuySenior(seniorAmount)}
-                    disabled={actionsDisabled}
-                    loading={busyAction === "buy_senior"}
-                    className="w-full"
-                  >
-                    {t("vault.buySenior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
-                  </Button>
+          {(lastSeniorBuy || lastJuniorBuy) && (
+            <div className="flex flex-col gap-1 border-t border-border-subtle px-4 py-3 text-[13px] text-foreground-muted sm:flex-row sm:flex-wrap sm:gap-x-6">
+              {lastSeniorBuy && (
+                <span className="flex flex-wrap items-center gap-x-1.5">
+                  {t("vault.lastSeniorBuy", { amount: formatCspr(lastSeniorBuy.amountCspr, 0) })}
+                  <TxLink hash={lastSeniorBuy.hash} />
                 </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={1}
-                  value={juniorAmount}
-                  onChange={e => setJuniorAmount(Number(e.target.value) || 0)}
-                  disabled={actionsDisabled}
-                  className="h-9 w-20 rounded-lg border border-border-subtle bg-surface px-2 text-xs text-foreground disabled:opacity-50"
-                  aria-label={t("vault.juniorInputLabel")}
-                />
-                <span title={readOnlyTooltip} className="flex-1">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onBuyJunior(juniorAmount)}
-                    disabled={actionsDisabled}
-                    loading={busyAction === "buy_junior"}
-                    className="w-full"
-                  >
-                    {t("vault.buyJunior", { cost: ACTION_COST_ESTIMATES_CSPR.investTranche })}
-                  </Button>
+              )}
+              {lastJuniorBuy && (
+                <span className="flex flex-wrap items-center gap-x-1.5">
+                  {t("vault.lastJuniorBuy", { amount: formatCspr(lastJuniorBuy.amountCspr, 0) })}
+                  <TxLink hash={lastJuniorBuy.hash} />
                 </span>
-              </div>
+              )}
             </div>
-
-            {(lastSeniorBuy || lastJuniorBuy) && (
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground-muted">
-                {lastSeniorBuy && (
-                  <span>
-                    {t("vault.lastSeniorBuy", { amount: formatCspr(lastSeniorBuy.amountCspr, 0) })}{" "}
-                    <TxLink hash={lastSeniorBuy.hash} />
-                  </span>
-                )}
-                {lastJuniorBuy && (
-                  <span>
-                    {t("vault.lastJuniorBuy", { amount: formatCspr(lastJuniorBuy.amountCspr, 0) })}{" "}
-                    <TxLink hash={lastJuniorBuy.hash} />
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </CardBody>
     </Card>
+  );
+}
+
+function fill(outstanding: number | undefined, face: number): number | null {
+  if (typeof outstanding !== "number") return null;
+  return Math.max(0, Math.min(1, outstanding / Math.max(1, face)));
+}
+
+function StackSegment({ share, filled, tone }: { share: number; filled: number | null; tone: "senior" | "brand" }) {
+  return (
+    <div className="relative h-full bg-surface-3" style={{ flexGrow: share, flexBasis: 0 }}>
+      {filled !== null && (
+        <div
+          className={cn("h-full transition-[width] duration-700", tone === "senior" ? "bg-senior" : "bg-brand")}
+          style={{ width: `${filled * 100}%` }}
+        />
+      )}
+    </div>
+  );
+}
+
+function BuyRow({
+  id,
+  label,
+  amount,
+  onAmount,
+  disabled,
+  tooltip,
+  loading,
+  onBuy,
+  text,
+}: {
+  id: string;
+  label: string;
+  amount: number;
+  onAmount: (v: number) => void;
+  disabled: boolean;
+  tooltip?: string;
+  loading: boolean;
+  onBuy: () => void;
+  text: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="number"
+        min={1}
+        value={amount}
+        onChange={e => onAmount(Number(e.target.value) || 0)}
+        disabled={disabled}
+        className="field w-20"
+      />
+      <span title={tooltip} className="min-w-0 flex-1">
+        <Button size="sm" variant="secondary" onClick={onBuy} disabled={disabled} loading={loading} className="w-full">
+          {text}
+        </Button>
+      </span>
+    </div>
   );
 }
 
@@ -194,31 +244,22 @@ function TrancheBlock({
   const { t } = useI18n();
   const label = t(labelKey);
   const wiped = outstandingCspr !== null && outstandingCspr <= 0;
+  const senior = tone === "senior";
   return (
-    <div
-      className={cn(
-        "rounded-xl border p-4 transition-colors duration-500",
-        tone === "senior" ? "border-senior/30 bg-senior/5" : "border-junior/30 bg-junior/5",
-        wiped && "border-danger/50 bg-danger/10"
-      )}
-    >
-      <div className="mb-2 flex items-center justify-between">
-        <div className={cn("flex items-center gap-1.5 text-sm font-semibold", tone === "senior" ? "text-senior-glow" : "text-junior-glow")}>
-          <Icon className="size-4" aria-hidden />
-          {label}
-          {tooltipKey && <InfoTooltip label={t("tooltip.whatIs", { term: label })}>{t(tooltipKey)}</InfoTooltip>}
-        </div>
-        <Badge variant={tone}>{t("vault.faceValue", { amount: formatCspr(faceValueCspr, 0) })}</Badge>
+    <div className={cn("rounded border p-4", wiped ? "border-brand bg-brand-dim" : "border-border")}>
+      <div className={cn("flex items-center gap-1.5 text-[15px] font-semibold", senior ? "text-senior-glow" : "text-brand-glow")}>
+        <Icon className="size-4 shrink-0" aria-hidden />
+        {label}
+        {tooltipKey && <InfoTooltip label={t("tooltip.whatIs", { term: label })}>{t(tooltipKey)}</InfoTooltip>}
       </div>
-      <p className="mb-3 text-xs text-foreground-muted">{t(subKey)}</p>
-      <div className="mb-2 flex items-baseline justify-between">
-        <span className="font-mono text-2xl font-bold tabular-nums text-foreground">
-          {outstandingCspr === null ? "— CSPR" : <CountUp value={outstandingCspr} decimals={3} suffix=" CSPR" />}
-        </span>
-        <span className="text-xs text-foreground-faint">{t("vault.outstanding")}</span>
-      </div>
-      <ProgressBar value={outstandingCspr ?? 0} max={faceValueCspr || 1} tone={wiped ? "danger" : tone} />
-      {wiped && <div className="mt-2 text-xs font-medium text-danger-glow">{t("vault.wiped")}</div>}
+      <p className="mt-1 text-[13px] text-foreground-muted">{t(subKey)}</p>
+      <p className="mt-0.5 font-mono text-xs text-foreground-faint">{t("vault.faceValue", { amount: formatCspr(faceValueCspr, 0) })}</p>
+      <p className="mt-4 font-mono text-2xl font-semibold tabular-nums text-foreground">
+        {outstandingCspr === null ? "—" : <CountUp value={outstandingCspr} decimals={3} />}
+        <span className="ml-1.5 text-sm font-normal text-foreground-faint">CSPR</span>
+      </p>
+      <p className="text-[13px] text-foreground-faint">{t("vault.outstanding")}</p>
+      {wiped && <p className="mt-2 text-[13px] font-medium text-brand-glow">{t("vault.wiped")}</p>}
     </div>
   );
 }

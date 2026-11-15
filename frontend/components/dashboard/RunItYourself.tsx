@@ -1,87 +1,83 @@
 "use client";
 
-import { Code2, Droplets, ExternalLink } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { ArrowUpRight, Code2, Droplets } from "lucide-react";
+import { buttonClasses } from "@/components/ui/Button";
 import { useI18n } from "@/lib/i18n/context";
 import { GITHUB_REPO_URL, CASPER_FAUCET_URL, DEPLOYED_CONTRACTS, REDEPLOYED_CONTRACTS } from "@/lib/dashboard-config";
+import { truncateHash } from "@/lib/utils";
 
 const EXPLORER_BASE_URL = process.env.NEXT_PUBLIC_CASPER_EXPLORER_URL ?? "https://testnet.cspr.live";
+
+function ContractRow({ name, packageHash }: { name: string; packageHash: string }) {
+  return (
+    <li>
+      <a
+        href={`${EXPLORER_BASE_URL}/contract-package/${packageHash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex min-h-11 items-center justify-between gap-3 px-4 py-2 transition-colors hover:bg-surface-2"
+      >
+        <span className="text-sm font-medium text-foreground">{name}</span>
+        <span className="flex items-center gap-1.5 font-mono text-[13px] text-foreground-muted">
+          {truncateHash(packageHash, 6, 4)}
+          <ArrowUpRight className="size-3.5 text-foreground-faint transition-transform group-hover:-translate-y-px group-hover:translate-x-px" aria-hidden />
+        </span>
+      </a>
+    </li>
+  );
+}
 
 export function RunItYourself() {
   const { t } = useI18n();
   const steps = [1, 2, 3, 4] as const;
 
   return (
-    <Card accent="none" className="mt-6">
-      <CardHeader>
-        <div>
-          <CardTitle>{t("runItYourself.title")}</CardTitle>
-          <p className="text-xs text-foreground-muted">{t("runItYourself.thesis")}</p>
-        </div>
-      </CardHeader>
-      <CardBody className="space-y-5">
-        <ol className="space-y-2 text-xs text-foreground-muted">
-          {steps.map(n => (
-            <li key={n} className="flex gap-2">
-              <span className="font-mono text-foreground-faint">{n}.</span>
-              <span>{t(`runItYourself.step${n}` as const)}</span>
-            </li>
-          ))}
-        </ol>
-
-        <div className="flex flex-wrap gap-2">
-          <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-            <Badge variant="neutral" className="cursor-pointer hover:brightness-110">
-              <Code2 className="size-3" aria-hidden />
+    <section id="run-locally" className="panel">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
+        <div className="border-b border-border-subtle p-5 sm:p-6 lg:border-b-0 lg:border-r">
+          <h2 className="font-display text-2xl font-semibold text-foreground">{t("runItYourself.title")}</h2>
+          <p className="mt-2 text-[15px] leading-relaxed text-foreground-muted">{t("runItYourself.thesis")}</p>
+          <ol className="mt-5 space-y-3">
+            {steps.map(n => (
+              <li key={n} className="flex gap-3 text-sm leading-relaxed text-foreground-muted">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded border border-border font-mono text-xs text-foreground">
+                  {n}
+                </span>
+                <span>{t(`runItYourself.step${n}` as const)}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" className={buttonClasses("primary", "md")}>
+              <Code2 className="size-4" aria-hidden />
               {t("runItYourself.repoLink")}
-            </Badge>
-          </a>
-          <a href={CASPER_FAUCET_URL} target="_blank" rel="noopener noreferrer">
-            <Badge variant="brand" className="cursor-pointer hover:brightness-110">
-              <Droplets className="size-3" aria-hidden />
+            </a>
+            <a href={CASPER_FAUCET_URL} target="_blank" rel="noopener noreferrer" className={buttonClasses("secondary", "md")}>
+              <Droplets className="size-4" aria-hidden />
               {t("runItYourself.faucetLink")}
-            </Badge>
-          </a>
+            </a>
+          </div>
         </div>
 
-        <div className="border-t border-border-subtle pt-4">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-foreground-faint">
+        <div className="min-w-0">
+          <p className="border-b border-border-subtle px-4 py-3 text-[13px] font-medium text-foreground-muted">
             {t("runItYourself.contractsTitle")}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <ul className="divide-y divide-border-subtle">
             {DEPLOYED_CONTRACTS.map(c => (
-              <a
-                key={c.name}
-                href={`${EXPLORER_BASE_URL}/contract-package/${c.packageHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Badge variant="carbon" className="cursor-pointer hover:brightness-110">
-                  {c.name}
-                  <ExternalLink className="size-3" aria-hidden />
-                </Badge>
-              </a>
+              <ContractRow key={c.name} name={c.name} packageHash={c.packageHash} />
             ))}
-          </div>
-          <p className="mb-2 mt-4 text-xs text-foreground-muted">{t("runItYourself.redeployedTitle")}</p>
-          <div className="flex flex-wrap gap-2">
+          </ul>
+          <p className="border-y border-border-subtle bg-surface-2 px-4 py-3 text-[13px] leading-relaxed text-foreground-muted">
+            {t("runItYourself.redeployedTitle")}
+          </p>
+          <ul className="divide-y divide-border-subtle">
             {REDEPLOYED_CONTRACTS.map(c => (
-              <a
-                key={c.packageHash}
-                href={`${EXPLORER_BASE_URL}/contract-package/${c.packageHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Badge variant="neutral" className="cursor-pointer hover:brightness-110">
-                  {c.name} v2
-                  <ExternalLink className="size-3" aria-hidden />
-                </Badge>
-              </a>
+              <ContractRow key={c.packageHash} name={`${c.name} v2`} packageHash={c.packageHash} />
             ))}
-          </div>
+          </ul>
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }

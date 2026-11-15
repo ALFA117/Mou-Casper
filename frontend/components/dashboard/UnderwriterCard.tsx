@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ShieldCheck, Flame, Zap, Stamp, Skull } from "lucide-react";
+import { ShieldCheck, Flame, Zap, Stamp, Skull, Lock, FileCheck2, ChevronDown } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TxLink } from "@/components/ui/TxLink";
@@ -65,148 +64,165 @@ export function UnderwriterCard({
     wasSlashedBefore.current = wasSlashed;
   }, [wasSlashed]);
 
+  const iconTone = wasSlashed
+    ? "border-border bg-surface-3 text-foreground-muted"
+    : tone === "senior"
+      ? "border-senior/30 bg-senior-dim text-senior-glow"
+      : "border-brand/30 bg-brand-dim text-brand-glow";
+
   return (
     <Card
       accent={wasSlashed ? "carbon" : tone}
-      className={cn("relative overflow-hidden transition-colors duration-700", wasSlashed && "grayscale", justFlashed && "animate-slash-flash")}
+      className={cn("flex flex-col", justFlashed && "animate-slash-flash")}
     >
-      <CardHeader className="flex-wrap gap-y-2">
+      <CardHeader className="pt-5">
         <div className="flex min-w-0 items-center gap-3">
-          <div
-            className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-lg",
-              wasSlashed
-                ? "bg-carbon/20 text-foreground-muted"
-                : tone === "senior"
-                  ? "bg-senior/10 text-senior-glow"
-                  : "bg-junior/10 text-junior-glow"
-            )}
-          >
+          <div className={cn("flex size-10 shrink-0 items-center justify-center rounded border", iconTone)}>
             {wasSlashed ? (
-              <Skull className="size-4" aria-hidden />
+              <Skull className="size-[18px]" aria-hidden />
             ) : tone === "senior" ? (
-              <ShieldCheck className="size-4" aria-hidden />
+              <ShieldCheck className="size-[18px]" aria-hidden />
             ) : (
-              <Flame className="size-4" aria-hidden />
+              <Flame className="size-[18px]" aria-hidden />
             )}
           </div>
-          <div>
-            <CardTitle className={wasSlashed ? "text-foreground-muted" : undefined}>{wallet}</CardTitle>
-            <p className="text-xs text-foreground-muted">
+          <div className="min-w-0">
+            <CardTitle className="font-mono text-base font-semibold">{wallet}</CardTitle>
+            <p className={cn("text-[13px]", wasSlashed ? "font-medium text-brand-glow" : "text-foreground-muted")}>
               {wasSlashed
                 ? t("underwriter.sliced")
                 : `${t(profile === "conservative" ? "underwriter.conservative" : "underwriter.aggressive")} · Gemini 2.5 Flash`}
             </p>
           </div>
         </div>
-        <Badge
-          variant={wasSlashed ? "carbon" : tone}
-          className="shrink-0 whitespace-nowrap font-mono"
-        >
-          {liveStakeCspr === null ? "— CSPR" : <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />}{" "}
-          {t("underwriter.atStake")}
-        </Badge>
+        {quote && (
+          <div className="shrink-0 text-right">
+            <p className="text-xs text-foreground-faint">{t("underwriter.rating")}</p>
+            <p className="font-mono text-lg font-semibold tabular-nums text-foreground">
+              {quote.rating}
+              <span className="text-sm font-normal text-foreground-faint">/1000</span>
+            </p>
+          </div>
+        )}
       </CardHeader>
-      <CardBody className="space-y-4">
-        {/* Cotizacion mas reciente (real, de run-log.json) */}
+
+      {/* Stake y reputacion leidos on-chain */}
+      <div className="grid grid-cols-2 border-b border-border-subtle">
+        <div className="min-w-0 border-r border-border-subtle px-5 py-4 sm:px-6">
+          <p className="flex items-center gap-1 text-[13px] text-foreground-muted">
+            {t("underwriter.stakeLabel")}
+            <InfoTooltip label={t("tooltip.whatIs", { term: "stake" })}>{t("underwriter.stakeTooltip")}</InfoTooltip>
+          </p>
+          <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
+            {liveStakeCspr === null ? "—" : <CountUp value={liveStakeCspr} decimals={3} />}
+            <span className="ml-1 text-sm font-normal text-foreground-faint">CSPR</span>
+          </p>
+        </div>
+        <div className="min-w-0 px-5 py-4 sm:px-6">
+          <p className="text-[13px] text-foreground-muted">{t("underwriter.reputationLabel")}</p>
+          <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
+            {liveReputation === null ? "—" : <CountUp value={liveReputation} />}
+            <span className="text-sm font-normal text-foreground-faint">/1000</span>
+          </p>
+          <ProgressBar
+            value={liveReputation ?? 0}
+            max={1000}
+            tone={wasSlashed ? "carbon" : tone}
+            trackClassName="mt-2"
+            label={t("underwriter.reputationLabel")}
+          />
+        </div>
+      </div>
+
+      <CardBody className="flex-1 space-y-4">
         {quote ? (
-          <div className="rounded-xl border border-border-subtle bg-surface-2/60 p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wide text-foreground-faint">
+          <>
+            <div>
+              <p className="text-[13px] text-foreground-faint">
                 {t("underwriter.latestQuote", {
                   assetId: latestRun!.assetId,
                   date: formatDate(latestRun!.loggedAt, locale),
                 })}
-              </span>
-              <Badge variant={tone} className="font-mono">{quote.rating}/1000</Badge>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <Stat label={t("underwriter.recommendedTranche")} value={quote.recommended_tranche} capitalize />
-              <Stat label={t("underwriter.quotedSpread")} value={formatBps(quote.price_bps)} mono />
-              <Stat label={t("underwriter.feedPd")} value={bpsOrDash(latestRun!.riskData?.defaultProbabilityBps)} mono />
-              <Stat label={t("underwriter.marketSpread")} value={bpsOrDash(latestRun!.riskData?.recommendedSpreadBps)} mono />
-            </div>
-            {!hasRiskData && (
-              <p className="mt-2 rounded-md border border-junior/30 bg-junior/5 px-2 py-1.5 text-xs text-foreground-muted">
-                {t("underwriter.noRiskData")}
               </p>
-            )}
-            <p className="mt-2 text-[11px] leading-relaxed text-foreground-muted">{quote.short_reasoning}</p>
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-              {latestRun!.hashes.x402 && (
-                <span className="flex items-center gap-1 text-foreground-muted">
-                  <Zap className="size-3" aria-hidden /> x402 <TxLink hash={latestRun!.hashes.x402} />
-                </span>
+              <dl className="mt-2 divide-y divide-border-subtle border-y border-border-subtle text-sm">
+                <Stat label={t("underwriter.recommendedTranche")} value={quote.recommended_tranche} capitalize />
+                <Stat label={t("underwriter.quotedSpread")} value={formatBps(quote.price_bps)} mono />
+                <Stat label={t("underwriter.feedPd")} value={bpsOrDash(latestRun!.riskData?.defaultProbabilityBps)} mono />
+                <Stat label={t("underwriter.marketSpread")} value={bpsOrDash(latestRun!.riskData?.recommendedSpreadBps)} mono />
+              </dl>
+              {!hasRiskData && (
+                <p className="mt-3 border-l-2 border-brand pl-3 text-[13px] leading-relaxed text-foreground-muted">
+                  {t("underwriter.noRiskData")}
+                </p>
               )}
-              <span className="flex items-center gap-1 text-foreground-muted">
-                <Stamp className="size-3 text-brand-glow" aria-hidden /> register <TxLink hash={latestRun!.hashes.register} />
-              </span>
-              <span className="flex items-center gap-1 text-foreground-muted">stake <TxLink hash={latestRun!.hashes.stake} /></span>
-              <span className="flex items-center gap-1 text-foreground-muted">attest <TxLink hash={latestRun!.hashes.attest} /></span>
             </div>
-          </div>
+
+            <details className="group rounded border border-border-subtle bg-surface-2">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
+                {t("underwriter.rationale")}
+                <ChevronDown className="size-4 text-foreground-faint transition-transform group-open:rotate-180" aria-hidden />
+              </summary>
+              <p className="border-t border-border-subtle px-3 py-3 text-[13px] leading-relaxed text-foreground-muted">
+                {quote.short_reasoning}
+              </p>
+            </details>
+
+            <ul className="grid grid-cols-1 gap-x-4 gap-y-0.5 text-[13px] text-foreground-muted">
+              {latestRun!.hashes.x402 && (
+                <li className="flex items-center gap-1.5">
+                  <Zap className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
+                  <span className="w-16 shrink-0">x402</span> <TxLink hash={latestRun!.hashes.x402} />
+                </li>
+              )}
+              <li className="flex items-center gap-1.5">
+                <Stamp className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
+                <span className="w-16 shrink-0">register</span> <TxLink hash={latestRun!.hashes.register} />
+              </li>
+              <li className="flex items-center gap-1.5">
+                <Lock className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
+                <span className="w-16 shrink-0">stake</span> <TxLink hash={latestRun!.hashes.stake} />
+              </li>
+              <li className="flex items-center gap-1.5">
+                <FileCheck2 className="size-3.5 shrink-0 text-foreground-faint" aria-hidden />
+                <span className="w-16 shrink-0">attest</span> <TxLink hash={latestRun!.hashes.attest} />
+              </li>
+            </ul>
+          </>
         ) : (
-          <div className="rounded-xl border border-dashed border-border-subtle p-3 text-center text-xs text-foreground-faint">
+          <div className="rounded border border-dashed border-border px-4 py-6 text-center text-sm text-foreground-muted">
             {t("underwriter.noRunsYet")}
           </div>
         )}
-
-        {/* Stake en vivo (leido on-chain) */}
-        <div>
-          <div className="mb-1 flex items-baseline justify-between">
-            <span className="flex items-center gap-1 text-xs text-foreground-muted">
-              {t("underwriter.stakeLabel")}
-              <InfoTooltip label={t("tooltip.whatIs", { term: "stake" })}>{t("underwriter.stakeTooltip")}</InfoTooltip>
-            </span>
-            <span className="font-mono text-base font-semibold tabular-nums text-foreground">
-              {liveStakeCspr === null ? "—" : <CountUp value={liveStakeCspr} decimals={3} suffix=" CSPR" />}
-            </span>
-          </div>
-          <ProgressBar
-            value={liveStakeCspr ?? 0}
-            max={Math.max(1, liveStakeCspr ?? 0)}
-            tone={wasSlashed ? "carbon" : tone}
-          />
-        </div>
-
-        {/* Reputacion en vivo (leida on-chain, escala 0-1000) */}
-        <div>
-          <div className="mb-1 flex items-baseline justify-between">
-            <span className="text-xs text-foreground-muted">{t("underwriter.reputationLabel")}</span>
-            <span className="font-mono text-base font-semibold tabular-nums text-foreground">
-              {liveReputation === null ? "—" : <CountUp value={liveReputation} className="text-foreground" />}
-              <span className="text-foreground-faint">/1000</span>
-            </span>
-          </div>
-          <ProgressBar value={liveReputation ?? 0} max={1000} tone={wasSlashed ? "carbon" : "brand"} />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min={1}
-            value={stakeInputCspr}
-            onChange={e => onStakeInputChange(Number(e.target.value) || 0)}
-            disabled={disabled}
-            className="h-9 w-20 rounded-lg border border-border-subtle bg-surface-2 px-2 text-xs text-foreground disabled:opacity-50"
-            aria-label={t("underwriter.stakeInputLabel")}
-          />
-          <span title={tooltip} className="flex-1">
-            <Button size="sm" onClick={onRun} disabled={disabled} loading={busy} className="w-full">
-              {t("underwriter.runButton", { cost: ACTION_COST_ESTIMATES_CSPR.runUnderwriter })}
-            </Button>
-          </span>
-        </div>
       </CardBody>
+
+      <div className="flex items-center gap-2 border-t border-border-subtle bg-surface-2 px-5 py-3 sm:px-6">
+        <label className="sr-only" htmlFor={`stake-${wallet}`}>
+          {t("underwriter.stakeInputLabel")}
+        </label>
+        <input
+          id={`stake-${wallet}`}
+          type="number"
+          min={1}
+          value={stakeInputCspr}
+          onChange={e => onStakeInputChange(Number(e.target.value) || 0)}
+          disabled={disabled}
+          className="field w-20"
+        />
+        <span title={tooltip} className="min-w-0 flex-1">
+          <Button size="sm" variant="secondary" onClick={onRun} disabled={disabled} loading={busy} className="w-full">
+            {t("underwriter.runButton", { cost: ACTION_COST_ESTIMATES_CSPR.runUnderwriter })}
+          </Button>
+        </span>
+      </div>
     </Card>
   );
 }
 
 function Stat({ label, value, capitalize, mono }: { label: string; value: string; capitalize?: boolean; mono?: boolean }) {
   return (
-    <div>
-      <div className="text-foreground-faint">{label}</div>
-      <div className={cn("font-medium text-foreground", mono && "font-mono tabular-nums", capitalize && "capitalize")}>{value}</div>
+    <div className="flex items-baseline justify-between gap-3 py-2">
+      <dt className="text-foreground-muted">{label}</dt>
+      <dd className={cn("font-medium text-foreground", mono && "font-mono tabular-nums", capitalize && "capitalize")}>{value}</dd>
     </div>
   );
 }

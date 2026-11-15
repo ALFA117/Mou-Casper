@@ -12,14 +12,11 @@ export function GuideHint({ text, targetId }: { text: string; targetId: string }
   return (
     <a
       href={`#${targetId}`}
-      className="group flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-4 py-2 text-xs font-medium text-brand-glow shadow-glow-brand transition-colors hover:bg-brand/15"
+      className="group flex min-h-11 items-center gap-2.5 rounded border border-border-strong bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-hard-sm transition-colors hover:bg-surface-2"
     >
-      <span className="relative flex size-2 shrink-0">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand-glow opacity-75" />
-        <span className="relative inline-flex size-2 rounded-full bg-brand-glow" />
-      </span>
+      <span aria-hidden className="size-2 shrink-0 rounded-full bg-brand" />
       {text}
-      <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />
+      <ArrowRight className="ml-auto size-4 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />
     </a>
   );
 }
