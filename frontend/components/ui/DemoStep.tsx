@@ -6,18 +6,11 @@ import type { ReactNode } from "react";
 
 type Tone = "senior" | "brand" | "junior" | "danger";
 
-const railTone: Record<Tone, string> = {
-  senior: "bg-senior/40",
-  brand: "bg-brand/40",
-  junior: "bg-junior/40",
-  danger: "bg-danger/40",
-};
-
 const badgeTone: Record<Tone, string> = {
-  senior: "border-senior/50 text-senior-glow",
-  brand: "border-brand/50 text-brand-glow",
-  junior: "border-junior/50 text-junior-glow",
-  danger: "border-danger/50 text-danger-glow",
+  senior: "border-border-strong text-foreground",
+  brand: "border-border-strong text-foreground",
+  junior: "border-border-strong text-foreground",
+  danger: "border-brand text-brand-glow",
 };
 
 /**
@@ -44,17 +37,15 @@ export function DemoStep({
 }) {
   const { t } = useI18n();
   return (
-    <div className="relative lg:pl-10">
-      {!last && (
-        <div className={cn("absolute left-[15px] top-8 hidden w-px lg:block", railTone[tone])} style={{ bottom: "-1.5rem" }} />
-      )}
+    <div className="relative lg:pl-12">
+      {!last && <div className="absolute left-[15px] top-8 hidden w-px bg-border lg:block" style={{ bottom: "-2.5rem" }} />}
       <a
         href={`#${targetId}`}
         aria-label={t("nav.goToSection", { n })}
         className={cn(
-          "absolute left-0 top-0 hidden size-8 items-center justify-center rounded-full border bg-background font-mono text-[11px] font-semibold tabular-nums transition-transform duration-150 hover:scale-110 lg:flex",
+          "absolute left-0 top-0 hidden size-8 items-center justify-center rounded border bg-surface font-mono text-xs font-semibold tabular-nums transition-colors duration-150 hover:bg-surface-3 lg:flex",
           badgeTone[tone],
-          suggested && "animate-pulse ring-2 ring-brand/60 ring-offset-2 ring-offset-background"
+          suggested && "ring-2 ring-brand ring-offset-2 ring-offset-background"
         )}
       >
         {n}

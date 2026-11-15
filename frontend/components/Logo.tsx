@@ -2,7 +2,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * Marca de MOU CASPER: logo oficial (public/logo.png), recortado en circulo
+ * Marca de MOU CASPER: logo oficial (public/logo.png), recortado en círculo
  * para ocultar las marcas de agua originales cerca de los bordes — ver
  * public/logo-source.png para el archivo sin procesar.
  */
@@ -11,10 +11,10 @@ export function Logo({ className }: { className?: string }) {
     <Image
       src="/logo.png"
       alt="MOU CASPER"
-      width={192}
-      height={192}
+      width={96}
+      height={96}
       priority
-      className={cn("rounded-full drop-shadow-[0_0_8px_rgba(255,31,31,0.55)]", className)}
+      className={cn("rounded-full border border-border bg-foreground", className)}
     />
   );
 }

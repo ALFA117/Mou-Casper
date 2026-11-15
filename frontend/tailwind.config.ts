@@ -1,121 +1,100 @@
 import type { Config } from "tailwindcss";
 
+// Todos los colores salen de variables CSS (app/globals.css) para que el modo
+// claro y el oscuro compartan nombres. Significado fijo:
+//   brand  = rojo Casper: marca, riesgo junior, perdida y slash.
+//   senior = azul tinta: tramo senior, underwriter_A (conservador), lo protegido.
+//   carbon = gris: lo ya castigado / apagado.
+const v = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 const config: Config = {
-  darkMode: "class",
-  content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./lib/**/*.{ts,tsx}",
-  ],
+  darkMode: "media",
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        background: "#0A0A0A",
+        background: v("bg"),
         surface: {
-          DEFAULT: "#111111",
-          2: "#161616",
-          3: "#1D1D1D",
+          DEFAULT: v("surface"),
+          2: v("surface-2"),
+          3: v("surface-3"),
         },
         border: {
-          DEFAULT: "#2A2A2A",
-          subtle: "#1C1C1C",
+          DEFAULT: v("border"),
+          subtle: v("border-subtle"),
+          strong: v("border-strong"),
         },
         foreground: {
-          DEFAULT: "#FFFFFF",
-          muted: "#A6A6AC",
-          faint: "#6E6E76",
+          DEFAULT: v("fg"),
+          muted: v("fg-muted"),
+          faint: v("fg-faint"),
         },
-        // Casper red — marca/acento primario. Nunca como color de texto corrido.
         brand: {
-          DEFAULT: "#FF1F1F",
-          dim: "#8C1010",
-          glow: "#FF5C5C",
+          DEFAULT: v("brand"),
+          dim: v("brand-dim"),
+          glow: v("brand-text"),
+          ink: v("on-brand"),
         },
-        // Senior tranche: cromo/blanco contenido — "bajo riesgo" se lee frio, no rojo.
         senior: {
-          DEFAULT: "#E7E7EA",
-          dim: "#8E8E96",
-          glow: "#FFFFFF",
+          DEFAULT: v("senior"),
+          dim: v("senior-dim"),
+          glow: v("senior-text"),
         },
-        // Junior tranche: ascua/ember — misma familia que brand pero mas calida y
-        // ligeramente distinta, para que A y B se distingan incluso lado a lado.
         junior: {
-          DEFAULT: "#FF4D2E",
-          dim: "#8C2A18",
-          glow: "#FF9270",
+          DEFAULT: v("brand"),
+          dim: v("brand-dim"),
+          glow: v("brand-text"),
         },
-        // Alerta de alta tension (boton mark_default, exposure exceeded, badges de
-        // slash %) — carmesi mas caliente que brand, para el build-up ANTES del
-        // momento del slash. El momento en si usa `carbon`, no este tono.
         danger: {
-          DEFAULT: "#E8112B",
-          dim: "#7A0A17",
-          glow: "#FF5470",
+          DEFAULT: v("brand"),
+          dim: v("brand-dim"),
+          glow: v("brand-text"),
         },
-        // Dedicado exclusivamente al instante del slash: la tarjeta/nodo del
-        // underwriter castigado se apaga aqui, no a "mas rojo" (ver ClimaxPanel /
-        // UnderwriterCard / Background3D).
         carbon: {
-          DEFAULT: "#4B4B52",
-          dim: "#232326",
-          glow: "#FFFFFF",
+          DEFAULT: v("carbon"),
+          dim: v("surface-3"),
+          glow: v("fg"),
         },
       },
       fontFamily: {
-        display: ["var(--font-display)", "sans-serif"],
-        sans: ["var(--font-sans)", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+      },
+      borderRadius: {
+        // Un solo radio para tarjetas, controles y chips.
+        DEFAULT: "6px",
       },
       boxShadow: {
-        // Panel base: highlight interno arriba (luz "de arriba") + linea de
-        // contorno + sombra ambiental — usado por Card/badges/toasts en todo
-        // el dashboard, asi que un solo cambio le da profundidad a todo.
-        glow: "inset 0 1px 0 0 rgba(255,255,255,0.07), 0 0 0 1px rgba(255,255,255,0.06), 0 8px 30px -8px rgba(0,0,0,0.8)",
-        "glow-brand": "0 0 24px -4px rgba(255,31,31,0.5)",
-        "glow-senior": "0 0 20px -4px rgba(255,255,255,0.35)",
-        "glow-junior": "0 0 24px -4px rgba(255,77,46,0.5)",
-        "glow-danger": "0 0 28px -4px rgba(232,17,43,0.55)",
-        "glow-carbon": "0 0 22px -2px rgba(255,255,255,0.3)",
-      },
-      backgroundImage: {
-        "grid-fade":
-          "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,31,31,0.14), transparent)",
-        "grid-lines":
-          "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-        scanlines:
-          "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px)",
-        "hero-glow": "radial-gradient(ellipse 60% 80% at 50% 0%, rgba(255,31,31,0.22), transparent 70%)",
+        // Sombras duras y discretas (sin desenfoque): solo en lo que se presiona
+        // o en el panel que contiene el resultado principal.
+        hard: "3px 3px 0 0 rgb(var(--c-shadow) / var(--shadow-a))",
+        "hard-sm": "2px 2px 0 0 rgb(var(--c-shadow) / var(--shadow-a))",
+        "hard-brand": "3px 3px 0 0 rgb(var(--c-brand) / 0.35)",
+        none: "none",
       },
       animation: {
-        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        shimmer: "shimmer 2.5s linear infinite",
-        "flash-danger": "flash-danger 0.9s ease-in-out",
+        rise: "rise 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both",
         "slash-flash": "slash-flash 1.1s ease-out",
-        "count-flicker": "count-flicker 0.4s ease-in-out",
-        "glow-pulse": "glow-pulse 0.7s ease-out",
+        "glow-pulse": "value-pulse 0.6s ease-out",
+        shimmer: "shimmer 1.6s linear infinite",
       },
       keyframes: {
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        "glow-pulse": {
-          "0%": { filter: "drop-shadow(0 0 0 currentColor)", opacity: "0.7" },
-          "30%": { filter: "drop-shadow(0 0 7px currentColor)", opacity: "1" },
-          "100%": { filter: "drop-shadow(0 0 0 currentColor)", opacity: "1" },
-        },
-        "flash-danger": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(232,17,43,0)" },
-          "30%": { boxShadow: "0 0 0 6px rgba(232,17,43,0.3)" },
+        rise: {
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "slash-flash": {
-          "0%": { backgroundColor: "rgba(255,255,255,0.9)", boxShadow: "0 0 40px 4px rgba(255,255,255,0.6)" },
-          "100%": { backgroundColor: "rgba(75,75,82,0.1)", boxShadow: "0 0 0 0 rgba(255,255,255,0)" },
+          "0%": { backgroundColor: "rgb(var(--c-brand) / 0.18)" },
+          "100%": { backgroundColor: "transparent" },
         },
-        "count-flicker": {
-          "0%": { opacity: "1" },
-          "50%": { opacity: "0.3" },
+        "value-pulse": {
+          "0%": { opacity: "0.55" },
           "100%": { opacity: "1" },
+        },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(300%)" },
         },
       },
     },

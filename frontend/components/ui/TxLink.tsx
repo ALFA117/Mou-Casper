@@ -34,16 +34,16 @@ export function TxLink({
   };
 
   return (
-    <span className={cn("group inline-flex items-center gap-1 font-mono text-xs", className)}>
+    <span className={cn("group inline-flex items-center gap-1 font-mono text-[13px]", className)}>
       <button
         type="button"
         onClick={handleCopy}
         title={copied ? t("tx.copied") : t("tx.copyHash", { hash })}
         className={cn(
-          "cursor-pointer underline decoration-dotted underline-offset-2 transition-colors duration-150",
+          "cursor-pointer py-1 underline decoration-border underline-offset-[3px] transition-colors duration-150",
           copied
-            ? "text-brand-glow decoration-brand-glow"
-            : "text-foreground-muted decoration-foreground-faint group-hover:text-senior-glow group-hover:decoration-senior-glow"
+            ? "text-senior-glow decoration-senior-glow"
+            : "text-foreground-muted hover:text-foreground hover:decoration-foreground"
         )}
       >
         {label ?? truncateHash(hash)}
@@ -54,13 +54,13 @@ export function TxLink({
         rel="noreferrer noopener"
         title={t("tx.openExplorer", { hash })}
         aria-label={t("tx.openExplorerShort", { hash: truncateHash(hash) })}
-        className="text-foreground-faint transition-colors hover:text-senior-glow"
+        className="-m-1 inline-flex p-1 text-foreground-faint transition-colors hover:text-foreground"
       >
         {copied ? (
-          <Check className="size-3 shrink-0 text-brand-glow" aria-hidden />
+          <Check className="size-3.5 shrink-0 text-senior-glow" aria-hidden />
         ) : (
           <ArrowUpRight
-            className="size-3 shrink-0 opacity-60 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+            className="size-3.5 shrink-0 transition-transform duration-150 group-hover:-translate-y-px group-hover:translate-x-px"
             aria-hidden
           />
         )}

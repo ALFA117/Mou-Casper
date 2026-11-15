@@ -5,18 +5,29 @@ import type { ButtonHTMLAttributes } from "react";
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
+// primary = tinta (acción principal), danger = rojo (marcar default),
+// secondary = borde, ghost = sin borde para la barra superior.
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-brand text-background hover:bg-brand-glow shadow-glow-brand",
-  secondary: "bg-surface-3 text-foreground border border-border hover:border-foreground-faint",
-  ghost: "bg-transparent text-foreground-muted hover:text-foreground hover:bg-surface-3",
-  danger: "bg-danger text-white hover:bg-danger/90 shadow-glow-danger",
+  primary: "border border-border-strong bg-foreground text-background shadow-hard-sm enabled:hover:bg-foreground/90",
+  secondary: "border border-border-strong/70 bg-surface text-foreground shadow-hard-sm enabled:hover:bg-surface-2",
+  ghost: "border border-transparent bg-transparent text-foreground-muted enabled:hover:border-border enabled:hover:text-foreground",
+  danger: "border border-brand bg-brand text-brand-ink shadow-hard-sm enabled:hover:bg-brand/90",
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs gap-1.5",
-  md: "h-10 px-4 text-sm gap-2",
-  lg: "h-12 px-6 text-base gap-2",
+  sm: "min-h-11 px-3.5 text-sm gap-2",
+  md: "min-h-11 px-4 text-sm gap-2",
+  lg: "min-h-12 px-5 text-base gap-2",
 };
+
+const base =
+  "inline-flex cursor-pointer select-none items-center justify-center rounded font-medium transition-[transform,box-shadow,background-color,color] duration-100 ease-out";
+const press = "active:translate-x-[2px] active:translate-y-[2px] active:shadow-none";
+
+/** Mismas clases para un <a> que se ve como botón (anclas del hero). */
+export function buttonClasses(variant: Variant = "primary", size: Size = "md", className?: string) {
+  return cn(base, press, variantClasses[variant].replace(/enabled:/g, ""), sizeClasses[size], className);
+}
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -36,13 +47,12 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center rounded-xl font-medium tracking-tight transition-all duration-200 ease-out",
-        // Deshabilitado = neutro y legible (antes: el color del boton al 40 %,
-        // blanco sobre rojo tenue con contraste ~1.6). En la vitrina de solo
-        // lectura TODOS los botones estan asi, asi que se tienen que leer.
-        "disabled:cursor-not-allowed disabled:border disabled:border-border-subtle disabled:bg-surface-2 disabled:text-foreground-muted disabled:shadow-none",
-        "enabled:hover:-translate-y-px active:scale-[0.98]",
+        base,
+        "enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none",
         variantClasses[variant],
+        // Deshabilitado = neutro y legible: en la vitrina de solo lectura
+        // todos los botones de acción están así y se tienen que leer.
+        "disabled:cursor-not-allowed disabled:border-dashed disabled:border-border disabled:bg-surface-2 disabled:text-foreground-muted disabled:shadow-none",
         sizeClasses[size],
         className
       )}

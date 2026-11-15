@@ -4,13 +4,13 @@ import type { HTMLAttributes } from "react";
 type Variant = "neutral" | "brand" | "senior" | "junior" | "danger" | "warning" | "carbon";
 
 const variantClasses: Record<Variant, string> = {
-  neutral: "bg-surface-3 text-foreground-muted border-border",
-  brand: "bg-brand/10 text-brand-glow border-brand/30",
-  senior: "bg-senior/10 text-senior-glow border-senior/30",
-  junior: "bg-junior/10 text-junior-glow border-junior/30",
-  danger: "bg-danger/10 text-danger-glow border-danger/30",
-  warning: "bg-junior/10 text-junior-glow border-junior/30",
-  carbon: "bg-carbon/15 text-foreground-muted border-carbon/50",
+  neutral: "border-border bg-surface-2 text-foreground-muted",
+  brand: "border-brand/30 bg-brand-dim text-brand-glow",
+  senior: "border-senior/30 bg-senior-dim text-senior-glow",
+  junior: "border-brand/30 bg-brand-dim text-brand-glow",
+  danger: "border-brand/30 bg-brand-dim text-brand-glow",
+  warning: "border-brand/30 bg-brand-dim text-brand-glow",
+  carbon: "border-border bg-surface-3 text-foreground-muted",
 };
 
 export function Badge({
@@ -22,7 +22,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium tabular-nums",
+        "inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-medium tabular-nums",
         variantClasses[variant],
         className
       )}

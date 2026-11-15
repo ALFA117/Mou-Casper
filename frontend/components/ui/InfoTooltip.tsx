@@ -41,7 +41,7 @@ export function InfoTooltip({ label, children, className }: { label: string; chi
         onMouseLeave={hide}
         onFocus={show}
         onBlur={hide}
-        className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-foreground-faint transition-colors hover:text-brand-glow focus-visible:text-brand-glow"
+        className="-m-1 inline-flex size-6 shrink-0 items-center justify-center rounded text-foreground-faint transition-colors hover:text-foreground focus-visible:text-foreground"
       >
         <Info className="size-3.5" aria-hidden />
         <span className="sr-only">{label}</span>
@@ -51,7 +51,7 @@ export function InfoTooltip({ label, children, className }: { label: string; chi
           id={id}
           role="tooltip"
           className={cn(
-            "pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-border bg-surface-3 px-3 py-2 text-[11px] font-normal leading-snug text-foreground-muted shadow-glow transition-all ease-out",
+            "pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded border border-border-strong bg-surface px-3 py-2.5 font-sans text-[13px] font-normal normal-case leading-snug tracking-normal text-foreground-muted shadow-hard-sm transition-[opacity,transform] ease-out",
             "motion-reduce:transition-none",
             entered ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
           )}

@@ -1,12 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Sutil fade+rise al montar, escalonado por `index` — comunica "esto es un
- * producto terminado", no un efecto decorativo. Respeta prefers-reduced-motion
- * via el modificador motion-reduce de Tailwind (sin transform ni delay).
+ * Entrada corta (opacidad + 6 px) escalonada por `index`. Es una animación
+ * CSS, no un estado de React: el contenido nunca queda invisible si el JS
+ * tarda o no corre, y prefers-reduced-motion la apaga desde globals.css.
  */
 export function RevealOnMount({
   index = 0,
@@ -17,22 +14,8 @@ export function RevealOnMount({
   className?: string;
   children: React.ReactNode;
 }) {
-  const [entered, setEntered] = useState(false);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
   return (
-    <div
-      className={cn(
-        "transition-all duration-500 ease-out motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100",
-        entered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
-        className
-      )}
-      style={{ transitionDelay: `${index * 60}ms` }}
-    >
+    <div className={cn("animate-rise", className)} style={{ animationDelay: `${index * 50}ms` }}>
       {children}
     </div>
   );
