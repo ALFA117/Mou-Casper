@@ -85,12 +85,12 @@ export function SiteHeader({
           </div>
         </div>
         <nav aria-label={t("nav.label")} className="border-t border-border-subtle lg:hidden">
-          <ul className="mx-auto flex max-w-[1240px] overflow-x-auto px-2 sm:px-4 [scrollbar-width:none]">
+          <ul className="mx-auto flex max-w-[1240px] snap-x overflow-x-auto px-2 pr-10 [mask-image:linear-gradient(to_right,#000_calc(100%-3rem),transparent)] [scrollbar-width:none] sm:px-4 sm:pr-10 md:justify-center md:[mask-image:none]">
             {NAV.map(item => (
-              <li key={item.href} className="shrink-0">
+              <li key={item.href} className="shrink-0 snap-start">
                 <a
                   href={item.href}
-                  className="flex min-h-11 items-center px-3 text-sm text-foreground-muted transition-colors hover:text-foreground"
+                  className="flex min-h-11 items-center whitespace-nowrap px-2.5 text-sm text-foreground-muted transition-colors hover:text-foreground"
                 >
                   {t(item.key)}
                 </a>

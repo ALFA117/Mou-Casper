@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Zap, Stamp, Lock, Layers, ShieldAlert, AlertTriangle, Skull, Activity, type LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Zap, Stamp, Lock, Layers, ShieldAlert, AlertTriangle, Skull, Activity, type LucideIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { TxLink } from "@/components/ui/TxLink";
 import { useI18n } from "@/lib/i18n/context";
@@ -123,6 +123,8 @@ function toFeedItems(log: RunLogEntry[], t: Translate): FeedItem[] {
   return items.sort((a, b) => b.timestamp - a.timestamp);
 }
 
+const FEED_PREVIEW = 8;
+
 const TONE_COLOR: Record<FeedTone, string> = {
   senior: "border-senior/30 bg-senior-dim text-senior-glow",
   junior: "border-brand/30 bg-brand-dim text-brand-glow",
@@ -136,16 +138,18 @@ function FeedEntryRow({
   isNew,
   staggerIndex,
   locale,
+  collapsed,
 }: {
   entry: FeedItem;
   isNew: boolean;
   staggerIndex: number;
   locale: string;
+  collapsed: boolean;
 }) {
   const Icon = entry.icon;
   return (
     <li
-      className={cn("flex gap-3 px-5 py-3.5", isNew && "animate-rise")}
+      className={cn("gap-3 px-5 py-3.5", collapsed ? "hidden xl:flex" : "flex", isNew && "animate-rise")}
       style={isNew ? { animationDelay: `${staggerIndex * 40}ms` } : undefined}
     >
       <div className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded border", TONE_COLOR[entry.tone])}>
@@ -177,6 +181,10 @@ export function AttestationFeed({
 }) {
   const { t, locale } = useI18n();
   const entries = toFeedItems(runLog, t);
+  // Debajo de xl el feed no tiene scroll interno: se muestran las más
+  // recientes y el resto queda a un clic, para no enterrar lo que sigue.
+  const [expanded, setExpanded] = useState(false);
+  const hiddenCount = Math.max(0, entries.length - FEED_PREVIEW);
 
   // Cada entrada recuerda si ya se vio antes (Set persistente entre renders).
   // Las nunca-vistas entran con slide-in escalonado; el resto no re-anima en
@@ -224,15 +232,39 @@ export function AttestationFeed({
             {t("feed.empty")}
           </div>
         ) : (
+          <>
           <ol className="divide-y divide-border-subtle">
-            {entries.map(entry => {
+            {entries.map((entry, idx) => {
               // Nunca animar la carga inicial (evita una cascada de toda la
               // historia al entrar a la pagina) — solo lo que llega despues.
               const isNew = !isFirstLoadRef.current && !seenIdsRef.current.has(entry.id);
               if (isNew) newIndex++;
-              return <FeedEntryRow key={entry.id} entry={entry} isNew={isNew} staggerIndex={newIndex} locale={locale} />;
+              return (
+                <FeedEntryRow
+                  key={entry.id}
+                  entry={entry}
+                  isNew={isNew}
+                  staggerIndex={newIndex}
+                  locale={locale}
+                  collapsed={!expanded && idx >= FEED_PREVIEW}
+                />
+              );
             })}
           </ol>
+          {hiddenCount > 0 && (
+            <div className="border-t border-border-subtle p-3 xl:hidden">
+              <button
+                type="button"
+                onClick={() => setExpanded(v => !v)}
+                aria-expanded={expanded}
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded border border-border bg-surface text-sm font-medium text-foreground transition-colors hover:bg-surface-2"
+              >
+                {expanded ? t("feed.showLess") : t("feed.showAll", { n: entries.length })}
+                <ChevronDown className={cn("size-4 text-foreground-faint transition-transform", expanded && "rotate-180")} aria-hidden />
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
     </Card>
